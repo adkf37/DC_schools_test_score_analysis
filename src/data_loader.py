@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Tuple
 import pandas as pd
 
 from config import (
-    COLUMN_MAPPINGS, SUBGROUP_STANDARDIZATION, EXPECTED_COLS,
+    COLUMN_MAPPINGS, COLUMN_ALIASES, SUBGROUP_STANDARDIZATION, EXPECTED_COLS,
     METRIC_FILTER, SKIP_SHEET_PATTERNS, REQUIRED_SHEET_COLUMNS,
     SUPPRESSED_VALUES
 )
@@ -150,12 +150,63 @@ def find_count_columns(cols: List[str]) -> Dict:
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Normalize column names using the standard mapping.
-    
+
     Applies column renames from config.COLUMN_MAPPINGS.
     """
-    # Apply column mappings
+    if df.empty:
+        return df
+
+    # Clean raw headers
+    df = df.rename(columns=lambda c: c.strip() if isinstance(c, str) else c)
+
+    # Case-insensitive lookup for existing columns
+    lower_to_actual = {
+        c.lower(): c for c in df.columns if isinstance(c, str)
+    }
+
+    # Apply alias-based renames first so that changing headers map to a
+    # consistent canonical name regardless of the school year
+    rename_map: Dict[str, str] = {}
+    for canonical, aliases in COLUMN_ALIASES.items():
+        if canonical in df.columns:
+            continue
+        for alias in aliases:
+            alias_key = alias.lower()
+            actual = lower_to_actual.get(alias_key)
+            if actual is not None and actual not in rename_map:
+                rename_map[actual] = canonical
+                break
+
+    if rename_map:
+        df = df.rename(columns=rename_map)
+
+    # Apply legacy mappings (kept for older data sources)
     df = df.rename(columns=COLUMN_MAPPINGS)
-    
+
+    # Handle the 2024-25 "Enrolled Grade or Course" column which replaces
+    # both the tested grade and grade of enrollment fields.
+    enrolled_col = None
+    for col in df.columns:
+        if isinstance(col, str) and col.lower() == 'enrolled grade or course':
+            enrolled_col = col
+            break
+
+    if enrolled_col:
+        source = df[enrolled_col]
+        if 'Grade of Enrollment' in df.columns:
+            df['Grade of Enrollment'] = df['Grade of Enrollment'].fillna(source)
+        else:
+            df['Grade of Enrollment'] = source
+
+        if 'Tested Grade/Subject' in df.columns:
+            df['Tested Grade/Subject'] = df['Tested Grade/Subject'].fillna(source)
+        else:
+            df['Tested Grade/Subject'] = source
+
+        # Drop the helper column after copying so downstream code works with
+        # the consistent names.
+        df = df.drop(columns=[enrolled_col])
+
     # Ensure essential columns exist
     for col in ['lea_name', 'Student group', 'Subgroup Value']:
         if col not in df.columns:
@@ -254,7 +305,11 @@ def should_skip_sheet(sheet_name: str) -> bool:
     return False
 
 
-def read_csv_file(file_path: str, stats: DataLoadStats) -> Optional[pd.DataFrame]:
+def read_csv_file(
+    file_path: str,
+    stats: DataLoadStats,
+    display_name: Optional[str] = None,
+) -> Optional[pd.DataFrame]:
     """
     Read and process a CSV file.
     
@@ -265,7 +320,7 @@ def read_csv_file(file_path: str, stats: DataLoadStats) -> Optional[pd.DataFrame
     Returns:
         Processed DataFrame or None if failed
     """
-    filename = os.path.basename(file_path)
+    filename = display_name or os.path.basename(file_path)
     
     # Extract year from filename
     year = extract_year_from_filename(file_path)
@@ -301,7 +356,11 @@ def read_csv_file(file_path: str, stats: DataLoadStats) -> Optional[pd.DataFrame
         return None
 
 
-def read_excel_file(file_path: str, stats: DataLoadStats) -> Optional[pd.DataFrame]:
+def read_excel_file(
+    file_path: str,
+    stats: DataLoadStats,
+    display_name: Optional[str] = None,
+) -> Optional[pd.DataFrame]:
     """
     Read and process an Excel file (possibly with multiple sheets).
     
@@ -312,7 +371,7 @@ def read_excel_file(file_path: str, stats: DataLoadStats) -> Optional[pd.DataFra
     Returns:
         Processed DataFrame (combined from all valid sheets) or None if failed
     """
-    filename = os.path.basename(file_path)
+    filename = display_name or os.path.basename(file_path)
     
     # Extract year from filename
     year = extract_year_from_filename(file_path)
@@ -382,37 +441,39 @@ def load_all_input_files(input_path: str, selected_schools: Optional[List[str]] 
     logger.info(f"Loading data from: {input_path}")
     logger.info("=" * 60)
     
-    # Get all files
     try:
-        files = sorted(os.listdir(input_path))
+        entries: List[Tuple[str, str]] = []
+        for root, _, files in os.walk(input_path):
+            files_sorted = sorted(files)
+            for name in files_sorted:
+                if name.startswith('~$'):
+                    continue
+                fp = os.path.join(root, name)
+                if not os.path.isfile(fp):
+                    continue
+                rel_name = os.path.relpath(fp, input_path)
+                entries.append((fp, rel_name))
     except Exception as e:
         logger.error(f"Could not read input directory: {e}")
         return pd.DataFrame(), stats
-    
+
+    if not entries:
+        logger.warning("No input files found. Add XLSX/CSV files to the input_data directory.")
+        return pd.DataFrame(), stats
+
     # Process each file
-    for name in files:
-        fp = os.path.join(input_path, name)
-        
-        # Skip directories
-        if not os.path.isfile(fp):
-            continue
-        
-        # Skip temp files
-        if name.startswith('~$'):
-            continue
-        
-        # Process based on file type
-        lower = name.lower()
+    for fp, rel_name in entries:
+        lower = rel_name.lower()
         df = None
-        
+
         if lower.endswith('.csv'):
-            df = read_csv_file(fp, stats)
+            df = read_csv_file(fp, stats, display_name=rel_name)
         elif lower.endswith('.xlsx') or lower.endswith('.xls'):
-            df = read_excel_file(fp, stats)
+            df = read_excel_file(fp, stats, display_name=rel_name)
         else:
-            stats.add_file_skip(name, "Unsupported file type")
+            stats.add_file_skip(rel_name, "Unsupported file type")
             continue
-        
+
         # Add to frames if successful
         if df is not None and not df.empty:
             frames.append(df)

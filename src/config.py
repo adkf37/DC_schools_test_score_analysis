@@ -24,12 +24,48 @@ EXPECTED_COLS = [
 ]
 
 # Column name mappings for normalization
+# (kept for backwards compatibility with older sheets)
 COLUMN_MAPPINGS = {
     'LEA Name': 'lea_name',
+    'lea Name': 'lea_name',
     'Student Group': 'Student group',
     'Student group': 'Student group',
     'Student Group Value': 'Subgroup Value',
     'Student group Value': 'Subgroup Value',
+}
+
+# Additional aliases used to align changing column headers across releases
+COLUMN_ALIASES = {
+    'lea_name': ['LEA Name', 'lea_name', 'Lea Name'],
+    'Student group': ['Student group', 'Student Group', 'student group'],
+    'Subgroup Value': [
+        'Subgroup Value',
+        'Subgroup value',
+        'Student Group Value',
+        'Student group value',
+        'Student Group Value ',
+    ],
+    'Tested Grade/Subject': [
+        'Tested Grade/Subject',
+        'Tested Grade Subject',
+        'Tested Grade / Subject',
+        'Tested Grade or Subject',
+    ],
+    'Grade of Enrollment': [
+        'Grade of Enrollment',
+        'Grade Of Enrollment',
+    ],
+    'Aggregation Level': ['Aggregation Level'],
+    'LEA Code': ['LEA Code'],
+    'School Code': ['School Code'],
+    'School Name': ['School Name'],
+    'Assessment Name': ['Assessment Name'],
+    'Subject': ['Subject'],
+    'Count': ['Count'],
+    'Total Count': ['Total Count'],
+    'Percent': ['Percent'],
+    'Metric': ['Metric'],
+    'Enrolled Grade or Course': ['Enrolled Grade or Course', 'Enrolled Grade/Course'],
 }
 
 # Subgroup value standardization mapping
