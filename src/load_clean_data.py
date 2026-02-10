@@ -1,8 +1,15 @@
 """
 Load and clean DC school test score data from 4 specific XLSX files.
 Each file has a different schema that needs to be normalized.
+
+Key normalizations:
+- Column names standardized across schema versions
+- Grade names normalized (e.g., "Grade 6-All" → "Grade 6", "06" → "Grade 6")
+- Duplicate rows removed
+- Assessment name standardized (PARCC / DCCAPE → main assessment)
 """
 import os
+import re
 import pandas as pd
 from typing import Dict, List
 
@@ -197,6 +204,58 @@ def load_file(config: Dict) -> pd.DataFrame:
     return df
 
 
+def normalize_grade(val: str) -> str:
+    """
+    Normalize grade values to a consistent format.
+    
+    Examples:
+        'Grade 6-All' → 'Grade 6'
+        'Grade 7-All' → 'Grade 7'
+        '06' → 'Grade 6'
+        'Grade 8' → 'Grade 8'
+        'HS-Algebra I' → 'Algebra I'
+        'All' → 'All'
+    """
+    if pd.isna(val) or str(val).strip() == '':
+        return val
+    s = str(val).strip()
+    
+    # Remove '-All' suffix (appears in 2025 data)
+    s = re.sub(r'-All$', '', s)
+    
+    # Remove 'HS-' prefix (appears in 2025 data) 
+    s = re.sub(r'^HS-', '', s)
+    
+    # Convert bare 2-digit grade numbers to 'Grade N' format
+    m = re.match(r'^(\d{1,2})$', s)
+    if m:
+        grade_num = int(m.group(1))
+        s = f'Grade {grade_num}'
+    
+    return s
+
+
+def extract_grade_number(grade_str: str) -> int:
+    """
+    Extract a numeric grade level from a grade string.
+    
+    Returns -1 if not a numeric grade (e.g., 'All', 'Algebra I').
+    
+    Examples:
+        'Grade 6' → 6
+        'Grade 8' → 8
+        'Grade 11' → 11
+        'All' → -1
+        'Algebra I' → -1
+    """
+    if pd.isna(grade_str):
+        return -1
+    m = re.match(r'Grade\s+(\d+)', str(grade_str).strip())
+    if m:
+        return int(m.group(1))
+    return -1
+
+
 def main():
     """Load all 4 files and combine into a single dataset."""
     
@@ -225,6 +284,39 @@ def main():
     
     combined_df = pd.concat(all_dfs, ignore_index=True)
     
+    print(f"\nCombined dataset (before cleanup):")
+    print(f"  Total rows: {len(combined_df):,}")
+    
+    # ── Grade normalization ──────────────────────────────────────────────
+    print("\nNormalizing grade names...")
+    combined_df['Tested Grade/Subject'] = combined_df['Tested Grade/Subject'].apply(normalize_grade)
+    combined_df['Grade of Enrollment'] = combined_df['Grade of Enrollment'].apply(normalize_grade)
+    
+    # Add numeric grade column for cohort tracking
+    combined_df['Grade Number'] = combined_df['Tested Grade/Subject'].apply(extract_grade_number)
+    
+    # ── Deduplicate rows ─────────────────────────────────────────────────
+    # Some year/school/grade/subject/group combos appear with both a specific
+    # assessment (PARCC, DCCAPE) AND an aggregated "All" assessment row that
+    # has identical values. Keep only the specific assessment rows when duplicates
+    # exist; fall back to "All" when there is no specific assessment row.
+    dedup_keys = [
+        'Year', 'School Code', 'School Name', 'Subject',
+        'Tested Grade/Subject', 'Grade of Enrollment',
+        'Student Group', 'Student Group Value'
+    ]
+    
+    before_dedup = len(combined_df)
+    # Sort so specific assessments come before "All"
+    combined_df['_assess_sort'] = combined_df['Assessment Name'].apply(
+        lambda x: 1 if str(x).strip() == 'All' else 0
+    )
+    combined_df = combined_df.sort_values(dedup_keys + ['_assess_sort'])
+    combined_df = combined_df.drop_duplicates(subset=dedup_keys, keep='first')
+    combined_df = combined_df.drop(columns=['_assess_sort'])
+    after_dedup = len(combined_df)
+    print(f"  Deduplicated: {before_dedup:,} → {after_dedup:,} rows (removed {before_dedup - after_dedup:,} duplicates)")
+    
     print(f"\nCombined dataset:")
     print(f"  Total rows: {len(combined_df):,}")
     print(f"  Total columns: {len(combined_df.columns)}")
@@ -243,6 +335,11 @@ def main():
     # Show unique subjects
     unique_subjects = combined_df['Subject'].dropna().unique()
     print(f"Unique subjects: {sorted(unique_subjects)}")
+    
+    # Show grade breakdown
+    grade_nums = combined_df[combined_df['Grade Number'] >= 0]['Grade Number'].unique()
+    print(f"Numeric grades: {sorted(grade_nums)}")
+    print(f"Non-numeric grade values: {sorted(combined_df[combined_df['Grade Number'] < 0]['Tested Grade/Subject'].dropna().unique())}")
     
     # Show sample of data
     print(f"\nSample of first few rows:")

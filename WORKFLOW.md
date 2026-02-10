@@ -1,12 +1,37 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Ready to Analyze!
+## ✅ Current Status: Ready to Analyze (with Cohort Growth!)
 
-You now have a **clean, streamlined workflow** with 3 simple scripts.
+You now have a **complete analysis pipeline** with 4 scripts covering both
+same-grade trends AND cohort-based growth (the manual Stuart-Hobson approach,
+automated citywide).
 
 ---
 
-## 📊 Where You Are in the Project
+## 📊 Two Types of Growth Analysis
+
+### Cohort Growth (NEW – replicates the manual Stuart-Hobson example)
+Tracks the **same group of students** as they advance from Grade N to Grade N+1:
+
+```
+Grade 6 in 2022 → Grade 7 in 2023  (same students, one year later)
+Grade 7 in 2022 → Grade 8 in 2023
+```
+
+This answers: **"Are students at this school making progress?"**
+
+### Same-Grade Year-over-Year
+Compares performance at the **same grade level** across years:
+
+```
+Grade 6 in 2022 vs Grade 6 in 2023  (different students, same grade)
+```
+
+This answers: **"Is this grade getting stronger over time?"**
+
+---
+
+## 📁 Pipeline Steps
 
 ### 1. Data Preparation ✅ COMPLETE
 **File**: `src/load_clean_data.py`
@@ -14,148 +39,150 @@ You now have a **clean, streamlined workflow** with 3 simple scripts.
 **What it does:**
 - Reads the 4 XLSX files (2021-22, 2022-23, 2023-24, 2024-25)
 - Handles different schemas across years
-- Normalizes column names
-- Combines into a single clean dataset
+- **Normalizes grade names** (e.g., "Grade 6-All" → "Grade 6", "HS-Algebra I" → "Algebra I")
+- **Deduplicates** rows (prefers specific assessment over "All" aggregates)
+- Adds numeric `Grade Number` column for cohort tracking
 
-**Output**: `output_data/combined_all_years.csv` (398,809 rows)
+**Output**: `output_data/combined_all_years.csv`
 - 4 years of data (2022-2025)
 - 236 schools
 - 2 subjects (ELA, Math)
 - All student groups
 
-**Run it:**
 ```bash
 python src/load_clean_data.py
 ```
 
 ---
 
-### 2. Growth Analysis ✅ READY
-**File**: `src/analyze_growth.py`
+### 2. Cohort Growth Analysis ✅ NEW
+**File**: `src/analyze_cohort_growth.py`
 
 **What it does:**
 - Reads the combined CSV
-- Parses percent values (handles suppressed data like "DS", "n<10")
-- Computes year-over-year growth by school/subject/subgroup
-- Creates summary tables
+- Matches Grade N / Year Y with Grade N+1 / Year Y+1 for each school
+- Computes percentage-point change in proficiency for each cohort transition
+- Creates summary tables and an Excel workbook with pivots
+- Validates results against the Stuart-Hobson manual example
 
 **Outputs:**
-- `school_growth_full.csv` - Detailed growth metrics (209,617 rows)
-- `school_growth_by_school_subject.csv` - School-level summary (8,034 rows)
+- `cohort_growth_detail.csv` – One row per school/subject/subgroup/transition
+- `cohort_growth_summary.csv` – Aggregated school-level metrics
+- `cohort_growth_pivot.xlsx` – Excel workbook with 6 sheets:
+  - All Students Summary (sorted by growth)
+  - Full Summary (all subgroups)
+  - All Students Detail (every transition)
+  - ELA Cohort Pivot (schools × transitions)
+  - Math Cohort Pivot (schools × transitions)
+  - Full Detail
 
-**Run it:**
+```bash
+python src/analyze_cohort_growth.py
+```
+
+**Key Columns in Detail Output:**
+| Column | Description |
+|--------|-------------|
+| `baseline_grade` | Starting grade (e.g., 6) |
+| `baseline_year` | Starting year (e.g., 2022) |
+| `baseline_pct` | % Meeting/Exceeding at start |
+| `followup_grade` | Next grade (e.g., 7) |
+| `followup_year` | Next year (e.g., 2023) |
+| `followup_pct` | % Meeting/Exceeding at follow-up |
+| `pp_growth` | Percentage-point change |
+| `transition_label` | e.g., "Gr6→Gr7 (2022→2023)" |
+
+---
+
+### 3. Same-Grade Growth Analysis ✅ READY
+**File**: `src/analyze_growth.py`
+
+**What it does:**
+- Computes year-over-year change at the same grade level
+- Also calls `analyze_cohort_growth.py` automatically
+
+**Outputs:**
+- `school_growth_full.csv` – Detailed same-grade growth metrics
+- `school_growth_by_school_subject.csv` – School-level summary
+
 ```bash
 python src/analyze_growth.py
 ```
 
-**Key Features:**
-- First-to-last growth (2022 → 2025)
-- Year-over-year growth (2024 → 2025)
-- Aggregated by school, subject, and student group
-
 ---
 
-### 3. Interactive Dashboard ✅ READY
+### 4. Interactive Dashboard ✅ ENHANCED
 **File**: `app/app_simple.py`
 
-**What it does:**
-- Interactive Dash web app for exploring the data
-- Filter by subject, student group, schools
-- Visualizations:
-  - Time series trends
-  - Bar charts of top schools
-  - Map view (if you add school_locations.csv)
+**Features:**
+- **Same-grade time series** – school performance over time
+- **Cohort growth charts** – bar charts and box plots of cohort growth
+- Filter by subject, student group, schools, year range
+- Map view (if school_locations.csv available)
 
-**Run it:**
 ```bash
 python app/app_simple.py
 ```
-
 Then open: http://127.0.0.1:8050/
-
----
-
-## 🎯 What's Working
-
-### Data Loading:
-✅ All 4 Excel files successfully loaded
-✅ 398,809 records combined
-✅ Column schemas normalized
-✅ Years: 2022, 2023, 2024, 2025
-
-### Growth Analysis:
-✅ Percent values parsed correctly
-✅ Suppressed data handled (DS, n<10, etc.)
-✅ Growth metrics calculated
-✅ School-level summaries created
-
-### Visualization:
-✅ Dash app loads the combined CSV
-✅ Filters work (subject, student group, schools, years)
-✅ Three interactive charts
-
----
-
-## 📁 Key Files
-
-### Input Files (in `input_data/`):
-- `2021-22 School Level PARCC and MSAA Data.xlsx`
-- `2022-23 School Level PARCC and MSAA Data_9_5.xlsx`
-- `DC Cape Scores 2023-2024.xlsx`
-- `2024-25 Public File School Level DCCAPE and MSAA Data 1.xlsx`
-
-### Scripts (in `src/`):
-1. **`load_clean_data.py`** - Combine raw Excel files → CSV
-2. **`analyze_growth.py`** - Calculate growth metrics
-3. **`app_simple.py`** (in `app/`) - Interactive dashboard
-
-### Output Files (in `output_data/`):
-- **`combined_all_years.csv`** - Clean combined dataset (all years)
-- **`school_growth_full.csv`** - Detailed growth analysis
-- **`school_growth_by_school_subject.csv`** - School-level summary
 
 ---
 
 ## 🚀 Quick Start Guide
 
-### To analyze the data:
 ```bash
 # 1. Combine the Excel files (if not done already)
 python src/load_clean_data.py
 
-# 2. Calculate growth metrics
+# 2. Run cohort growth analysis (the main analysis!)
+python src/analyze_cohort_growth.py
+
+# 3. (Optional) Run same-grade year-over-year analysis
 python src/analyze_growth.py
 
-# 3. Launch the interactive dashboard
+# 4. Launch the interactive dashboard
 python app/app_simple.py
 ```
 
-### To explore specific questions:
-- **View the combined data**: Open `output_data/combined_all_years.csv`
-- **See growth trends**: Open `output_data/school_growth_by_school_subject.csv`
-- **Interactive exploration**: Run `python app/app_simple.py`
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/load_clean_data.py` | Combine raw Excel → `combined_all_years.csv` |
+| `src/analyze_cohort_growth.py` | **Cohort growth** (Grade N→N+1) — main analysis |
+| `src/analyze_growth.py` | Same-grade YoY growth |
+| `app/app_simple.py` | Interactive dashboard |
+| `output_data/cohort_growth_detail.csv` | Every cohort transition |
+| `output_data/cohort_growth_summary.csv` | School-level cohort summary |
+| `output_data/cohort_growth_pivot.xlsx` | Excel workbook with pivots |
+| `output_data/school_growth_full.csv` | Same-grade growth detail |
+| `output_data/combined_all_years.csv` | Clean combined source data |
 
 ---
 
-## 📈 Example Analysis Questions You Can Answer
+## 📈 Example Analysis Questions
 
-With the current setup, you can:
+### Cohort Growth Questions (NEW):
+1. **Which schools had the biggest cohort growth?**
+   → Open `cohort_growth_summary.csv`, sort by `avg_pp_growth`
 
-1. **Track school performance over time**
-   - Which schools improved the most from 2022 to 2025?
-   - Which schools declined?
+2. **How did Stuart-Hobson's 6th graders do when they became 7th graders?**
+   → Filter `cohort_growth_detail.csv` for Stuart-Hobson, Gr6→Gr7
 
-2. **Compare subjects**
-   - How does Math performance compare to ELA?
-   - Which schools excel in one but not the other?
+3. **Which schools are accelerating student learning?**
+   → Look at schools where `avg_pp_growth > 0` across multiple transitions
 
-3. **Analyze student groups**
-   - How do different demographic groups perform?
-   - Which schools have the smallest achievement gaps?
+4. **Are there racial achievement gaps in growth?**
+   → Compare cohort growth by `Student Group Value` within a school
 
-4. **Year-over-year changes**
-   - What was the impact of the most recent year?
-   - Which schools had the biggest jumps?
+5. **Which grade transitions show the most/least growth?**
+   → Pivot the detail data by `transition_label`
+
+### Same-Grade Questions:
+1. **Is Grade 6 ELA citywide improving?**
+   → Filter `school_growth_full.csv` for Grade 6, ELA
+
+2. **Which schools improved the most from 2022 to 2025?**
+   → Sort `school_growth_by_school_subject.csv` by `growth_first_to_last`
 
 ---
 
@@ -194,9 +221,15 @@ With the current setup, you can:
 - Make sure you run `load_clean_data.py` first
 - Check that the Excel files are in `input_data/`
 
+### Cohort growth shows 0 transitions:
+- Ensure `combined_all_years.csv` has at least 2 consecutive years of data
+- Check that grade names are consistent (script normalizes them automatically)
+- 2025 data uses "Grade 6-All" format – the loader now normalizes this
+
 ### Dash app won't start:
 - Install required packages: `pip install dash plotly`
 - Make sure `combined_all_years.csv` exists
+- For cohort charts, run `analyze_cohort_growth.py` first
 
 ---
 
