@@ -1,11 +1,25 @@
 """
 Analyze DC school test score growth from the cleaned combined dataset.
 
-This script reads the pre-cleaned combined_all_years.csv and computes:
-- Year-over-year growth by school, subject, and subgroup
-- Summary statistics and comparisons
+This script computes TWO types of growth:
+
+1. **Same-Grade Year-over-Year** (this file)
+   - Compares performance at the SAME grade level across years
+   - e.g., Grade 6 ELA in 2022 vs Grade 6 ELA in 2023
+   - Answers: "Is this grade getting better-prepared students or
+     teaching more effectively over time?"
+
+2. **Cohort Growth** (see analyze_cohort_growth.py)
+   - Tracks the SAME students as they advance a grade
+   - e.g., Grade 6 in 2022 vs Grade 7 in 2023
+   - Answers: "Are students at this school making progress?"
+
+Outputs:
+    school_growth_full.csv             – detailed same-grade YoY growth
+    school_growth_by_school_subject.csv – school-level summary
 """
 import os
+import re
 import pandas as pd
 import numpy as np
 from typing import List
@@ -27,16 +41,19 @@ def parse_percent(series: pd.Series) -> pd.Series:
             return np.nan
         s = str(val).strip().upper()
         # Suppressed values
-        if s in ['DS', 'N<10', '<5%', '<=10%', 'N/A', 'NA', '']:
+        if s in ['DS', 'N<10', '<5%', '<=10%', 'N/A', 'NA', '', 'NONE', '.']:
+            return np.nan
+        # "n < 10" with spaces, or "N < 10"
+        if 'N' in s and '<' in s:
             return np.nan
         # Inequality markers
         if any(s.startswith(marker) for marker in ['<', '<=', '>', '>=']):
             return np.nan
         # Remove % sign and convert
-        s = s.replace('%', '').strip()
+        s = s.replace('%', '').replace(',', '').strip()
         try:
             return float(s)
-        except:
+        except (ValueError, TypeError):
             return np.nan
     
     return series.apply(_parse_value)
@@ -88,7 +105,34 @@ def load_and_prepare_data() -> pd.DataFrame:
     # Filter to school level only
     df = df[df['Aggregation Level'].str.upper() == 'SCHOOL']
     
-    print(f"After filtering: {len(df):,} rows")
+    # Normalize grade names (handles 2025's "Grade 6-All" → "Grade 6")
+    def _normalize_grade(val):
+        if pd.isna(val):
+            return val
+        s = str(val).strip()
+        s = re.sub(r'-All$', '', s)
+        s = re.sub(r'^HS-', '', s)
+        m = re.match(r'^(\d{1,2})$', s)
+        if m:
+            s = f'Grade {int(m.group(1))}'
+        return s
+    
+    df['Tested Grade/Subject'] = df['Tested Grade/Subject'].apply(_normalize_grade)
+    df['Grade of Enrollment'] = df['Grade of Enrollment'].apply(_normalize_grade)
+    
+    # Deduplicate: prefer specific assessment over "All" 
+    dedup_keys = [
+        'year', 'School Code', 'School Name', 'Subject',
+        'Tested Grade/Subject', 'Student Group', 'subgroup_value_std'
+    ]
+    df['_assess_sort'] = df['Assessment Name'].apply(
+        lambda x: 1 if str(x).strip() == 'All' else 0
+    )
+    df = df.sort_values(dedup_keys + ['_assess_sort'])
+    df = df.drop_duplicates(subset=dedup_keys, keep='first')
+    df = df.drop(columns=['_assess_sort'])
+    
+    print(f"After filtering and dedup: {len(df):,} rows")
     print(f"Years: {sorted(df['year'].dropna().unique())}")
     print(f"Schools: {df['School Name'].nunique()}")
     print(f"Subjects: {sorted(df['Subject'].dropna().unique())}")
@@ -248,7 +292,7 @@ def main():
     if df.empty:
         return
     
-    # Compute growth metrics
+    # Compute same-grade year-over-year growth metrics
     growth_df = compute_growth_metrics(df)
     
     # Create school-level summary
@@ -259,18 +303,41 @@ def main():
     
     # Print some interesting findings
     print("\n" + "=" * 70)
-    print("KEY FINDINGS")
+    print("KEY FINDINGS - Same-Grade Year-over-Year")
     print("=" * 70)
     
     # Top schools by recent growth
     if 'percent_growth_last_vs_prev' in summary_df.columns:
-        print("\nTop 10 Schools by Recent Growth (last year vs previous):")
-        top_growth = (
-            summary_df[summary_df['subgroup_value_std'] == 'All Students']
-            .nlargest(10, 'percent_growth_last_vs_prev')[['School Name', 'Subject', 'percent_growth_last_vs_prev']]
-        )
-        for idx, row in top_growth.iterrows():
-            print(f"  {row['School Name']} ({row['Subject']}): +{row['percent_growth_last_vs_prev']:.1f}%")
+        # Filter to just 'All' or 'All Students' subgroup
+        all_stu = summary_df[summary_df['subgroup_value_std'].isin(['All', 'All Students'])]
+        
+        if not all_stu.empty:
+            print("\nTop 10 Schools by Same-Grade YoY Growth (All Students, last year vs previous):")
+            top_growth = (
+                all_stu
+                .dropna(subset=['percent_growth_last_vs_prev'])
+                .nlargest(10, 'percent_growth_last_vs_prev')
+                [['School Name', 'Subject', 'percent_growth_last_vs_prev']]
+            )
+            for idx, row in top_growth.iterrows():
+                print(f"  {row['School Name']} ({row['Subject']}): "
+                      f"+{row['percent_growth_last_vs_prev']:.1f} pp")
+    
+    # Also run cohort growth analysis
+    print("\n" + "=" * 70)
+    print("Now running COHORT GROWTH analysis...")
+    print("(This tracks students as they advance grades)")
+    print("=" * 70)
+    
+    try:
+        from analyze_cohort_growth import main as cohort_main
+        cohort_main()
+    except ImportError:
+        print("  Cohort analysis module not found. Run separately:")
+        print("  python src/analyze_cohort_growth.py")
+    except Exception as e:
+        print(f"  Cohort analysis error: {e}")
+        print("  Run separately: python src/analyze_cohort_growth.py")
 
 
 if __name__ == '__main__':

@@ -140,25 +140,69 @@ After running, check:
 
 ## Next Steps for Further Improvement
 
-1. **Fix Remaining Issues**
-   - Investigate why some Excel files have "No valid sheets"
-   - Determine correct structure for older PARCC files (2015-2018)
-   - Add support for more filename patterns if needed
+1. ~~**Fix Remaining Issues**~~ ✅ Addressed via new cohort pipeline
+2. ~~**Add Data Quality Metrics**~~ ✅ Cohort pipeline validates against manual example
+3. **Performance Optimization** (future)
+4. **Testing** (future)
 
-2. **Add Data Quality Metrics**
-   - Report on completeness percentages
-   - Identify schools with missing years
-   - Flag anomalies (unusual score changes, etc.)
+---
 
-3. **Performance Optimization**
-   - Cache loaded data for faster re-runs
-   - Optimize Excel reading for large files
-   - Add optional parallel processing
+## Phase 2 Improvements – Cohort Growth Analysis
 
-4. **Testing**
-   - Add unit tests for data loading functions
-   - Create test fixtures with sample data
-   - Add validation tests for output data
+### Problem Statement
+The original codebase only computed **same-grade year-over-year** growth (e.g., Grade 6 in 2022 vs Grade 6 in 2023). The Stuart-Hobson manual example spreadsheet showed a different, more meaningful metric: **cohort-based growth** — tracking the *same group of students* as they advance from Grade N in Year Y to Grade N+1 in Year Y+1.
+
+### Root Cause: Two Grade Dimensions
+The raw OSSE data files contain **two grade columns**:
+- **Tested Grade/Subject**: the test level taken (Grade 8, Algebra I, Geometry, etc.)
+- **Grade of Enrollment**: the grade the students are enrolled in
+
+For Middle School math, the same Grade 8 class may have students taking "Grade 8 Math" AND "Algebra I". The row with `Tested Grade/Subject = "All"` + `Grade of Enrollment = "Grade 8"` combines all test levels and represents the true enrolled-cohort proficiency rate.
+
+### What Was Built
+
+#### New Script: `src/analyze_cohort_growth.py`
+Core cohort growth engine (~540 lines) that:
+1. **Uses Grade of Enrollment** (not Tested Grade/Subject) for cohort assignment
+2. **Prefers combined "All" test rows** over specific test-level rows to avoid subset bias (e.g., Algebra I only covering 43 of 145 enrolled students)
+3. **Filters out subset-only rows** like "Algebra I" or "Geometry" that don't represent the full enrolled cohort
+4. **Self-joins** the data: Grade N / Year Y → Grade N+1 / Year Y+1
+5. **Harmonizes student group labels** across years ("All"→"All Students", "White/Caucasian"→"White", etc.)
+
+**Outputs:**
+- `cohort_growth_detail.csv` — 4,794 individual cohort transitions (200 schools)
+- `cohort_growth_summary.csv` — 1,732 school/subject/subgroup aggregations
+- `cohort_growth_pivot.xlsx` — 6-sheet Excel workbook with pivot-friendly views
+
+#### Updated: `src/load_clean_data.py`
+- Added grade normalization (`normalize_grade()`, `extract_grade_number()`)
+- **Fixed deduplication**: now includes `Grade of Enrollment` in dedup keys to preserve enrolled-grade variants (129,861 rows, was 93,989)
+- Handles "Grade 6-All", "HS-Algebra I", bare "06" format variations
+
+#### Updated: `app/app_simple.py`
+- Added cohort growth visualizations (bar chart + box plot/grouped bar)
+- Loads both cohort detail and summary CSVs
+- 5 output figures (was 3)
+
+### Validation: Stuart-Hobson Manual Example
+
+All four cohort transitions from the manual spreadsheet now match:
+
+| Transition | Manual | Automated | Match |
+|---|---|---|---|
+| ELA Gr6→Gr7 (2022→2023) | 33.5% → 40.5% (+7.0 pp) | 33.5% → 40.5% (+7.0 pp) | ✅ |
+| ELA Gr7→Gr8 (2022→2023) | 36.3% → 46.6% (+10.3 pp) | 36.2% → 46.6% (+10.3 pp) | ✅ |
+| Math Gr6→Gr7 (2022→2023) | 11.0% → 14.7% (+3.6 pp) | 11.0% → 14.7% (+3.6 pp) | ✅ |
+| Math Gr7→Gr8 (2022→2023) | 13.7% → 19.6% (+5.9 pp) | 13.7% → 19.6% (+5.8 pp) | ✅ |
+
+*(The 0.1pp difference is rounding: 19.58 − 13.73 = 5.85)*
+
+### Key Design Decisions
+1. **Grade of Enrollment over Tested Grade/Subject** — students enrolled in Grade 8 who take Algebra I should count as Grade 8 for cohort tracking
+2. **"All" test rows preferred** — combined proficiency avoids subset bias
+3. **Algebra I / Geometry rows excluded** — these only cover a subset of enrolled students and would inflate/deflate the cohort rate
+4. **Minimum N=10** — avoids noisy small-sample results
+5. **PARCC/DCCAPE preferred over "All" assessment** — when a specific assessment name exists alongside an aggregate "All" assessment, use the specific one
 
 ## Migration Notes
 

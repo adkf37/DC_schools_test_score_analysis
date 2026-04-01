@@ -1,12 +1,17 @@
 """
 Dash app for exploring DC school test scores.
 
-Reads from the pre-cleaned combined_all_years.csv file.
+Reads from the pre-cleaned combined_all_years.csv and cohort growth outputs.
+Provides:
+  - Time series & bar charts of school performance
+  - Cohort growth analysis (Grade N → Grade N+1)
+  - Map view (when school_locations.csv is available)
 """
 import os
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output
 from typing import List, Optional
 
@@ -85,6 +90,19 @@ def try_load_school_locations() -> Optional[pd.DataFrame]:
 # Load data
 multi_year = load_data()
 locations_df = try_load_school_locations()
+
+# Load cohort growth data if available
+COHORT_DETAIL_FILE = os.path.join(OUTPUT_DIR, 'cohort_growth_detail.csv')
+COHORT_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'cohort_growth_summary.csv')
+
+cohort_detail = pd.DataFrame()
+cohort_summary = pd.DataFrame()
+if os.path.isfile(COHORT_DETAIL_FILE):
+    cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
+    print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
+if os.path.isfile(COHORT_SUMMARY_FILE):
+    cohort_summary = pd.read_csv(COHORT_SUMMARY_FILE)
+    print(f"Loaded cohort summary: {len(cohort_summary):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -165,12 +183,31 @@ app.layout = html.Div(
             ),
         ]),
         
-        html.Div(className="row g-3 mt-3", children=[
+        # ── Same-grade time series & bar charts ──────────────────────────
+        html.H4("Same-Grade Performance Over Time", className="mt-4"),
+        html.P("How does each grade's proficiency change year over year?", className="text-muted small"),
+        html.Div(className="row g-3 mt-1", children=[
             html.Div(className="col-lg-6", children=[
                 dcc.Graph(id='timeseries')
             ]),
             html.Div(className="col-lg-6", children=[
                 dcc.Graph(id='bars')
+            ]),
+        ]),
+        
+        html.Hr(),
+        
+        # ── Cohort growth section ────────────────────────────────────────
+        html.H4("Cohort Growth (Grade N → Grade N+1)", className="mt-3"),
+        html.P("Tracks the same group of students as they advance one grade. "
+               "Positive values mean students gained proficiency over the year.",
+               className="text-muted small"),
+        html.Div(className="row g-3 mt-1", children=[
+            html.Div(className="col-lg-6", children=[
+                dcc.Graph(id='cohort-bars')
+            ]),
+            html.Div(className="col-lg-6", children=[
+                dcc.Graph(id='cohort-detail')
             ]),
         ]),
         
@@ -209,6 +246,8 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
 @app.callback(
     Output('timeseries', 'figure'),
     Output('bars', 'figure'),
+    Output('cohort-bars', 'figure'),
+    Output('cohort-detail', 'figure'),
     Output('map', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
@@ -306,7 +345,87 @@ def update_figures(subject, subgroup, schools, year_range):
             margin=dict(l=0, r=0, t=40, b=0)
         )
     
-    return fig_ts, fig_bars, fig_map
+    # ── Cohort growth charts ─────────────────────────────────────────────
+    fig_cohort_bars = go.Figure()
+    fig_cohort_detail = go.Figure()
+
+    if not cohort_summary.empty:
+        cs = cohort_summary.copy()
+        # Filter by subject
+        if subject:
+            cs = cs[cs['Subject'] == subject]
+        # Filter by subgroup
+        if subgroup:
+            cs = cs[cs['Student Group Value'] == subgroup]
+        # Filter by schools
+        if schools:
+            cs = cs[cs['School Name'].isin(schools)]
+
+        if not cs.empty:
+            # Bar chart: top/bottom schools by avg cohort growth
+            cs_sorted = cs.sort_values('avg_pp_growth', ascending=True)
+            if not schools:
+                # Show top 15 and bottom 5
+                top15 = cs_sorted.tail(15)
+                bot5 = cs_sorted.head(5)
+                chart_data = pd.concat([bot5, top15]).drop_duplicates()
+            else:
+                chart_data = cs_sorted
+
+            colors = ['#d32f2f' if v < 0 else '#388e3c' for v in chart_data['avg_pp_growth']]
+            fig_cohort_bars = go.Figure(go.Bar(
+                x=chart_data['avg_pp_growth'],
+                y=chart_data['School Name'],
+                orientation='h',
+                marker_color=colors,
+                text=chart_data['avg_pp_growth'].apply(lambda x: f'{x:+.1f}'),
+                textposition='auto',
+            ))
+            fig_cohort_bars.update_layout(
+                title=f'{subject} – Avg Cohort Growth (pp)',
+                xaxis_title='Percentage Point Growth',
+                yaxis_title='',
+                yaxis=dict(autorange='reversed') if not schools else {},
+                height=max(400, len(chart_data) * 25),
+            )
+
+    if not cohort_detail.empty:
+        cd = cohort_detail.copy()
+        if subject:
+            cd = cd[cd['Subject'] == subject]
+        if subgroup:
+            cd = cd[cd['Student Group Value'] == subgroup]
+        if schools:
+            cd = cd[cd['School Name'].isin(schools)]
+
+        if not cd.empty:
+            # Grouped bar: show each transition for selected schools
+            if schools:
+                fig_cohort_detail = px.bar(
+                    cd,
+                    x='transition_label',
+                    y='pp_growth',
+                    color='School Name',
+                    barmode='group',
+                    title=f'{subject} – Cohort Growth by Transition',
+                    labels={'pp_growth': 'PP Growth', 'transition_label': 'Transition'},
+                )
+            else:
+                # Distribution of growth across all schools per transition
+                fig_cohort_detail = px.box(
+                    cd,
+                    x='transition_label',
+                    y='pp_growth',
+                    title=f'{subject} – Cohort Growth Distribution by Transition',
+                    labels={'pp_growth': 'PP Growth', 'transition_label': 'Transition'},
+                )
+    
+    if fig_cohort_bars.data == ():
+        fig_cohort_bars.update_layout(title='No cohort data – run analyze_cohort_growth.py')
+    if fig_cohort_detail.data == ():
+        fig_cohort_detail.update_layout(title='No cohort data – run analyze_cohort_growth.py')
+
+    return fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail, fig_map
 
 
 if __name__ == '__main__':
