@@ -1,0 +1,11 @@
+# Core analysis pipeline dependencies
+pandas>=1.5.0
+numpy>=1.23.0
+openpyxl>=3.0.0
+
+# Optional: statistical tests (Task 05)
+scipy>=1.9.0
+
+# Optional: interactive dashboard (Task 04)
+# dash>=2.0.0
+# plotly>=5.0.0
