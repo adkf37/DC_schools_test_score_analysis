@@ -1,53 +1,70 @@
 # DC Schools Test Score Analysis
 
-A lightweight pipeline for comparing DC school test performance across years, subjects, and student groups. The goal is simple: drop raw files in `input_data/`, run one script, and read clean growth tables from `output_data/`.
+This repository is intended to analyze DC OSSE assessment files across the 2021–22 through 2024–25 school years, combine them into a single cleaned dataset, and then compute cohort-growth outputs for policy analysis.
 
-## Quick start
+## Current project state
 
-```bash
-pip install pandas openpyxl  # openpyxl only needed for Excel export
-python src/test_score_growth.py
-```
+**As of 2026-04-25, closeout did _not_ approve final handoff. The repo returns to Build.**
 
-Place any CSV/XLSX/XLS files under `input_data/` (nested folders are fine). Files are auto-detected and processed as long as the school year appears in the filename (e.g., `2021-22`, `2023_24`, `2025`).
+What was validated from a fresh clone:
 
-## What the script does
+- `python -m pip install -r requirements.txt` ✅
+- `python -m py_compile src/*.py app/*.py inspect_data.py` ✅
+- `python src/load_clean_data.py` ❌
+- `python src/analyze_cohort_growth.py` ❌ (blocked because the loader did not generate `output_data/combined_all_years.csv`)
 
-1. **Ingest all source files** – walks the entire `input_data/` tree, ignoring temp files, and reads every CSV/Excel sheet that looks like school-level results.
-2. **Standardize schemas** – aligns year-to-year header changes (e.g., `LEA Name` vs `lea_name`, or the 2024–25 `Enrolled Grade or Course` field) and treats suppressed values (`DS`, `<5%`, `n<10`, …) as missing data.
-3. **Filter to the performance metric** – keeps “Meeting or Exceeding” metrics when a `Metric` column exists, while earlier files without that column are left untouched.
-4. **Compute growth** – produces full-grain pivot tables plus school × subject summaries with both first-to-last and last-vs-previous year deltas.
-5. **Write outputs** – saves tidy CSVs (and optionally an Excel workbook) under `output_data/` and a short processing report describing which files were loaded.
+### Active blocker
 
-## Output files
+`src/load_clean_data.py` currently expects four exact workbook names in the top-level `input_data/` directory. The repository snapshot instead contains differently named workbooks under `input_data/School and Demographic Group Aggregation/`, and no exact match for the required 2024-25 workbook was present during validation. Until that input-file contract is fixed, the pipeline cannot be reproduced from a fresh clone.
 
-- `output_data/filtered_data.csv` – rows for the configured subgroup(s) across every loaded year.
-- `output_data/school_growth_full.csv` – the wide pivot by school/subject/subgroup with percent, count, and total count metrics plus growth columns.
-- `output_data/school_growth_by_school_subject.csv` – school × subject × subgroup summary with growth metrics.
-- `output_data/processing_report.txt` – a log-style recap of what was read and any issues encountered.
-- (Optional) `output_data/school_growth_pivot.xlsx` – Excel workbook containing the two main tables; enable by uncommenting the block in `src/test_score_growth.py` and install `openpyxl`.
+## Expected pipeline
 
-## Customization knobs
-
-Open `src/test_score_growth.py` and adjust the constants near the top:
-
-- `SELECTED_SCHOOLS` – limit the analysis to specific school names (leave empty for all schools).
-- `SUBGROUP_VALUES_FOR_FILTER` – control which student groups appear in `filtered_data.csv`.
-
-## Data cleaning notes
-
-- Column aliases cover the shifting headers shown in recent public files (`LEA Name` ↔ `lea_name`, `Student Group Value` ↔ `Subgroup Value`, `Enrolled Grade or Course`, etc.).
-- Subgroup labels are standardized (`White/Caucasian` → `White`, `Hispanic/Latino of any race` → `Hispanic/Latino`).
-- Suppressed metrics (`DS`, `<5%`, `<=10%`, `N<10`) are stored as missing values so they do not distort growth calculations.
-- If multiple files exist for the same year and grain, values are averaged.
-
-## Dash app (optional)
-
-Install Dash/Plotly and run the simple explorer:
+Once the input-data contract is fixed, the intended workflow is:
 
 ```bash
-pip install dash plotly
-python app/app.py
+python -m pip install -r requirements.txt
+python src/load_clean_data.py
+python src/analyze_cohort_growth.py
 ```
 
-Add `input_data/school_locations.csv` (columns: `School Name`, `Latitude`, `Longitude`) to unlock the map view.
+Optional after the core pipeline succeeds:
+
+```bash
+python app/app_simple.py
+```
+
+## Required source files
+
+Backlog Task 01 expects these four annual workbooks:
+
+- `2021-22 School Level PARCC and MSAA Data.xlsx`
+- `2022-23 School Level PARCC and MSAA Data_9_5.xlsx`
+- `DC Cape Scores 2023-2024.xlsx` or a documented equivalent that the loader recognizes
+- `2024-25 Public File School Level DCCAPE and MSAA Data 1.xlsx`
+
+## Intended outputs
+
+If the loader and cohort analysis run successfully, the project should produce:
+
+- `output_data/combined_all_years.csv`
+- `output_data/processing_report.txt`
+- `output_data/cohort_growth_detail.csv`
+- `output_data/cohort_growth_summary.csv`
+- `output_data/cohort_growth_pivot.xlsx`
+
+The current closeout review could not regenerate these files from a fresh clone because of the active input-data blocker above.
+
+## Supporting documentation
+
+- `STATUS.md` — current phase, blockers, and next recommended step
+- `.squad/validation_report.md` — latest validation evidence
+- `.squad/review_report.md` — closeout decision and explicit return-to-work recommendation
+- `docs/methods.md` — cohort-growth and statistical-significance methodology
+
+## Next steps before another closeout attempt
+
+1. Align `src/load_clean_data.py` with the actual repo input layout or place/rename the OSSE files so the documented loader command succeeds.
+2. Resolve the missing 2024-25 workbook requirement.
+3. Regenerate `output_data/combined_all_years.csv`.
+4. Re-run `python src/analyze_cohort_growth.py` and verify the Stuart-Hobson benchmark plus Task 05 significance outputs.
+5. Re-run validation and only then request another closeout review.
