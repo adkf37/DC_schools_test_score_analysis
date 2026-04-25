@@ -1,10 +1,15 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Ready to Analyze (with Cohort Growth!)
+## ⚠️ Current Status: Return to Build (not ready for final handoff)
 
-You now have a **complete analysis pipeline** with 4 scripts covering both
-same-grade trends AND cohort-based growth (the manual Stuart-Hobson approach,
-automated citywide).
+As of the 2026-04-25 closeout review, a fresh-clone smoke test does **not** complete successfully:
+
+- `python -m pip install -r requirements.txt` ✅
+- `python -m py_compile src/*.py app/*.py inspect_data.py` ✅
+- `python src/load_clean_data.py` ❌
+- `python src/analyze_cohort_growth.py` ❌ (blocked on missing `output_data/combined_all_years.csv`)
+
+The current blocker is an input-file contract mismatch: `src/load_clean_data.py` expects four exact workbook names in top-level `input_data/`, while the repo snapshot contains differently named files under `input_data/School and Demographic Group Aggregation/` and no exact 2024-25 workbook match. Treat the workflow below as the **intended** pipeline once that blocker is fixed, not as a claim that the current repository snapshot is handoff-ready.
 
 ---
 
@@ -188,26 +193,23 @@ python app/app_simple.py
 
 ## 💡 Next Steps
 
-### If you want to dive deeper:
+### Required before another validation / closeout pass:
 
-1. **Add statistical tests**
-   - Test if growth differences are statistically significant
-   - Identify outliers
+1. **Fix the input-data contract**
+   - Update `src/load_clean_data.py` to recognize the repo's actual workbook layout/names, or
+   - Place/rename the OSSE files so the documented loader command succeeds
 
-2. **More visualizations**
-   - Heatmaps of growth by school
-   - Distribution plots
-   - Scatter plots comparing subjects
+2. **Resolve the 2024-25 source file**
+   - Add the required workbook or document the accepted replacement filename
 
-3. **Export for presentation**
-   - Generate summary reports
-   - Create PowerPoint-ready charts
-   - Excel workbooks with formatted tables
+3. **Regenerate core outputs**
+   - Run `python src/load_clean_data.py`
+   - Run `python src/analyze_cohort_growth.py`
 
-4. **Filter and focus**
-   - Analyze specific schools of interest
-   - Compare charter vs. traditional public schools
-   - Look at specific grades
+4. **Re-run evidence checks**
+   - Verify Stuart-Hobson benchmark values
+   - Verify Task 05 significance columns in generated outputs
+   - Only then proceed to dashboard validation / final handoff
 
 ---
 
