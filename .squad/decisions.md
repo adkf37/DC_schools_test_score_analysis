@@ -104,3 +104,12 @@
 - `.squad/validation_report.md` is the authoritative validation record for this loop and now includes Task 04 evidence.
 - `STATUS.md` should move the project to **Validate complete / Closeout next** rather than reporting closeout as already finished for the current loop.
 - Closeout should focus on the remaining explicit limitations: missing normalized 4-workbook / 2024-25 data, the 1,234-row summary output versus the original ≥ 1,700 target, and the environment-blocked browser-console check.
+
+### D-014 — Closeout Signs Off the Dashboard-Aware Wide-Format Loop and Returns to Build
+**Date:** 2026-04-25
+**Decision:** Closeout approves handoff for the current dashboard-aware wide-format loop and returns the repo to **Build** rather than marking the full project complete.
+**Rationale:** A fresh-clone closeout re-run succeeded end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, and `python src/analyze_cohort_growth.py` all exited 0. `python app/app_simple.py` also started successfully, `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200, and a live `POST /_dash-update-component` request returned all five figures for the regenerated outputs. The repo is therefore handoff-ready for the current 3-year wide-format path, but it still lacks the normalized 4-workbook / 2024-25 data path, still falls short of the original ≥ 1,700 summary-row target, and still has environment-blocked dashboard follow-up checks (browser console and optional locations file).
+**Consequences:**
+- `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for the current loop while explicitly sending the repo back to **Build**.
+- `.squad/review_report.md` becomes the authoritative closeout record for the dashboard-aware loop.
+- The next Build loop must choose between restoring the normalized-data / 2024-25 path or finishing the remaining dashboard checks before another Validate/Closeout pass.

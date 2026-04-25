@@ -1,13 +1,15 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Closeout Complete for the Wide-Format Loop
+## ✅ Current Status: Closeout Complete for the Dashboard-Aware Wide-Format Loop
 
 As of the 2026-04-25 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**:
 
 - `python -m pip install -r requirements.txt` ✅
+- `python -m pip install dash plotly` ✅
 - `python -m py_compile src/*.py app/*.py inspect_data.py` ✅
 - `python src/load_wide_format_data.py` ✅ ← use this when normalized OSSE files are unavailable
 - `python src/analyze_cohort_growth.py` ✅
+- `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 **Two data pipeline options:**
 
@@ -141,7 +143,7 @@ python src/analyze_growth.py
 
 ---
 
-### 4. Interactive Dashboard 🔲 PENDING VALIDATION
+### 4. Interactive Dashboard ✅ VALIDATED FOR THE CURRENT LOOP
 **File**: `app/app_simple.py`
 
 **Features:**
@@ -154,6 +156,13 @@ python src/analyze_growth.py
 python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
+
+**Validated closeout evidence:**
+- App startup succeeds against regenerated CSVs
+- `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
+- A live `POST /_dash-update-component` request returns all five figures
+- If `input_data/school_locations.csv` is absent, the map shows `Add school_locations.csv to enable mapping`
+- Direct browser-console inspection was blocked in this environment and remains an explicit follow-up item
 
 ---
 
@@ -169,7 +178,7 @@ python src/analyze_cohort_growth.py
 # 3. (Optional) Run same-grade year-over-year analysis
 python src/analyze_growth.py
 
-# 4. (Optional / pending validation) Launch the interactive dashboard
+# 4. (Optional / already validated for the current loop) Launch the interactive dashboard
 python app/app_simple.py
 ```
 
@@ -222,8 +231,8 @@ python app/app_simple.py
 ### Required before the next validation / closeout pass:
 
 1. **Choose the next Build target**
-   - Validate/finish Task 04 dashboard work, or
-   - Restore the full normalized-data / 2024-25 ingestion path
+   - Restore the full normalized-data / 2024-25 ingestion path, or
+   - Extend dashboard validation to the blocked browser-console and locations-file checks
 
 2. **If pursuing the normalized-data path**
    - Update `src/load_clean_data.py` to recognize the repo's actual workbook layout/names, or
@@ -231,7 +240,7 @@ python app/app_simple.py
 
 3. **If pursuing the dashboard path**
    - Run `python app/app_simple.py`
-   - Confirm the dashboard acceptance criteria against the regenerated CSV outputs
+   - Confirm the browser-console and optional locations-file acceptance criteria against the regenerated CSV outputs
 
 4. **Re-run evidence checks**
    - Verify Stuart-Hobson benchmark values

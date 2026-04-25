@@ -2,9 +2,9 @@
 
 ## Current Objective
 
-**Validate is complete for the current wide-format loop; advance to Closeout for final handoff review.**
+**Closeout is complete for the current dashboard-aware wide-format loop; return to Build for the remaining backlog scope.**
 
-The documented fresh-clone validation path passes: `python -m pip install -r requirements.txt` → `python -m pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → start `python app/app_simple.py` and validate the dashboard via `GET /` plus `POST /_dash-update-component`. The run regenerated `combined_all_years.csv` (12,378 rows), `cohort_growth_detail.csv` (5,391 rows), `cohort_growth_summary.csv` (1,234 rows), and `cohort_growth_pivot.xlsx` (6 sheets), preserved the Stuart-Hobson benchmark within ±0.1 pp, and served all five dashboard figures.
+The documented fresh-clone validation path passes: `python -m pip install -r requirements.txt` → `python -m pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → start `python app/app_simple.py` and validate the dashboard via `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component`. The run regenerated `combined_all_years.csv` (12,378 rows), `cohort_growth_detail.csv` (5,391 rows), `cohort_growth_summary.csv` (1,234 rows), and `cohort_growth_pivot.xlsx` (6 sheets), preserved the Stuart-Hobson benchmark within ±0.1 pp, and served all five dashboard figures.
 
 ---
 
@@ -16,8 +16,8 @@ The documented fresh-clone validation path passes: `python -m pip install -r req
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete for the current loop — all five backlog tasks implemented |
-| 4 | Validate | ✅ Complete for the current loop — ready for Closeout |
-| 5 | Closeout | ⏭️ Next — review validated loop and decide signoff / return-to-Build scope |
+| 4 | Validate | ✅ Complete for the current loop — dashboard-aware wide-format path revalidated from a fresh clone |
+| 5 | Closeout | ✅ Complete for the current loop — sign off the validated wide-format path and return the repo to Build |
 
 ---
 
@@ -46,7 +46,7 @@ The documented fresh-clone validation path passes: `python -m pip install -r req
 | Statistical methods note | `docs/methods.md` | ✅ Created |
 | Interactive dashboard | `app/app_simple.py` | ✅ Validated — starts without errors, 5 figures render |
 | Validation report | `.squad/validation_report.md` | ✅ Updated with dashboard-aware validation evidence |
-| Review report | `.squad/review_report.md` | ⏳ Pending next closeout pass |
+| Review report | `.squad/review_report.md` | ✅ Updated with closeout signoff and return-to-Build recommendation |
 
 ---
 
@@ -71,9 +71,10 @@ The documented fresh-clone validation path passes: `python -m pip install -r req
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
   4. `python src/load_wide_format_data.py`
   5. `python src/analyze_cohort_growth.py`
-  6. Start `python app/app_simple.py`, then hit `GET /` plus `POST /_dash-update-component`
-- **Wide-format validation passed for the current loop.** Required outputs regenerate from a fresh clone, significance columns remain present, and the dashboard serves all five figure payloads.
+  6. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component`
+- **Wide-format validation passed for the current loop.** Required outputs regenerate from a fresh clone, significance columns remain present, and the dashboard serves all five figure payloads for a live callback request.
 - **Summary row count:** 1,234 rows vs Task 03 target of ≥ 1,700. The shortfall is because (a) we have only 3 years of data (no 2024-25 file), and (b) small demographic groups are suppressed by OSSE in many schools. This remains an explicit limitation.
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo. These must be downloaded manually from OSSE. The wide-format alternative covers the available data already committed here.
-- **Browser-console inspection:** direct manual console checking was blocked by a Playwright browser-profile lock in this environment. Dashboard startup plus live callback requests showed no server-side exceptions.
-- **Next recommended step:** Advance to **Closeout** to review the validated loop, record the remaining limitations, and decide whether to sign off or return to **Build** for the missing normalized-data / 2024-25 scope.
+- **Browser-console inspection:** direct manual console checking was blocked in this environment. Dashboard startup plus live callback requests showed no server-side exceptions.
+- **Closeout outcome:** Sign off the current dashboard-aware wide-format loop for handoff, but do **not** mark the full project complete.
+- **Next recommended step:** Start the next **Build** loop and choose between (a) restoring the normalized-data / 2024-25 ingestion path or (b) expanding dashboard validation to the remaining browser-console and locations-file checks.
