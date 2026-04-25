@@ -4,7 +4,7 @@
 
 **Validate is complete for the current wide-format loop; advance to Closeout for final handoff review.**
 
-The documented fresh-clone validation path passes: `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python app/app_simple.py` (startup plus Dash callback check). The run regenerated `combined_all_years.csv` (12,378 rows), `cohort_growth_detail.csv` (5,391 rows), `cohort_growth_summary.csv` (1,234 rows), and `cohort_growth_pivot.xlsx` (6 sheets), preserved the Stuart-Hobson benchmark within ±0.1 pp, and served all five dashboard figures.
+The documented fresh-clone validation path passes: `python -m pip install -r requirements.txt` → `python -m pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → start `python app/app_simple.py` and validate the dashboard via `GET /` plus `POST /_dash-update-component`. The run regenerated `combined_all_years.csv` (12,378 rows), `cohort_growth_detail.csv` (5,391 rows), `cohort_growth_summary.csv` (1,234 rows), and `cohort_growth_pivot.xlsx` (6 sheets), preserved the Stuart-Hobson benchmark within ±0.1 pp, and served all five dashboard figures.
 
 ---
 
@@ -65,7 +65,13 @@ The documented fresh-clone validation path passes: `pip install -r requirements.
 
 ## Notes / Blockers / Follow-up
 
-- **Validated smoke test commands:** `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python app/app_simple.py`
+- **Validated smoke test commands:**
+  1. `python -m pip install -r requirements.txt`
+  2. `python -m pip install dash plotly`
+  3. `python -m py_compile src/*.py app/*.py inspect_data.py`
+  4. `python src/load_wide_format_data.py`
+  5. `python src/analyze_cohort_growth.py`
+  6. Start `python app/app_simple.py`, then hit `GET /` plus `POST /_dash-update-component`
 - **Wide-format validation passed for the current loop.** Required outputs regenerate from a fresh clone, significance columns remain present, and the dashboard serves all five figure payloads.
 - **Summary row count:** 1,234 rows vs Task 03 target of ≥ 1,700. The shortfall is because (a) we have only 3 years of data (no 2024-25 file), and (b) small demographic groups are suppressed by OSSE in many schools. This remains an explicit limitation.
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo. These must be downloaded manually from OSSE. The wide-format alternative covers the available data already committed here.

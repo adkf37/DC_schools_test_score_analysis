@@ -26,7 +26,10 @@ Validate the latest build output against the current sprint commitments for Task
    - Command: `python src/load_wide_format_data.py`
    - Result: ✅ Passed
    - Evidence:
-     - Detected and loaded the 3 in-repo wide-format workbooks under `input_data/School and Demographic Group Aggregation/`
+     - Detected and loaded 3 in-repo wide-format workbooks:
+       - `input_data/School and Demographic Group Aggregation/DC PARCC Scores – School Year 2021-22.xlsx`
+       - `input_data/School and Demographic Group Aggregation/DC PARCC Scores – School Year 2022-23.xlsx`
+       - `input_data/School and Demographic Group Aggregation/DC Cape Scores 2023-2024.xlsx`
      - Wrote `output_data/combined_all_years.csv` with **12,378 rows**
      - Wrote `output_data/processing_report.txt`
 
@@ -45,14 +48,14 @@ Validate the latest build output against the current sprint commitments for Task
      - `cohort_growth_detail.csv` contains the Task 03 columns plus Task 05 fields `p_value` and `significant`
      - `cohort_growth_summary.csv` contains Task 05 field `pct_significant_transitions`
      - Stuart-Hobson 2022→2023 transitions remained within ±0.1 pp:
-       - ELA Gr6→Gr7: `33.5% → 40.5% (+7.0 pp)`
-       - ELA Gr7→Gr8: `36.2% → 46.6% (+10.3 pp)`
-       - Math Gr6→Gr7: `11.0% → 14.7% (+3.6 pp)`
-       - Math Gr7→Gr8: `13.7% → 19.6% (+5.9 pp)`
+       - ELA Gr6→Gr7: `33.5% → 40.5% (+7.0 pp)`; max absolute deviation from target = **0.048 pp**
+       - ELA Gr7→Gr8: `36.2% → 46.6% (+10.3 pp)`; max absolute deviation from target = **0.050 pp**
+       - Math Gr6→Gr7: `11.0% → 14.7% (+3.6 pp)`; max absolute deviation from target = **0.039 pp**
+       - Math Gr7→Gr8: `13.7% → 19.6% (+5.9 pp)`; max absolute deviation from target = **0.045 pp**
 
 7. **Dashboard startup / rendering smoke test**
    - Commands:
-     - `python app/app_simple.py`
+     - `python app/app_simple.py` (start server)
      - `GET http://127.0.0.1:8050/`
      - `POST http://127.0.0.1:8050/_dash-update-component`
    - Result: ✅ Passed
