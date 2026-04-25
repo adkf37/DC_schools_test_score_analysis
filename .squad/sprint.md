@@ -1,8 +1,8 @@
 # Sprint Plan
 
-## Current Phase: Build (Phase 3)
+## Current Phase: Closeout complete → return to Build
 
-Wide-format alternative loader implemented (Task 01/02 unblocked). Tasks 03 and 05 outputs are verified with Stuart-Hobson benchmarks passing. Re-run Validate next.
+Wide-format alternative loader is implemented and validated from a fresh clone. Tasks 03 and 05 outputs are verified with Stuart-Hobson benchmarks passing. Closeout for this loop is complete; the next loop should return to Build for the remaining scope.
 
 ## Ordered Execution Plan
 
@@ -19,5 +19,5 @@ Wide-format alternative loader implemented (Task 01/02 unblocked). Tasks 03 and 
 - Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py`
 - `load_clean_data.py` still requires normalized OSSE files (download from OSSE website) — use `load_wide_format_data.py` for the files already in the repo.
 - `cohort_growth_summary.csv` has 1,234 rows (Task 03 target was ≥ 1,700); shortfall is due to 3 years of data only (no 2024-25) and OSSE demographic suppression.
-- Next action: re-run Validate phase with updated smoke commands.
-
+- Closeout outcome: sign off the current wide-format loop as handoff-ready documentation, but return the repo to Build because Task 04 is still pending and the normalized 4-workbook path is still unavailable in-repo.
+- Next action: start the next Build loop for either Task 04 dashboard work or the missing normalized-data / 2024-25 ingestion path.
