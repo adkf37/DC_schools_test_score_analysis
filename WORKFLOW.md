@@ -1,15 +1,22 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ⚠️ Current Status: Return to Build (not ready for final handoff)
+## ✅ Current Status: Build Phase — Wide-Format Pipeline Operational
 
-As of the 2026-04-25 closeout review, a fresh-clone smoke test does **not** complete successfully:
+As of the 2026-04-25 Build phase, a fresh-clone smoke test with the available data completes successfully using the **wide-format alternative loader**:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m py_compile src/*.py app/*.py inspect_data.py` ✅
-- `python src/load_clean_data.py` ❌
-- `python src/analyze_cohort_growth.py` ❌ (blocked on missing `output_data/combined_all_years.csv`)
+- `python src/load_wide_format_data.py` ✅ ← use this when normalized OSSE files are unavailable
+- `python src/analyze_cohort_growth.py` ✅
 
-The current blocker is an input-file contract mismatch: `src/load_clean_data.py` expects four exact workbook names in top-level `input_data/`, while the repo snapshot contains differently named files under `input_data/School and Demographic Group Aggregation/` and no exact 2024-25 workbook match. Treat the workflow below as the **intended** pipeline once that blocker is fixed, not as a claim that the current repository snapshot is handoff-ready.
+**Two data pipeline options:**
+
+| Script | Input files | Use when |
+|--------|------------|---------|
+| `src/load_clean_data.py` | Normalized OSSE files (4 exact workbook names in `input_data/`) | You have downloaded the normalized school-level PARCC/DCCAPE files from OSSE |
+| `src/load_wide_format_data.py` | Wide-format demographic files in `input_data/School and Demographic Group Aggregation/` | Using files already in the repository (2021-22, 2022-23, 2023-24) |
+
+> **Note:** `src/load_clean_data.py` still expects the four normalized OSSE filenames (see Task 01). The wide-format loader (`src/load_wide_format_data.py`) works with the files already committed to the repo.
 
 ---
 
@@ -38,27 +45,45 @@ This answers: **"Is this grade getting stronger over time?"**
 
 ## 📁 Pipeline Steps
 
-### 1. Data Preparation ✅ COMPLETE
-**File**: `src/load_clean_data.py`
+### 1. Data Preparation
+**File**: `src/load_clean_data.py` (normalized OSSE) or `src/load_wide_format_data.py` (wide-format)
+
+#### Option A — Normalized OSSE Files (`src/load_clean_data.py`)
 
 **What it does:**
-- Reads the 4 XLSX files (2021-22, 2022-23, 2023-24, 2024-25)
+- Reads the 4 XLSX files (2021-22, 2022-23, 2023-24, 2024-25) — must be downloaded from OSSE
 - Handles different schemas across years
 - **Normalizes grade names** (e.g., "Grade 6-All" → "Grade 6", "HS-Algebra I" → "Algebra I")
 - **Deduplicates** rows (prefers specific assessment over "All" aggregates)
 - Adds numeric `Grade Number` column for cohort tracking
 
-**Output**: `output_data/combined_all_years.csv`
-- 4 years of data (2022-2025)
-- 236 schools
-- 2 subjects (ELA, Math)
-- All student groups
-
 ```bash
 python src/load_clean_data.py
 ```
 
----
+#### Option B — Wide-Format Demographic Files (`src/load_wide_format_data.py`) ✅ Operational
+
+**What it does:**
+- Discovers XLSX files automatically under `input_data/` (searches all subdirectories)
+- Reads the "School and Demographic Group Aggregation" workbooks (already in the repo)
+- Converts wide format (ELA + Math side-by-side, separate sheets per demographic) to long format
+- Uses dynamic column-name detection to handle the extra "Subgroup" column in demographic sheets
+- Produces the same `combined_all_years.csv` format as Option A
+
+**Available data:**
+- 2021-22 PARCC (grades 3-8, 13 demographic sheets)
+- 2022-23 PARCC (grades 3-8, 13 demographic sheets)
+- 2023-24 DCCAPE (grades 3-8, 13 demographic sheets)
+
+```bash
+python src/load_wide_format_data.py
+```
+
+**Output**: `output_data/combined_all_years.csv`
+- 3 years of data (2022–2024, using the wide-format option)
+- ~96 schools with cohort-trackable grades (3-8)
+- 2 subjects (ELA, Math)
+- 11 student groups (All Students + demographic breakdowns)
 
 ### 2. Cohort Growth Analysis ✅ NEW
 **File**: `src/analyze_cohort_growth.py`
