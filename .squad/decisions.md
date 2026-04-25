@@ -116,6 +116,15 @@
 - `docs/methods.md` documents the gap metrics (proficiency_gap, followup_gap, gap_change, growth_gap, is_disadvantaged).
 - Smoke test commands updated to include `python src/equity_gap_analysis.py`.
 
+### D-016 — Validate Passes the Equity-Aware Wide-Format Loop
+**Date:** 2026-04-25
+**Decision:** Mark the current Validate pass as successful and advance the repo to **Closeout** for the latest equity-aware wide-format loop.
+**Rationale:** Re-running the documented smoke path succeeded end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, and `python src/equity_gap_analysis.py` all exited 0. `python app/app_simple.py` also started successfully against the regenerated outputs, `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200, and a live `POST /_dash-update-component` request returned all seven figures (including the two new equity charts). Direct browser-console inspection remained blocked because the Playwright browser profile was locked in this environment, but no server-side exceptions were observed while serving the dashboard requests.
+**Consequences:**
+- `.squad/validation_report.md` is the authoritative validation record for the current loop and now includes equity-output evidence.
+- `STATUS.md` should move the project to **Validate complete / Closeout next** for loop 2.
+- Closeout should focus on the remaining explicit limitations: the missing normalized 4-workbook / 2024-25 data path, the 1,234-row summary output versus the original ≥ 1,700 target, and the environment-blocked browser-console/manual locations-file checks.
+
 **Date:** 2026-04-25
 **Decision:** Closeout approves handoff for the current dashboard-aware wide-format loop and returns the repo to **Build** rather than marking the full project complete.
 **Rationale:** A fresh-clone closeout re-run succeeded end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, and `python src/analyze_cohort_growth.py` all exited 0. `python app/app_simple.py` also started successfully, `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200, and a live `POST /_dash-update-component` request returned all five figures for the regenerated outputs. The repo is therefore handoff-ready for the current 3-year wide-format path, but it still lacks the normalized 4-workbook / 2024-25 data path, still falls short of the original ≥ 1,700 summary-row target, and still has environment-blocked dashboard follow-up checks (browser console and optional locations file).
