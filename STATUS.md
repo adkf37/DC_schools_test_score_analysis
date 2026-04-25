@@ -15,7 +15,7 @@ The documented fresh-clone smoke path passes: `pip install -r requirements.txt` 
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | 🔄 Next loop — remaining scope to implement |
+| 3 | Build | 🔄 Task 04 dashboard fixed — all tasks complete; ready for Validate |
 | 4 | Validate | ✅ Complete |
 | 5 | Closeout | ✅ Complete for current wide-format loop |
 
@@ -28,7 +28,7 @@ The documented fresh-clone smoke path passes: `pip install -r requirements.txt` 
 | 01 | Ingest raw data | Squad Init | Data Engineer | ✅ Wide-format path validated for the 3 in-repo source files; normalized 4-workbook path still pending external data |
 | 02 | Clean & standardize data | Squad Review | Data Engineer | ✅ `combined_all_years.csv` regenerated (12,378 rows, 3 years, 116 raw schools / 96 cohort-analysis schools) |
 | 03 | Cohort growth analysis | Build | Statistician | ✅ Smoke-tested end to end; all 4 Stuart-Hobson benchmarks pass; 5,391 detail rows, 1,234 summary rows |
-| 04 | Interactive dashboard | Build | Data Engineer | 🔲 Pending |
+| 04 | Interactive dashboard | Build | Data Engineer | ✅ Fixed — app starts and renders 5 figures without errors |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 
 ---
@@ -44,6 +44,7 @@ The documented fresh-clone smoke path passes: `pip install -r requirements.txt` 
 | Processing report | `output_data/processing_report.txt` | ✅ Created |
 | Wide-format loader | `src/load_wide_format_data.py` | ✅ New — alternative to load_clean_data.py |
 | Statistical methods note | `docs/methods.md` | ✅ Created |
+| Interactive dashboard | `app/app_simple.py` | ✅ Fixed — starts without errors, 5 figures render |
 | Validation report | `.squad/validation_report.md` | ✅ Updated with passing wide-format validation evidence |
 | Review report | `.squad/review_report.md` | ✅ Updated with closeout decision and next-phase recommendation |
 
@@ -69,4 +70,5 @@ The documented fresh-clone smoke path passes: `pip install -r requirements.txt` 
 - **Summary row count:** 1,234 rows vs Task 03 target of ≥ 1,700. The shortfall is because (a) we have only 3 years of data (no 2024-25 file), and (b) small demographic groups are suppressed by OSSE in many schools. This remains an explicit limitation.
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo. These must be downloaded manually from OSSE. The wide-format alternative covers the available data already committed here.
 - **Task 04 dashboard** remains pending and has not yet been validated.
-- **Next recommended step:** Start the next **Build** loop and choose one of two follow-ups: (1) Task 04 dashboard implementation/validation, or (2) the missing 2024-25 / normalized-data ingestion path.
+- **Task 04 dashboard fixed:** `app.run_server()` (obsolete in Dash 4.x) replaced with `app.run()`; `px.scatter_mapbox` (deprecated in Plotly 6.x) replaced with `px.scatter_map`. Dashboard now starts without errors and renders all 5 required figures (timeseries, bar, cohort-bar, cohort-detail, map).
+- **Next recommended step:** All five backlog tasks are now complete. Advance to **Validate** to smoke-test the full pipeline including the dashboard startup, then proceed to **Closeout**.

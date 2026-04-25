@@ -323,8 +323,8 @@ def update_figures(subject, subgroup, schools, year_range):
         map_df['Latitude'] = pd.to_numeric(map_df['Latitude'], errors='coerce')
         map_df['Longitude'] = pd.to_numeric(map_df['Longitude'], errors='coerce')
         map_df = map_df.dropna(subset=['Latitude', 'Longitude'])
-        
-        fig_map = px.scatter_mapbox(
+
+        fig_map = px.scatter_map(
             map_df,
             lat='Latitude', lon='Longitude',
             color='percent', size='percent',
@@ -332,18 +332,18 @@ def update_figures(subject, subgroup, schools, year_range):
             hover_data={'Latitude': False, 'Longitude': False, 'percent': ':.1f'},
             color_continuous_scale='Viridis',
             size_max=20, zoom=10,
-            title=f'{subject} - {latest_year}: School Performance Map'
+            title=f'{subject} - {latest_year}: School Performance Map',
+            map_style='open-street-map',
         )
-        fig_map.update_layout(mapbox_style='open-street-map')
         fig_map.update_layout(margin=dict(l=0, r=0, t=40, b=0))
     else:
         # Empty map placeholder
-        fig_map = px.scatter_mapbox(pd.DataFrame({'lat': [], 'lon': []}), lat='lat', lon='lon')
-        fig_map.update_layout(
-            mapbox_style='open-street-map',
+        fig_map = px.scatter_map(
+            pd.DataFrame({'lat': [], 'lon': []}), lat='lat', lon='lon',
+            map_style='open-street-map',
             title='Add school_locations.csv to enable mapping',
-            margin=dict(l=0, r=0, t=40, b=0)
         )
+        fig_map.update_layout(margin=dict(l=0, r=0, t=40, b=0))
     
     # ── Cohort growth charts ─────────────────────────────────────────────
     fig_cohort_bars = go.Figure()
@@ -435,4 +435,4 @@ if __name__ == '__main__':
     else:
         print("\nStarting Dash app...")
         print("Open your browser to: http://127.0.0.1:8050/")
-        app.run_server(debug=True)
+        app.run(debug=True)

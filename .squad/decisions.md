@@ -85,3 +85,13 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe the repo as handoff-ready for the verified three-year wide-format path while clearly listing the remaining gaps.
 - `.squad/review_report.md` becomes the authoritative closeout record for this loop and should explicitly recommend returning to **Build** next.
 - The next Build loop must choose between dashboard validation work and the missing normalized-data / 2024-25 ingestion path before another Validate/Closeout cycle.
+
+### D-012 — Fix Dashboard API Compatibility for Dash 4.x and Plotly 6.x
+**Date:** 2026-04-25
+**Decision:** Update `app/app_simple.py` and `app/app.py` to replace deprecated/removed APIs: `app.run_server()` → `app.run()`, and `px.scatter_mapbox` → `px.scatter_map` with `map_style='open-street-map'`.
+**Rationale:** Dash 4.x removed `app.run_server()` (replaced by `app.run()`). Plotly 6.x deprecated `px.scatter_mapbox` in favour of `px.scatter_map` (the new MapLibre-based renderer that does not require a Mapbox API token). Without these fixes the dashboard raises an `ObsoleteAttributeException` at startup and produces `DeprecationWarning` at runtime, preventing Task 04 acceptance criteria from being met.
+**Consequences:**
+- `python app/app_simple.py` now starts without errors and serves all 5 required figures (timeseries, bar, cohort-bar, cohort-detail, map).
+- The map placeholder renders correctly (open-street-map tile layer) when `school_locations.csv` is absent.
+- Both `app/app.py` and `app/app_simple.py` are updated; `app.py` is the legacy entry point and `app_simple.py` is the current primary dashboard.
+- `dash>=2.0.0` and `plotly>=5.0.0` version pins remain commented out in `requirements.txt` (dashboard is still an optional dependency per D-005); users must `pip install dash plotly` separately.
