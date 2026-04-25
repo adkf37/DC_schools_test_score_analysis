@@ -1,8 +1,8 @@
 # Sprint Plan
 
-## Current Phase: Closeout complete → return to Build
+## Current Phase: All tasks complete → advance to Validate
 
-Wide-format alternative loader is implemented and validated from a fresh clone. Tasks 03 and 05 outputs are verified with Stuart-Hobson benchmarks passing. Closeout for this loop is complete; the next loop should return to Build for the remaining scope.
+All five backlog tasks are now implemented. The dashboard (`app/app_simple.py`) was fixed to use the current Dash and Plotly APIs. The next loop should run **Validate** to smoke-test the full pipeline and then **Closeout**.
 
 ## Ordered Execution Plan
 
@@ -11,7 +11,7 @@ Wide-format alternative loader is implemented and validated from a fresh clone. 
 | 1 | [Task 01] Ingest raw data | Data Engineer | — | ✅ Unblocked — `load_wide_format_data.py` reads files in repo |
 | 2 | [Task 02] Clean & standardize data | Data Engineer | Task 01 | ✅ `combined_all_years.csv` generated |
 | 3 | [Task 03] Cohort growth analysis | Statistician | Task 02 | ✅ Verified — 5,391 detail rows, benchmarks pass |
-| 4 | [Task 04] Interactive dashboard | Data Engineer | Task 02 | 🔲 Pending |
+| 4 | [Task 04] Interactive dashboard | Data Engineer | Task 02 | ✅ Fixed — app starts without errors, 5 figures render |
 | 5 | [Task 05] Statistical significance tests | Statistician | Task 03 | ✅ Verified — p_value and significant columns present |
 
 ## Notes

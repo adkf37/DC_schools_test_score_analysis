@@ -201,26 +201,28 @@ def update_figs(subject, subgroup, schools, year_range):
         map_df['Latitude'] = pd.to_numeric(map_df['Latitude'], errors='coerce')
         map_df['Longitude'] = pd.to_numeric(map_df['Longitude'], errors='coerce')
         map_df = map_df.dropna(subset=['Latitude', 'Longitude'])
-        fig_map = px.scatter_mapbox(
+        fig_map = px.scatter_map(
             map_df,
             lat='Latitude', lon='Longitude', color='percent', size='percent',
             hover_name='School Name',
             color_continuous_scale='Viridis',
             size_max=20, zoom=10,
-            title=f'Map {latest_year}: Percent Meeting/Exceeding'
+            title=f'Map {latest_year}: Percent Meeting/Exceeding',
+            map_style='open-street-map',
         )
-        fig_map.update_layout(mapbox_style='open-street-map')
         fig_map.update_layout(margin=dict(l=0, r=0, t=40, b=0))
     else:
         # Empty map placeholder
-        fig_map = px.scatter_mapbox(pd.DataFrame({'lat': [], 'lon': []}), lat='lat', lon='lon')
-        fig_map.update_layout(mapbox_style='open-street-map',
-                              title='Provide school_locations.csv to enable mapping',
-                              margin=dict(l=0, r=0, t=40, b=0))
+        fig_map = px.scatter_map(
+            pd.DataFrame({'lat': [], 'lon': []}), lat='lat', lon='lon',
+            map_style='open-street-map',
+            title='Provide school_locations.csv to enable mapping',
+        )
+        fig_map.update_layout(margin=dict(l=0, r=0, t=40, b=0))
 
     return fig_ts, fig_bars, fig_map
 
 
 if __name__ == '__main__':
     # Run app
-    app.run_server(debug=True)
+    app.run(debug=True)
