@@ -52,6 +52,11 @@ SHEET_SUBGROUP = {
     "EL":        ("English Learner Status", "EL Active"),
     "SpEd":      ("Special Education Status", "Students with Disabilities"),
     "EconDisad": ("Economic Status", "Econ Dis"),
+    # AtRisk (2021-22 only) maps to the same label as EconDisad because
+    # analyze_cohort_growth.py explicitly treats them as close proxies for
+    # cross-year comparison (see decision D-002 and subgroup_map therein).
+    # These sheets never co-exist in the same year file, so no duplicate rows
+    # are produced.
     "AtRisk":    ("Economic Status", "Econ Dis"),
 }
 
@@ -123,9 +128,11 @@ def _coerce(val):
     if val is None:
         return np.nan
     s = str(val).strip().upper()
-    if s in ("", "DS", "N < 10", "N<10", "<5%", ">95%", "N/A", "NA", "."):
+    # Consolidated suppression check: empty strings, OSSE suppression codes,
+    # and any value starting with N<, <=, or >= (e.g. "n < 10", "<5%", ">95%")
+    if s in ("", "DS", "N/A", "NA", "."):
         return np.nan
-    if re.match(r"^N\s*<", s) or re.match(r"^<=?\s*\d", s) or re.match(r"^>=?\s*\d", s):
+    if re.match(r"^(N\s*<|<[^-]|>|\.)|\bDS\b", s):
         return np.nan
     s = s.replace("%", "").replace(",", "").strip()
     try:
@@ -241,6 +248,10 @@ def read_wide_sheet(wb, sheet_name: str, year: int, assessment: str,
                 pct = pct_f
             return {
                 "Aggregation Level":   "School",
+                # LEA Code/Name are not present in wide-format files. Placeholders
+                # ("0" / "DC Schools") are used so pandas does not coerce the
+                # column to float64 NaN, which would cause groupby in
+                # analyze_cohort_growth.py to silently drop all rows (dropna=True).
                 "LEA Code":            "0",
                 "LEA Name":            "DC Schools",
                 "School Code":         school_code,
