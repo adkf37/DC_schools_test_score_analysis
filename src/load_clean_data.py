@@ -276,6 +276,10 @@ def main():
     # Combine all dataframes
     if not all_dfs:
         print("\nERROR: No data loaded from any files!")
+        print("\nTIP: If the above files are not available, use the alternative loader:")
+        print("     python src/load_wide_format_data.py")
+        print("  This loader reads the wide-format OSSE files from:")
+        print("  input_data/School and Demographic Group Aggregation/")
         return
     
     print("\n" + "=" * 70)

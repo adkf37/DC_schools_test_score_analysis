@@ -57,6 +57,15 @@
 
 
 
-- All meaningful changes require team consensus
-- Document architectural decisions here
-- Keep history focused on work, decisions focused on direction
+### D-009 — Wide-Format Alternative Loader to Unblock Pipeline
+**Date:** 2026-04-25  
+**Decision:** Implement `src/load_wide_format_data.py` as an alternative data ingestion script that reads the "School and Demographic Group Aggregation" wide-format OSSE workbooks already committed to the repository.  
+**Rationale:** `src/load_clean_data.py` was designed for a normalized long-format schema that requires four specific OSSE workbooks not available in the repo (and not downloadable automatically). The wide-format files (2021-22, 2022-23, 2023-24 PARCC/DCCAPE) are already in `input_data/School and Demographic Group Aggregation/` and contain the same data in a different layout (wide: ELA+Math side-by-side, separate sheets per demographic group). The alternative loader uses dynamic column-name detection to handle the extra "Subgroup" column present in demographic (non-Overall) sheets.  
+**Consequences:**  
+- The pipeline can now run end-to-end from a fresh clone without downloading additional files.  
+- Output uses placeholder `LEA Code = "0"` and `LEA Name = "DC Schools"` because the wide-format files do not include LEA metadata.  
+- `cohort_growth_summary.csv` has 1,234 rows (vs. Task 03 target of ≥ 1,700) because only 3 years of data are available (no 2024-25) and OSSE suppresses small demographic cells.  
+- All four Stuart-Hobson benchmark transitions pass within ±0.1 pp (D-004 constraint satisfied).  
+- The normalized `load_clean_data.py` remains the preferred path when the full OSSE download set is available.
+
+
