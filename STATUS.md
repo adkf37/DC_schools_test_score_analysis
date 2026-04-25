@@ -2,9 +2,9 @@
 
 ## Current Objective
 
-**Build Phase (Task 05): Statistical significance tests added to cohort growth analysis.**
+**Validate Phase result: Task 03 / Task 05 validation failed and the repo must return to Build.**
 
-Task 05 (statistical significance tests) has been implemented in `src/analyze_cohort_growth.py`. The two-proportion z-test is now computed for every cohort transition and surfaced in both output CSVs. A methods note has been added at `docs/methods.md`. The next step is to run the full pipeline against real data (Tasks 01–02) and validate the outputs per Task 03 and Task 05 acceptance criteria.
+Validation on 2026-04-25 installed the declared Python dependencies, passed a syntax sanity check, and then failed on the documented smoke commands. `src/load_clean_data.py` currently expects four exact workbook names in the top-level `input_data/` directory, but the repo snapshot contains differently named files under `input_data/School and Demographic Group Aggregation/` and no exact 2024-25 match. Because `combined_all_years.csv` was not generated, `src/analyze_cohort_growth.py` could not run and the Task 03 / Task 05 acceptance criteria remain unmet.
 
 ---
 
@@ -15,8 +15,8 @@ Task 05 (statistical significance tests) has been implemented in `src/analyze_co
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | 🔄 In Progress |
-| 4 | Validate | 🔲 Pending |
+| 3 | Build | 🔄 In Progress (return target) |
+| 4 | Validate | ⚠️ Failed / Blocked |
 | 5 | Closeout | 🔲 Pending |
 
 ---
@@ -25,11 +25,11 @@ Task 05 (statistical significance tests) has been implemented in `src/analyze_co
 
 | ID | Task | Phase | Owner | Status |
 |----|------|-------|-------|--------|
-| 01 | Ingest raw data | Squad Init | Data Engineer | 🔲 Blocked (data files not in repo) |
-| 02 | Clean & standardize data | Squad Review | Data Engineer | 🔲 Blocked (depends on Task 01) |
-| 03 | Cohort growth analysis | Build | Statistician | ✅ Implemented (`src/analyze_cohort_growth.py`) |
+| 01 | Ingest raw data | Squad Init | Data Engineer | ⚠️ Blocked (repo data layout/filenames do not match loader contract; no exact 2024-25 workbook match) |
+| 02 | Clean & standardize data | Squad Review | Data Engineer | ⚠️ Blocked (Task 01 / loader discovery issue prevents `combined_all_years.csv`) |
+| 03 | Cohort growth analysis | Validate | ⚠️ Validation blocked (`combined_all_years.csv` not generated) |
 | 04 | Interactive dashboard | Build | Data Engineer | 🔲 Pending |
-| 05 | Statistical significance tests | Build | Statistician | ✅ Implemented (Task 03 extended) |
+| 05 | Statistical significance tests | Validate | ⚠️ Validation blocked (depends on Task 03 outputs) |
 
 ---
 
@@ -37,12 +37,13 @@ Task 05 (statistical significance tests) has been implemented in `src/analyze_co
 
 | Output | Location | Status |
 |--------|----------|--------|
-| Combined dataset (all years) | `output_data/combined_all_years.csv` | ⏳ Generated on pipeline run |
-| Cohort growth detail | `output_data/cohort_growth_detail.csv` | ⏳ Generated on pipeline run |
-| Cohort growth summary | `output_data/cohort_growth_summary.csv` | ⏳ Generated on pipeline run |
-| Cohort growth Excel workbook | `output_data/cohort_growth_pivot.xlsx` | ⏳ Generated on pipeline run |
-| Processing report | `output_data/processing_report.txt` | ⏳ Generated on pipeline run |
+| Combined dataset (all years) | `output_data/combined_all_years.csv` | ❌ Not generated in validation run |
+| Cohort growth detail | `output_data/cohort_growth_detail.csv` | ❌ Not generated in validation run |
+| Cohort growth summary | `output_data/cohort_growth_summary.csv` | ❌ Not generated in validation run |
+| Cohort growth Excel workbook | `output_data/cohort_growth_pivot.xlsx` | ❌ Not generated in validation run |
+| Processing report | `output_data/processing_report.txt` | ❌ Not generated in validation run |
 | Statistical methods note | `docs/methods.md` | ✅ Created |
+| Validation report | `.squad/validation_report.md` | ✅ Created |
 
 ---
 
@@ -61,8 +62,8 @@ Task 05 (statistical significance tests) has been implemented in `src/analyze_co
 
 ## Notes / Blockers
 
-- Raw OSSE data files are not tracked in git and must be downloaded manually from [OSSE Assessment Data](https://osse.dc.gov/page/assessment-data). See `backlog/data_sources.md` for details. Tasks 01 and 02 are blocked on this.
-- Tasks 03 and 05 are fully implemented and will run once Tasks 01/02 data are available.
-- Statistical note: with a single middle school's grade cohort (~145 students), a 7 pp growth change is not statistically significant at p < 0.05 (requires N ≈ 366 per group). City-wide aggregations with larger N will yield more significant transitions.
-- Optional `input_data/school_locations.csv` (school geocoordinates) is not yet available; the map view in the dashboard will be skipped until this file is created.
-
+- Validation installed `requirements.txt` successfully and `python -m py_compile src/*.py app/*.py inspect_data.py` passed, so the current blocker is not a syntax error.
+- `src/load_clean_data.py` hardcodes four exact filenames in top-level `input_data/`, but the repo snapshot stores available workbooks under `input_data/School and Demographic Group Aggregation/` with different names.
+- No exact match for the expected 2024-25 workbook (`2024-25 Public File School Level DCCAPE and MSAA Data 1.xlsx`) was present during validation.
+- Because `combined_all_years.csv` was not generated, the Stuart-Hobson regression benchmark and Task 05 significance-output checks remain blocked.
+- **Next recommended step:** return to Build to align loader input discovery or repo data placement, generate the combined dataset, rerun `python src/load_clean_data.py`, then rerun `python src/analyze_cohort_growth.py` and the Stuart-Hobson validation.
