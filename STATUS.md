@@ -2,9 +2,9 @@
 
 ## Current Objective
 
-**Squad initialized; ready for Squad Review.**
+**Build Phase (Task 05): Statistical significance tests added to cohort growth analysis.**
 
-The Squad Init phase is complete. The `.squad/` directory has been bootstrapped with the full team roster (Lead, Data Engineer, Statistician, Tester, Scribe, Ralph), routing rules, an initialized decision log, and individual charter files for each agent. The next step is Squad Review (Phase 2): tighten backlog tasks, surface risks, and turn the backlog into an ordered execution plan in `.squad/sprint.md`.
+Task 05 (statistical significance tests) has been implemented in `src/analyze_cohort_growth.py`. The two-proportion z-test is now computed for every cohort transition and surfaced in both output CSVs. A methods note has been added at `docs/methods.md`. The next step is to run the full pipeline against real data (Tasks 01–02) and validate the outputs per Task 03 and Task 05 acceptance criteria.
 
 ---
 
@@ -14,8 +14,8 @@ The Squad Init phase is complete. The `.squad/` directory has been bootstrapped 
 |-------|------|--------|
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
-| 2 | Squad Review | 🔲 Next |
-| 3 | Build | 🔲 Pending |
+| 2 | Squad Review | ✅ Complete |
+| 3 | Build | 🔄 In Progress |
 | 4 | Validate | 🔲 Pending |
 | 5 | Closeout | 🔲 Pending |
 
@@ -25,11 +25,11 @@ The Squad Init phase is complete. The `.squad/` directory has been bootstrapped 
 
 | ID | Task | Phase | Owner | Status |
 |----|------|-------|-------|--------|
-| 01 | Ingest raw data | Squad Init | Data Engineer | 🔲 Pending |
-| 02 | Clean & standardize data | Squad Review | Data Engineer | 🔲 Pending |
-| 03 | Cohort growth analysis | Build | Statistician | 🔲 Pending |
+| 01 | Ingest raw data | Squad Init | Data Engineer | 🔲 Blocked (data files not in repo) |
+| 02 | Clean & standardize data | Squad Review | Data Engineer | 🔲 Blocked (depends on Task 01) |
+| 03 | Cohort growth analysis | Build | Statistician | ✅ Implemented (`src/analyze_cohort_growth.py`) |
 | 04 | Interactive dashboard | Build | Data Engineer | 🔲 Pending |
-| 05 | Statistical significance tests | Build | Statistician | 🔲 Pending |
+| 05 | Statistical significance tests | Build | Statistician | ✅ Implemented (Task 03 extended) |
 
 ---
 
@@ -42,6 +42,7 @@ The Squad Init phase is complete. The `.squad/` directory has been bootstrapped 
 | Cohort growth summary | `output_data/cohort_growth_summary.csv` | ⏳ Generated on pipeline run |
 | Cohort growth Excel workbook | `output_data/cohort_growth_pivot.xlsx` | ⏳ Generated on pipeline run |
 | Processing report | `output_data/processing_report.txt` | ⏳ Generated on pipeline run |
+| Statistical methods note | `docs/methods.md` | ✅ Created |
 
 ---
 
@@ -60,5 +61,8 @@ The Squad Init phase is complete. The `.squad/` directory has been bootstrapped 
 
 ## Notes / Blockers
 
-- Raw OSSE data files are not tracked in git and must be downloaded manually from [OSSE Assessment Data](https://osse.dc.gov/page/assessment-data). See `backlog/data_sources.md` for details.
+- Raw OSSE data files are not tracked in git and must be downloaded manually from [OSSE Assessment Data](https://osse.dc.gov/page/assessment-data). See `backlog/data_sources.md` for details. Tasks 01 and 02 are blocked on this.
+- Tasks 03 and 05 are fully implemented and will run once Tasks 01/02 data are available.
+- Statistical note: with a single middle school's grade cohort (~145 students), a 7 pp growth change is not statistically significant at p < 0.05 (requires N ≈ 366 per group). City-wide aggregations with larger N will yield more significant transitions.
 - Optional `input_data/school_locations.csv` (school geocoordinates) is not yet available; the map view in the dashboard will be skipped until this file is created.
+
