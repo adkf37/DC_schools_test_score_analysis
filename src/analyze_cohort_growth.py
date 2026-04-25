@@ -23,6 +23,12 @@ import numpy as np
 import pandas as pd
 from typing import List, Optional, Tuple
 
+try:
+    from scipy.stats import norm as _scipy_norm
+    _SCIPY_AVAILABLE = True
+except ImportError:
+    _SCIPY_AVAILABLE = False
+
 # ── Paths ────────────────────────────────────────────────────────────────
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 OUTPUT_PATH = os.path.abspath(os.path.join(CURRENT_PATH, '..', 'output_data'))
@@ -79,6 +85,69 @@ def normalize_grade(val) -> str:
     if m:
         s = f'Grade {int(m.group(1))}'
     return s
+
+
+def compute_significance(
+    baseline_pct: float,
+    baseline_total: int,
+    followup_pct: float,
+    followup_total: int,
+    alpha: float = 0.05,
+) -> Tuple[float, bool]:
+    """
+    Two-proportion z-test (two-tailed) comparing baseline vs. follow-up proficiency.
+
+    Parameters
+    ----------
+    baseline_pct : proficiency rate at baseline (0–100 scale)
+    baseline_total : number of students tested at baseline
+    followup_pct  : proficiency rate at follow-up (0–100 scale)
+    followup_total : number of students tested at follow-up
+    alpha : significance threshold (default 0.05)
+
+    Returns
+    -------
+    (p_value, significant) — NaN / False when the test cannot be run
+    (e.g. scipy not available, missing data, zero denominators).
+
+    Notes
+    -----
+    We reconstruct the count of proficient students as
+        count = round(pct / 100 × total)
+    because OSSE sometimes reports only the percentage and total.
+
+    No multiple-comparison correction is applied by default.  Given the
+    large number of school × subject × subgroup × transition combinations
+    (~5 000+), interpret individual p-values as descriptive flags rather
+    than family-wise guarantees.  See docs/methods.md for discussion.
+    """
+    if not _SCIPY_AVAILABLE:
+        return np.nan, False
+
+    try:
+        n1 = int(round(float(baseline_total)))
+        n2 = int(round(float(followup_total)))
+        if n1 <= 0 or n2 <= 0:
+            return np.nan, False
+        c1 = int(round(float(baseline_pct) / 100.0 * n1))
+        c2 = int(round(float(followup_pct) / 100.0 * n2))
+        # Clamp counts to valid range [0, n]
+        c1 = max(0, min(c1, n1))
+        c2 = max(0, min(c2, n2))
+        p1 = c1 / n1
+        p2 = c2 / n2
+        p_pool = (c1 + c2) / (n1 + n2)
+        if p_pool <= 0.0 or p_pool >= 1.0:
+            return np.nan, False
+        se = np.sqrt(p_pool * (1.0 - p_pool) * (1.0 / n1 + 1.0 / n2))
+        if se == 0.0:
+            return np.nan, False
+        z = (p1 - p2) / se
+        # Two-tailed p-value
+        p_value = float(2.0 * _scipy_norm.sf(abs(z)))
+        return p_value, bool(p_value < alpha)
+    except Exception:
+        return np.nan, False
 
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -273,6 +342,25 @@ def compute_cohort_growth(df: pd.DataFrame) -> pd.DataFrame:
     # Calculate growth
     merged['pp_growth'] = merged['percent_follow'] - merged['percent_value']
 
+    # ── Statistical significance test ────────────────────────────────────
+    # Two-proportion z-test (two-tailed): does proficiency differ significantly
+    # between baseline and follow-up given the tested student counts?
+    if _SCIPY_AVAILABLE:
+        sig_results = merged.apply(
+            lambda row: compute_significance(
+                row['percent_value'], row['total_count_value'],
+                row['percent_follow'], row['total_count_follow'],
+            ),
+            axis=1,
+            result_type='expand',
+        )
+        merged['p_value'] = sig_results[0].round(4)
+        merged['significant'] = sig_results[1]
+    else:
+        print("  NOTE: scipy not installed — p_value/significant columns will be NaN/False.")
+        merged['p_value'] = np.nan
+        merged['significant'] = False
+
     # Build clean output
     result = merged[[
         'LEA Code', 'LEA Name', 'School Code', 'School Name',
@@ -283,7 +371,7 @@ def compute_cohort_growth(df: pd.DataFrame) -> pd.DataFrame:
         'next_grade', 'next_year',
         'percent_follow', 'count_follow', 'total_count_follow',
         'assessment_follow', 'follow_tested_grade',
-        'pp_growth',
+        'pp_growth', 'p_value', 'significant',
     ]].copy()
 
     result = result.rename(columns={
@@ -353,6 +441,19 @@ def create_cohort_summary(detail: pd.DataFrame) -> pd.DataFrame:
             avg_followup_pct=('followup_pct', 'mean'),
         )
     )
+
+    # Add pct_significant_transitions: fraction of tested transitions that are
+    # statistically significant at p < 0.05 (two-proportion z-test).
+    if 'significant' in detail.columns:
+        def _pct_sig(x: pd.Series) -> float:
+            return round(100.0 * x.sum() / len(x), 1) if len(x) > 0 else np.nan
+
+        sig_agg = (
+            detail
+            .groupby(group_cols, as_index=False)['significant']
+            .agg(pct_significant_transitions=_pct_sig)
+        )
+        summary = summary.merge(sig_agg, on=group_cols, how='left')
 
     # Add the latest transition's growth
     latest = (

@@ -32,7 +32,18 @@
 **Rationale:** Keeps the environment lightweight and reproducible for policy researchers who may run this on modest hardware.  
 **Consequences:** Statistical tests are limited to classical frequentist tests available in scipy.
 
-## Governance
+### D-006 — Two-Proportion Z-Test for Significance (Task 05)
+**Date:** 2026-04-25  
+**Decision:** A pooled two-proportion z-test (two-tailed, α = 0.05) is used to assess whether a cohort's proficiency rate changed significantly between baseline and follow-up. The test uses `scipy.stats.norm` to compute the p-value from the pooled z-statistic.  
+**Rationale:** The z-test is the standard method for comparing two independent proportions when sample sizes are large enough. It is interpretable, reproducible, and available in scipy without additional dependencies.  
+**Consequences:**  
+- `cohort_growth_detail.csv` gains `p_value` (rounded to 4 dp) and `significant` (bool) columns.  
+- `cohort_growth_summary.csv` gains `pct_significant_transitions` (% of transitions with p < 0.05).  
+- No multiple-comparison correction is applied by default; `significant` is a screening flag, not a family-wise claim. See `docs/methods.md` for details.  
+- Small school cohorts (N ≈ 145) have low power; a 7pp change at 33% baseline requires N ≈ 366 per group for significance. City-wide aggregations will see more significant results.  
+- Proficient counts are reconstructed as `round(pct / 100 × total_count)` because OSSE files report percentages and totals but not always raw proficiency counts.
+
+
 
 - All meaningful changes require team consensus
 - Document architectural decisions here
