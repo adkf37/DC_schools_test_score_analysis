@@ -68,4 +68,11 @@
 - All four Stuart-Hobson benchmark transitions pass within ±0.1 pp (D-004 constraint satisfied).  
 - The normalized `load_clean_data.py` remains the preferred path when the full OSSE download set is available.
 
-
+### D-010 — Validate Passes the Wide-Format Loop and Advances to Closeout
+**Date:** 2026-04-25
+**Decision:** Mark the current Validate pass as successful for the repo's documented wide-format pipeline and move the project to **Closeout** for this loop.
+**Rationale:** Re-running the documented smoke path from a fresh clone succeeded: `python -m pip install -r requirements.txt`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, and `python src/analyze_cohort_growth.py` all exited 0. The run regenerated `combined_all_years.csv` (12,378 rows), `cohort_growth_detail.csv` (5,391 rows), `cohort_growth_summary.csv` (1,234 rows), and `cohort_growth_pivot.xlsx` (6 sheets); `cohort_growth_detail.csv` contains `p_value` and `significant`, `cohort_growth_summary.csv` contains `pct_significant_transitions`, and all four Stuart-Hobson benchmark transitions remained within ±0.1 pp of the manual targets.
+**Consequences:**
+- `.squad/validation_report.md` is now the authoritative validation evidence for the wide-format pipeline path.
+- Closeout should describe the current loop as validated, while still calling out unresolved scope gaps: Task 04 dashboard work is pending, the repo still lacks a committed 2024-25 source workbook, and the original Task 03 summary target (≥ 1,700 rows) is not met because only 3 years of data are available and OSSE suppresses small subgroup cells.
+- Any future validation of the full normalized-data path must be treated as a separate loop once the complete OSSE source set is available.
