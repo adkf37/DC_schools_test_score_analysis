@@ -82,3 +82,39 @@ If formal inference is required (e.g., for publication), consider:
 ## Validation Benchmark
 
 All pipeline changes are validated against four manually computed Stuart-Hobson transitions (ELA and Math, Gr6→Gr7 and Gr7→Gr8, 2022→2023). Values must match within ±0.1 percentage points of the manual spreadsheet (`StuartHobson_Manual_Growth_example.xlsx`). See Decision D-004.
+
+---
+
+## Equity Gap Analysis (src/equity_gap_analysis.py)
+
+### Purpose
+
+The equity gap analysis extends the cohort growth output to surface **achievement gaps** between individual student subgroups and the citywide "All Students" average, and to track whether those gaps are narrowing or widening as cohorts advance a grade.
+
+### Input
+
+`output_data/cohort_growth_detail.csv` (produced by `src/analyze_cohort_growth.py`).
+
+### Method
+
+For every matching school–subject–cohort-transition combination, the script joins subgroup rows against the "All Students" reference row and computes:
+
+| Metric | Formula | Interpretation |
+|--------|---------|----------------|
+| `proficiency_gap` | subgroup `baseline_pct` − All Students `baseline_pct` | Negative = subgroup starts below average |
+| `followup_gap` | subgroup `followup_pct` − All Students `followup_pct` | Negative = subgroup ends below average |
+| `gap_change` | `followup_gap` − `proficiency_gap` | Positive = gap narrowed; negative = gap widened |
+| `growth_gap` | subgroup `pp_growth` − All Students `pp_growth` | Positive = subgroup grew faster than average |
+
+### Outputs
+
+| File | Description |
+|------|-------------|
+| `equity_gap_detail.csv` | One row per school / subgroup / cohort transition. All columns from `cohort_growth_detail.csv` plus the four gap metrics above and an `is_disadvantaged` flag (True for: Black or African American, Hispanic/Latino of any race, EL Active, Econ Dis, Students with Disabilities). |
+| `equity_gap_summary.csv` | Aggregated to school / subject / subgroup level. Includes `avg_proficiency_gap`, `avg_followup_gap`, `avg_gap_change`, `avg_growth_gap`, `n_transitions`, and `pct_narrowing` (% of transitions where `gap_change > 0`). |
+
+### Limitations
+
+- Gaps are computed against the school-level "All Students" row, not the citywide "All Students" average. This means a 0 proficiency gap does not imply equity with the city; it means the subgroup performs at the same level as all students *at that school*.
+- Subgroups suppressed by OSSE (small N) have no rows in the detail file and are therefore absent from the equity analysis.
+- The `is_disadvantaged` flag is based on conventional DC policy categories and is for screening purposes only.

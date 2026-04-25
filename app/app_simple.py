@@ -94,15 +94,20 @@ locations_df = try_load_school_locations()
 # Load cohort growth data if available
 COHORT_DETAIL_FILE = os.path.join(OUTPUT_DIR, 'cohort_growth_detail.csv')
 COHORT_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'cohort_growth_summary.csv')
+EQUITY_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'equity_gap_summary.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
+equity_summary = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
 if os.path.isfile(COHORT_SUMMARY_FILE):
     cohort_summary = pd.read_csv(COHORT_SUMMARY_FILE)
     print(f"Loaded cohort summary: {len(cohort_summary):,} rows")
+if os.path.isfile(EQUITY_SUMMARY_FILE):
+    equity_summary = pd.read_csv(EQUITY_SUMMARY_FILE)
+    print(f"Loaded equity gap summary: {len(equity_summary):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -217,7 +222,32 @@ app.layout = html.Div(
             html.H5("School Locations Map (latest year)"),
             html.Small("Add input_data/school_locations.csv with columns: School Name, Latitude, Longitude to enable mapping.", className="text-muted"),
             dcc.Graph(id='map')
-        ])
+        ]),
+
+        html.Hr(),
+
+        # ── Equity gap section ───────────────────────────────────────────
+        html.H4("Equity Gap Analysis", className="mt-3"),
+        html.P(
+            "Difference between each student subgroup and the 'All Students' average. "
+            "Proficiency Gap = subgroup − All Students at baseline. "
+            "Gap Change = how much the gap narrowed (positive) or widened (negative) "
+            "over the cohort transition.",
+            className="text-muted small",
+        ),
+        html.Small(
+            "Run python src/equity_gap_analysis.py to generate this data.",
+            className="text-muted",
+            id='equity-note',
+        ),
+        html.Div(className="row g-3 mt-1", children=[
+            html.Div(className="col-lg-6", children=[
+                dcc.Graph(id='equity-gaps')
+            ]),
+            html.Div(className="col-lg-6", children=[
+                dcc.Graph(id='equity-gap-change')
+            ]),
+        ]),
     ]
 )
 
@@ -249,6 +279,8 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('cohort-bars', 'figure'),
     Output('cohort-detail', 'figure'),
     Output('map', 'figure'),
+    Output('equity-gaps', 'figure'),
+    Output('equity-gap-change', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -425,7 +457,124 @@ def update_figures(subject, subgroup, schools, year_range):
     if fig_cohort_detail.data == ():
         fig_cohort_detail.update_layout(title='No cohort data – run analyze_cohort_growth.py')
 
-    return fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail, fig_map
+    # ── Equity gap charts ────────────────────────────────────────────────
+    fig_equity_gaps = go.Figure()
+    fig_equity_gap_change = go.Figure()
+
+    if not equity_summary.empty:
+        eq = equity_summary.copy()
+        if subject:
+            eq = eq[eq['Subject'] == subject]
+        if schools:
+            eq = eq[eq['School Name'].isin(schools)]
+
+        if not eq.empty:
+            # Citywide view: average proficiency gap by subgroup
+            if not schools:
+                citywide_eq = (
+                    eq
+                    .groupby('Student Group Value', as_index=False)
+                    .agg(
+                        avg_proficiency_gap=('avg_proficiency_gap', 'mean'),
+                        avg_gap_change=('avg_gap_change', 'mean'),
+                        is_disadvantaged=('is_disadvantaged', 'first'),
+                    )
+                    .sort_values('avg_proficiency_gap')
+                )
+                colors_gap = [
+                    '#d32f2f' if row['is_disadvantaged'] else '#1565c0'
+                    for _, row in citywide_eq.iterrows()
+                ]
+                fig_equity_gaps = go.Figure(go.Bar(
+                    x=citywide_eq['avg_proficiency_gap'],
+                    y=citywide_eq['Student Group Value'],
+                    orientation='h',
+                    marker_color=colors_gap,
+                    text=citywide_eq['avg_proficiency_gap'].apply(lambda x: f'{x:+.1f}'),
+                    textposition='auto',
+                ))
+                fig_equity_gaps.update_layout(
+                    title=f'{subject} – Citywide Avg Proficiency Gap vs All Students',
+                    xaxis_title='Proficiency Gap (pp)',
+                    yaxis_title='',
+                    xaxis=dict(zeroline=True, zerolinewidth=2, zerolinecolor='black'),
+                )
+
+                colors_change = [
+                    '#388e3c' if v > 0 else '#d32f2f'
+                    for v in citywide_eq['avg_gap_change']
+                ]
+                fig_equity_gap_change = go.Figure(go.Bar(
+                    x=citywide_eq['avg_gap_change'],
+                    y=citywide_eq['Student Group Value'],
+                    orientation='h',
+                    marker_color=colors_change,
+                    text=citywide_eq['avg_gap_change'].apply(lambda x: f'{x:+.1f}'),
+                    textposition='auto',
+                ))
+                fig_equity_gap_change.update_layout(
+                    title=f'{subject} – Citywide Avg Gap Change (+ = narrowing)',
+                    xaxis_title='Gap Change (pp)',
+                    yaxis_title='',
+                    xaxis=dict(zeroline=True, zerolinewidth=2, zerolinecolor='black'),
+                )
+            else:
+                # School-level view: proficiency gap per school for selected subgroup
+                eq_sub = eq.copy()
+                if subgroup and subgroup != 'All Students':
+                    eq_sub = eq_sub[eq_sub['Student Group Value'] == subgroup]
+                if not eq_sub.empty:
+                    eq_sub_sorted = eq_sub.sort_values('avg_proficiency_gap')
+                    colors_gap = [
+                        '#d32f2f' if v < 0 else '#1565c0'
+                        for v in eq_sub_sorted['avg_proficiency_gap']
+                    ]
+                    fig_equity_gaps = go.Figure(go.Bar(
+                        x=eq_sub_sorted['avg_proficiency_gap'],
+                        y=eq_sub_sorted['School Name'],
+                        orientation='h',
+                        marker_color=colors_gap,
+                        text=eq_sub_sorted['avg_proficiency_gap'].apply(lambda x: f'{x:+.1f}'),
+                        textposition='auto',
+                    ))
+                    fig_equity_gaps.update_layout(
+                        title=f'{subject} – Proficiency Gap vs All Students',
+                        xaxis_title='Proficiency Gap (pp)',
+                        yaxis_title='',
+                        xaxis=dict(zeroline=True, zerolinewidth=2, zerolinecolor='black'),
+                        height=max(400, len(eq_sub_sorted) * 30),
+                    )
+
+                    colors_change = [
+                        '#388e3c' if v > 0 else '#d32f2f'
+                        for v in eq_sub_sorted['avg_gap_change']
+                    ]
+                    fig_equity_gap_change = go.Figure(go.Bar(
+                        x=eq_sub_sorted['avg_gap_change'],
+                        y=eq_sub_sorted['School Name'],
+                        orientation='h',
+                        marker_color=colors_change,
+                        text=eq_sub_sorted['avg_gap_change'].apply(lambda x: f'{x:+.1f}'),
+                        textposition='auto',
+                    ))
+                    fig_equity_gap_change.update_layout(
+                        title=f'{subject} – Gap Change (+ = narrowing)',
+                        xaxis_title='Gap Change (pp)',
+                        yaxis_title='',
+                        xaxis=dict(zeroline=True, zerolinewidth=2, zerolinecolor='black'),
+                        height=max(400, len(eq_sub_sorted) * 30),
+                    )
+
+    if fig_equity_gaps.data == ():
+        fig_equity_gaps.update_layout(
+            title='No equity data – run src/equity_gap_analysis.py'
+        )
+    if fig_equity_gap_change.data == ():
+        fig_equity_gap_change.update_layout(
+            title='No equity data – run src/equity_gap_analysis.py'
+        )
+
+    return fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail, fig_map, fig_equity_gaps, fig_equity_gap_change
 
 
 if __name__ == '__main__':

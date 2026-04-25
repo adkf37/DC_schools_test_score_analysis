@@ -105,7 +105,17 @@
 - `STATUS.md` should move the project to **Validate complete / Closeout next** rather than reporting closeout as already finished for the current loop.
 - Closeout should focus on the remaining explicit limitations: missing normalized 4-workbook / 2024-25 data, the 1,234-row summary output versus the original ≥ 1,700 target, and the environment-blocked browser-console check.
 
-### D-014 — Closeout Signs Off the Dashboard-Aware Wide-Format Loop and Returns to Build
+### D-015 — Equity Gap Analysis as Build Loop 2 Deliverable
+**Date:** 2026-04-25
+**Decision:** Implement `src/equity_gap_analysis.py` to compute proficiency gaps and growth gaps by student subgroup, and extend the dashboard to display two new equity charts.
+**Rationale:** All five original backlog tasks were complete. The next Build iteration needed a concrete deliverable that advances an explicitly stated project goal: "surfacing equity gaps (achievement growth by race/ethnicity and other subgroups)" (backlog/README.md). An equity gap analysis script was the most impactful and self-contained addition: it reads the already-produced `cohort_growth_detail.csv`, produces two new CSVs (`equity_gap_detail.csv`, `equity_gap_summary.csv`), and extends the dashboard from 5 to 7 figures.
+**Consequences:**
+- `src/equity_gap_analysis.py` is a new standalone script; run it after `analyze_cohort_growth.py`.
+- New output files: `equity_gap_detail.csv` (5,977 rows) and `equity_gap_summary.csv` (1,042 rows).
+- Dashboard callback now returns 7 figures; validated via POST `/_dash-update-component`.
+- `docs/methods.md` documents the gap metrics (proficiency_gap, followup_gap, gap_change, growth_gap, is_disadvantaged).
+- Smoke test commands updated to include `python src/equity_gap_analysis.py`.
+
 **Date:** 2026-04-25
 **Decision:** Closeout approves handoff for the current dashboard-aware wide-format loop and returns the repo to **Build** rather than marking the full project complete.
 **Rationale:** A fresh-clone closeout re-run succeeded end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, and `python src/analyze_cohort_growth.py` all exited 0. `python app/app_simple.py` also started successfully, `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200, and a live `POST /_dash-update-component` request returned all five figures for the regenerated outputs. The repo is therefore handoff-ready for the current 3-year wide-format path, but it still lacks the normalized 4-workbook / 2024-25 data path, still falls short of the original ≥ 1,700 summary-row target, and still has environment-blocked dashboard follow-up checks (browser console and optional locations file).
