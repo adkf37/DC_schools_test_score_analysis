@@ -2,9 +2,9 @@
 
 ## Current Objective
 
-**Backlog populated; ready for Squad Init.**
+**Squad initialized; ready for Squad Review.**
 
-The Planner phase is complete. The backlog (`backlog/`) has been created with project background, data-source inventory, phase breakdown, and five discrete task files. The next step is Squad Init (Phase 1): confirm all four OSSE raw data files are present in `input_data/` and that the full pipeline (`load_clean_data.py` → `analyze_cohort_growth.py`) runs end-to-end without errors.
+The Squad Init phase is complete. The `.squad/` directory has been bootstrapped with the full team roster (Lead, Data Engineer, Statistician, Tester, Scribe, Ralph), routing rules, an initialized decision log, and individual charter files for each agent. The next step is Squad Review (Phase 2): tighten backlog tasks, surface risks, and turn the backlog into an ordered execution plan in `.squad/sprint.md`.
 
 ---
 
@@ -13,8 +13,8 @@ The Planner phase is complete. The backlog (`backlog/`) has been created with pr
 | Phase | Name | Status |
 |-------|------|--------|
 | 0 | Planner | ✅ Complete |
-| 1 | Squad Init | 🔲 Next |
-| 2 | Squad Review | 🔲 Pending |
+| 1 | Squad Init | ✅ Complete |
+| 2 | Squad Review | 🔲 Next |
 | 3 | Build | 🔲 Pending |
 | 4 | Validate | 🔲 Pending |
 | 5 | Closeout | 🔲 Pending |
@@ -42,6 +42,19 @@ The Planner phase is complete. The backlog (`backlog/`) has been created with pr
 | Cohort growth summary | `output_data/cohort_growth_summary.csv` | ⏳ Generated on pipeline run |
 | Cohort growth Excel workbook | `output_data/cohort_growth_pivot.xlsx` | ⏳ Generated on pipeline run |
 | Processing report | `output_data/processing_report.txt` | ⏳ Generated on pipeline run |
+
+---
+
+## Squad
+
+| Member | Role | Charter |
+|--------|------|---------|
+| Lead | Project Lead & Architect | `.squad/agents/lead/charter.md` |
+| Data Engineer | Data Ingestion & Pipeline | `.squad/agents/data-engineer/charter.md` |
+| Statistician | Analysis & Statistical Tests | `.squad/agents/statistician/charter.md` |
+| Tester | Quality Assurance & Validation | `.squad/agents/tester/charter.md` |
+| Scribe | Documentation & History | `.squad/agents/scribe/charter.md` |
+| Ralph | Risk, Assumptions & Review | `.squad/agents/ralph/charter.md` |
 
 ---
 
