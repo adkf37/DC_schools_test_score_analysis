@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Build Phase — Wide-Format Pipeline Operational
+## ✅ Current Status: Closeout Complete for the Wide-Format Loop
 
-As of the 2026-04-25 Build phase, a fresh-clone smoke test with the available data completes successfully using the **wide-format alternative loader**:
+As of the 2026-04-25 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m py_compile src/*.py app/*.py inspect_data.py` ✅
@@ -141,7 +141,7 @@ python src/analyze_growth.py
 
 ---
 
-### 4. Interactive Dashboard ✅ ENHANCED
+### 4. Interactive Dashboard 🔲 PENDING VALIDATION
 **File**: `app/app_simple.py`
 
 **Features:**
@@ -160,8 +160,8 @@ Then open: http://127.0.0.1:8050/
 ## 🚀 Quick Start Guide
 
 ```bash
-# 1. Combine the Excel files (if not done already)
-python src/load_clean_data.py
+# 1. Combine the in-repo Excel files
+python src/load_wide_format_data.py
 
 # 2. Run cohort growth analysis (the main analysis!)
 python src/analyze_cohort_growth.py
@@ -169,7 +169,7 @@ python src/analyze_cohort_growth.py
 # 3. (Optional) Run same-grade year-over-year analysis
 python src/analyze_growth.py
 
-# 4. Launch the interactive dashboard
+# 4. (Optional / pending validation) Launch the interactive dashboard
 python app/app_simple.py
 ```
 
@@ -177,7 +177,8 @@ python app/app_simple.py
 
 | File | Purpose |
 |------|---------|
-| `src/load_clean_data.py` | Combine raw Excel → `combined_all_years.csv` |
+| `src/load_wide_format_data.py` | Combine in-repo wide-format Excel files → `combined_all_years.csv` |
+| `src/load_clean_data.py` | Combine normalized OSSE Excel files → `combined_all_years.csv` |
 | `src/analyze_cohort_growth.py` | **Cohort growth** (Grade N→N+1) — main analysis |
 | `src/analyze_growth.py` | Same-grade YoY growth |
 | `app/app_simple.py` | Interactive dashboard |
@@ -211,30 +212,31 @@ python app/app_simple.py
 1. **Is Grade 6 ELA citywide improving?**
    → Filter `school_growth_full.csv` for Grade 6, ELA
 
-2. **Which schools improved the most from 2022 to 2025?**
+2. **Which schools improved the most from 2022 to 2024 in the in-repo data?**
    → Sort `school_growth_by_school_subject.csv` by `growth_first_to_last`
 
 ---
 
 ## 💡 Next Steps
 
-### Required before another validation / closeout pass:
+### Required before the next validation / closeout pass:
 
-1. **Fix the input-data contract**
+1. **Choose the next Build target**
+   - Validate/finish Task 04 dashboard work, or
+   - Restore the full normalized-data / 2024-25 ingestion path
+
+2. **If pursuing the normalized-data path**
    - Update `src/load_clean_data.py` to recognize the repo's actual workbook layout/names, or
    - Place/rename the OSSE files so the documented loader command succeeds
 
-2. **Resolve the 2024-25 source file**
-   - Add the required workbook or document the accepted replacement filename
-
-3. **Regenerate core outputs**
-   - Run `python src/load_clean_data.py`
-   - Run `python src/analyze_cohort_growth.py`
+3. **If pursuing the dashboard path**
+   - Run `python app/app_simple.py`
+   - Confirm the dashboard acceptance criteria against the regenerated CSV outputs
 
 4. **Re-run evidence checks**
    - Verify Stuart-Hobson benchmark values
    - Verify Task 05 significance columns in generated outputs
-   - Only then proceed to dashboard validation / final handoff
+   - Only then proceed to the next validation / closeout pass
 
 ---
 
@@ -245,8 +247,8 @@ python app/app_simple.py
 - OneDrive sometimes locks files - save to a local folder if needed
 
 ### "File not found" error:
-- Make sure you run `load_clean_data.py` first
-- Check that the Excel files are in `input_data/`
+- For the in-repo data path, run `load_wide_format_data.py` first
+- For the normalized-data path, make sure the OSSE Excel files are in `input_data/`
 
 ### Cohort growth shows 0 transitions:
 - Ensure `combined_all_years.csv` has at least 2 consecutive years of data
@@ -262,11 +264,11 @@ python app/app_simple.py
 
 ## 📊 Your Data at a Glance
 
-- **Total Records**: 398,809
-- **Years**: 2022, 2023, 2024, 2025 (4 years)
-- **Schools**: 236 unique schools
+- **Total Records**: 12,378
+- **Years**: 2022, 2023, 2024 (3 years in repo)
+- **Schools**: 116 unique raw schools / 96 cohort-analysis schools
 - **Subjects**: ELA, Math
 - **Student Groups**: Multiple demographic and program groups
 - **Metrics**: Percent Meeting/Exceeding expectations
 
-**You're all set to start analyzing! 🎉**
+**You can reproduce the current wide-format analysis loop from a fresh clone; full-project completion still requires another Build cycle.**

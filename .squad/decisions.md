@@ -76,3 +76,12 @@
 - `.squad/validation_report.md` is now the authoritative validation evidence for the wide-format pipeline path.
 - Closeout should describe the current loop as validated, while still calling out unresolved scope gaps: Task 04 dashboard work is pending, the repo still lacks a committed 2024-25 source workbook, and the original Task 03 summary target (≥ 1,700 rows) is not met because only 3 years of data are available and OSSE suppresses small subgroup cells.
 - Any future validation of the full normalized-data path must be treated as a separate loop once the complete OSSE source set is available.
+
+### D-011 — Closeout Signs Off the Wide-Format Loop and Returns the Repo to Build
+**Date:** 2026-04-25
+**Decision:** Closeout approves handoff for the **current wide-format loop** and returns the repo to **Build** for the remaining backlog scope rather than marking the whole project complete.
+**Rationale:** A fresh-clone closeout re-run confirmed the documented smoke path succeeds: `python -m pip install -r requirements.txt`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, and `python src/analyze_cohort_growth.py` all exit 0. The run regenerated the expected outputs, preserved the Stuart-Hobson benchmark within ±0.1 pp, and kept the Task 05 significance fields. However, Task 04 dashboard work remains pending, the normalized 4-workbook OSSE path still depends on external data, and the original ≥ 1,700 summary-row target is still limited by missing 2024-25 data plus subgroup suppression.
+**Consequences:**
+- `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe the repo as handoff-ready for the verified three-year wide-format path while clearly listing the remaining gaps.
+- `.squad/review_report.md` becomes the authoritative closeout record for this loop and should explicitly recommend returning to **Build** next.
+- The next Build loop must choose between dashboard validation work and the missing normalized-data / 2024-25 ingestion path before another Validate/Closeout cycle.
