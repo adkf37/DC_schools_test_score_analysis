@@ -95,3 +95,12 @@
 - The map placeholder renders correctly (open-street-map tile layer) when `school_locations.csv` is absent.
 - Both `app/app.py` and `app/app_simple.py` are updated; `app.py` is the legacy entry point and `app_simple.py` is the current primary dashboard.
 - `dash>=2.0.0` and `plotly>=5.0.0` version pins remain commented out in `requirements.txt` (dashboard is still an optional dependency per D-005); users must `pip install dash plotly` separately.
+
+### D-013 — Validate Passes the Dashboard-Aware Wide-Format Loop
+**Date:** 2026-04-25
+**Decision:** Mark the current Validate pass as successful and advance the repo to **Closeout** for the latest wide-format loop, now including dashboard startup/rendering evidence in addition to the core analytical smoke tests.
+**Rationale:** Re-running the repo checks succeeded end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, and `python src/analyze_cohort_growth.py` all exited 0. `python app/app_simple.py` also started successfully against the regenerated outputs, and a live `/_dash-update-component` request returned all five figures while the map view degraded gracefully without `school_locations.csv`. Direct browser-console inspection was blocked because the Playwright browser profile was locked in this environment, but no server-side exceptions were observed while serving the dashboard requests.
+**Consequences:**
+- `.squad/validation_report.md` is the authoritative validation record for this loop and now includes Task 04 evidence.
+- `STATUS.md` should move the project to **Validate complete / Closeout next** rather than reporting closeout as already finished for the current loop.
+- Closeout should focus on the remaining explicit limitations: missing normalized 4-workbook / 2024-25 data, the 1,234-row summary output versus the original ≥ 1,700 target, and the environment-blocked browser-console check.
