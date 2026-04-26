@@ -2,9 +2,9 @@
 
 ## Current Objective
 
-**Validate loop 2 complete — the equity-aware wide-format path is ready for Closeout.**
+**Closeout loop 2 complete — the equity-aware wide-format path is signed off for handoff; start the next Build loop.**
 
-The validation loop re-ran the documented smoke path from a fresh clone: dependency install, syntax check, `src/load_wide_format_data.py`, `src/analyze_cohort_growth.py`, `src/equity_gap_analysis.py`, and live `app/app_simple.py` endpoint checks. The run regenerated the expected analytical outputs, preserved the Stuart-Hobson benchmark within ±0.1 pp, and confirmed that the dashboard callback now serves 7 figures including the two new equity charts.
+Closeout re-checked the backlog, sprint plan, decisions, validation evidence, and human-facing docs, then re-ran the documented smoke path from a fresh clone: dependency install, syntax check, `src/load_wide_format_data.py`, `src/analyze_cohort_growth.py`, `src/equity_gap_analysis.py`, and live `app/app_simple.py` endpoint checks. The run regenerated the expected analytical outputs, preserved the Stuart-Hobson benchmark within ±0.1 pp, and confirmed that the dashboard callback serves 7 figures including the two equity charts. This loop is handoff-ready for the in-repo wide-format path, but the repo now returns to **Build** because the normalized 4-workbook / 2024-25 path and environment-blocked manual dashboard checks remain open.
 
 ---
 
@@ -17,7 +17,7 @@ The validation loop re-ran the documented smoke path from a fresh clone: depende
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete for loop 2 — equity gap deliverables implemented |
 | 4 | Validate | ✅ Complete — wide-format, cohort, significance, equity, and dashboard smoke checks passed |
-| 5 | Closeout | ⏳ Pending |
+| 5 | Closeout | ✅ Complete for loop 2 — signoff recorded; repo returns to Build |
 
 ---
 
@@ -50,7 +50,7 @@ The validation loop re-ran the documented smoke path from a fresh clone: depende
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap section |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to 7 figures (2 equity gap charts added) |
 | Validation report | `.squad/validation_report.md` | ✅ Loop 2 updated — current validation evidence recorded |
-| Review report | `.squad/review_report.md` | ⏳ Pending — Closeout loop 2 still needs final review |
+| Review report | `.squad/review_report.md` | ✅ Updated — closeout signoff + return-to-Build recommendation |
 
 ---
 
@@ -77,8 +77,8 @@ The validation loop re-ran the documented smoke path from a fresh clone: depende
   5. `python src/analyze_cohort_growth.py`
   6. `python src/equity_gap_analysis.py`
   7. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (now returns 7 figures)
-- **Wide-format validation passed for the current loop.** Required outputs regenerate from a fresh clone, significance columns remain present, equity gap outputs are added, and the dashboard serves all seven figure payloads for a live callback request.
+- **Closeout completed for the current loop.** Required outputs regenerate from a fresh clone, significance columns remain present, equity gap outputs are added, and the dashboard serves all seven figure payloads for a live callback request.
 - **Summary row count:** 1,234 rows vs Task 03 target of ≥ 1,700. The shortfall is because (a) we have only 3 years of data (no 2024-25 file), and (b) small demographic groups are suppressed by OSSE in many schools. This remains an explicit limitation.
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo. These must be downloaded manually from OSSE. The wide-format alternative covers the available data already committed here.
-- **Browser-console inspection:** direct manual console checking was blocked in this environment. Dashboard startup plus live callback requests showed no server-side exceptions.
-- **Next recommended step:** Run Closeout for loop 2, then choose the next Build slice.
+- **Browser-console inspection:** direct manual console checking was blocked in this environment. Dashboard startup plus live callback requests showed no server-side exceptions, but manual browser-console review and the optional `school_locations.csv` path still need a future Build/Validate loop.
+- **Next recommended step:** Start the next **Build** loop and choose one explicit follow-up target: (a) restore the normalized 4-workbook / 2024-25 ingestion path, or (b) finish the remaining manual dashboard checks.

@@ -1,14 +1,15 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Closeout Complete for the Dashboard-Aware Wide-Format Loop
+## ✅ Current Status: Closeout Complete for the Equity-Aware Wide-Format Loop
 
-As of the 2026-04-25 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**:
+As of the 2026-04-26 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
 - `python -m py_compile src/*.py app/*.py inspect_data.py` ✅
 - `python src/load_wide_format_data.py` ✅ ← use this when normalized OSSE files are unavailable
 - `python src/analyze_cohort_growth.py` ✅
+- `python src/equity_gap_analysis.py` ✅
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 **Two data pipeline options:**
@@ -126,7 +127,26 @@ python src/analyze_cohort_growth.py
 
 ---
 
-### 3. Same-Grade Growth Analysis ✅ READY
+### 3. Equity Gap Analysis ✅ VALIDATED FOR LOOP 2
+**File**: `src/equity_gap_analysis.py`
+
+**What it does:**
+- Reads `cohort_growth_detail.csv`
+- Compares subgroup cohort performance against each school's "All Students" row
+- Computes proficiency-gap and growth-gap metrics
+- Produces summary tables used by the dashboard's two additional equity charts
+
+**Outputs:**
+- `equity_gap_detail.csv`
+- `equity_gap_summary.csv`
+
+```bash
+python src/equity_gap_analysis.py
+```
+
+---
+
+### 4. Same-Grade Growth Analysis ✅ READY
 **File**: `src/analyze_growth.py`
 
 **What it does:**
@@ -143,7 +163,7 @@ python src/analyze_growth.py
 
 ---
 
-### 4. Interactive Dashboard ✅ VALIDATED FOR THE CURRENT LOOP
+### 5. Interactive Dashboard ✅ VALIDATED FOR THE CURRENT LOOP
 **File**: `app/app_simple.py`
 
 **Features:**
@@ -160,7 +180,7 @@ Then open: http://127.0.0.1:8050/
 **Validated closeout evidence:**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
-- A live `POST /_dash-update-component` request returns all five figures
+- A live `POST /_dash-update-component` request returns all seven figures, including the two equity charts
 - If `input_data/school_locations.csv` is absent, the map shows `Add school_locations.csv to enable mapping`
 - Direct browser-console inspection was blocked in this environment and remains an explicit follow-up item
 
@@ -175,10 +195,13 @@ python src/load_wide_format_data.py
 # 2. Run cohort growth analysis (the main analysis!)
 python src/analyze_cohort_growth.py
 
-# 3. (Optional) Run same-grade year-over-year analysis
+# 3. Generate equity-gap outputs used in the current loop
+python src/equity_gap_analysis.py
+
+# 4. (Optional) Run same-grade year-over-year analysis
 python src/analyze_growth.py
 
-# 4. (Optional / already validated for the current loop) Launch the interactive dashboard
+# 5. (Optional / already validated for the current loop) Launch the interactive dashboard
 python app/app_simple.py
 ```
 
@@ -189,11 +212,14 @@ python app/app_simple.py
 | `src/load_wide_format_data.py` | Combine in-repo wide-format Excel files → `combined_all_years.csv` |
 | `src/load_clean_data.py` | Combine normalized OSSE Excel files → `combined_all_years.csv` |
 | `src/analyze_cohort_growth.py` | **Cohort growth** (Grade N→N+1) — main analysis |
+| `src/equity_gap_analysis.py` | Equity-gap metrics derived from cohort-growth output |
 | `src/analyze_growth.py` | Same-grade YoY growth |
 | `app/app_simple.py` | Interactive dashboard |
 | `output_data/cohort_growth_detail.csv` | Every cohort transition |
 | `output_data/cohort_growth_summary.csv` | School-level cohort summary |
 | `output_data/cohort_growth_pivot.xlsx` | Excel workbook with pivots |
+| `output_data/equity_gap_detail.csv` | School / subgroup / transition gap metrics |
+| `output_data/equity_gap_summary.csv` | Aggregated equity-gap metrics |
 | `output_data/school_growth_full.csv` | Same-grade growth detail |
 | `output_data/combined_all_years.csv` | Clean combined source data |
 
@@ -239,8 +265,8 @@ python app/app_simple.py
    - Place/rename the OSSE files so the documented loader command succeeds
 
 3. **If pursuing the dashboard path**
-   - Run `python app/app_simple.py`
-   - Confirm the browser-console and optional locations-file acceptance criteria against the regenerated CSV outputs
+    - Run `python app/app_simple.py`
+    - Confirm the browser-console and optional locations-file acceptance criteria against the regenerated CSV and equity outputs
 
 4. **Re-run evidence checks**
    - Verify Stuart-Hobson benchmark values
