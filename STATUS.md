@@ -2,9 +2,9 @@
 
 ## Current Objective
 
-**Build loop 2 — Equity Gap Analysis implemented; ready for Validate.**
+**Validate loop 2 complete — the equity-aware wide-format path is ready for Closeout.**
 
-A new equity gap analysis script (`src/equity_gap_analysis.py`) and two output files (`equity_gap_detail.csv`, `equity_gap_summary.csv`) were added to advance the stated project goal of surfacing achievement gaps by student subgroup. The dashboard (`app/app_simple.py`) was extended with two additional equity charts (proficiency gap and gap-change bar charts), raising the total figure count to 7. The `docs/methods.md` documents the new gap metrics. All existing smoke tests still pass.
+The validation loop re-ran the documented smoke path from a fresh clone: dependency install, syntax check, `src/load_wide_format_data.py`, `src/analyze_cohort_growth.py`, `src/equity_gap_analysis.py`, and live `app/app_simple.py` endpoint checks. The run regenerated the expected analytical outputs, preserved the Stuart-Hobson benchmark within ±0.1 pp, and confirmed that the dashboard callback now serves 7 figures including the two new equity charts.
 
 ---
 
@@ -15,8 +15,8 @@ A new equity gap analysis script (`src/equity_gap_analysis.py`) and two output f
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | 🔄 In progress — equity gap analysis added (loop 2) |
-| 4 | Validate | ⏳ Pending — validate equity analysis outputs |
+| 3 | Build | ✅ Complete for loop 2 — equity gap deliverables implemented |
+| 4 | Validate | ✅ Complete — wide-format, cohort, significance, equity, and dashboard smoke checks passed |
 | 5 | Closeout | ⏳ Pending |
 
 ---
@@ -49,8 +49,8 @@ A new equity gap analysis script (`src/equity_gap_analysis.py`) and two output f
 | Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap section |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to 7 figures (2 equity gap charts added) |
-| Validation report | `.squad/validation_report.md` | ✅ Loop 1 — needs update for loop 2 |
-| Review report | `.squad/review_report.md` | ✅ Loop 1 — needs update for loop 2 |
+| Validation report | `.squad/validation_report.md` | ✅ Loop 2 updated — current validation evidence recorded |
+| Review report | `.squad/review_report.md` | ⏳ Pending — Closeout loop 2 still needs final review |
 
 ---
 
@@ -77,8 +77,8 @@ A new equity gap analysis script (`src/equity_gap_analysis.py`) and two output f
   5. `python src/analyze_cohort_growth.py`
   6. `python src/equity_gap_analysis.py`
   7. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (now returns 7 figures)
-- **Wide-format validation passed for the current loop.** Required outputs regenerate from a fresh clone, significance columns remain present, equity gap outputs added, and the dashboard serves all seven figure payloads for a live callback request.
+- **Wide-format validation passed for the current loop.** Required outputs regenerate from a fresh clone, significance columns remain present, equity gap outputs are added, and the dashboard serves all seven figure payloads for a live callback request.
 - **Summary row count:** 1,234 rows vs Task 03 target of ≥ 1,700. The shortfall is because (a) we have only 3 years of data (no 2024-25 file), and (b) small demographic groups are suppressed by OSSE in many schools. This remains an explicit limitation.
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo. These must be downloaded manually from OSSE. The wide-format alternative covers the available data already committed here.
 - **Browser-console inspection:** direct manual console checking was blocked in this environment. Dashboard startup plus live callback requests showed no server-side exceptions.
-- **Next recommended step:** Run Validate on the equity gap outputs, then Closeout loop 2.
+- **Next recommended step:** Run Closeout for loop 2, then choose the next Build slice.
