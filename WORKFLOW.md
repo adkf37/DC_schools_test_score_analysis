@@ -146,6 +146,26 @@ python src/equity_gap_analysis.py
 
 ---
 
+### 3b. School Rankings ✅ NEW IN LOOP 3
+**File**: `src/generate_school_rankings.py`
+
+**What it does:**
+- Reads `cohort_growth_summary.csv` and `equity_gap_summary.csv`
+- Ranks all schools by average cohort growth for the "All Students" subgroup
+- Ranks schools by effectiveness at narrowing equity gaps for disadvantaged subgroups
+  (Black or African American, Hispanic/Latino, EL Active, Econ Dis, Students with Disabilities)
+- Prints top-10 / bottom-10 tables for both ELA and Math
+
+**Outputs:**
+- `school_rankings.csv` – Schools ranked by avg cohort PP growth (All Students)
+- `school_equity_rankings.csv` – Schools ranked by avg gap-change for disadvantaged subgroups
+
+```bash
+python src/generate_school_rankings.py
+```
+
+---
+
 ### 4. Same-Grade Growth Analysis ✅ READY
 **File**: `src/analyze_growth.py`
 
@@ -169,20 +189,20 @@ python src/analyze_growth.py
 **Features:**
 - **Same-grade time series** – school performance over time
 - **Cohort growth charts** – bar charts and box plots of cohort growth
+- **Equity gap charts** – proficiency gap vs All Students, gap-change analysis
 - Filter by subject, student group, schools, year range
-- Map view (if school_locations.csv available)
+- Map view (requires `input_data/school_locations.csv` — included in Loop 3)
 
 ```bash
 python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence:**
+**Validated closeout evidence (Loop 2):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
 - A live `POST /_dash-update-component` request returns all seven figures, including the two equity charts
-- If `input_data/school_locations.csv` is absent, the map shows `Add school_locations.csv to enable mapping`
-- Direct browser-console inspection was blocked in this environment and remains an explicit follow-up item
+- Loop 3 adds `input_data/school_locations.csv` so the map now renders all 115 DC schools
 
 ---
 
@@ -195,13 +215,16 @@ python src/load_wide_format_data.py
 # 2. Run cohort growth analysis (the main analysis!)
 python src/analyze_cohort_growth.py
 
-# 3. Generate equity-gap outputs used in the current loop
+# 3. Generate equity-gap outputs
 python src/equity_gap_analysis.py
 
-# 4. (Optional) Run same-grade year-over-year analysis
+# 4. Generate school rankings
+python src/generate_school_rankings.py
+
+# 5. (Optional) Run same-grade year-over-year analysis
 python src/analyze_growth.py
 
-# 5. (Optional / already validated for the current loop) Launch the interactive dashboard
+# 6. (Optional) Launch the interactive dashboard
 python app/app_simple.py
 ```
 
@@ -213,13 +236,17 @@ python app/app_simple.py
 | `src/load_clean_data.py` | Combine normalized OSSE Excel files → `combined_all_years.csv` |
 | `src/analyze_cohort_growth.py` | **Cohort growth** (Grade N→N+1) — main analysis |
 | `src/equity_gap_analysis.py` | Equity-gap metrics derived from cohort-growth output |
+| `src/generate_school_rankings.py` | School rankings by cohort growth and equity-gap change |
 | `src/analyze_growth.py` | Same-grade YoY growth |
 | `app/app_simple.py` | Interactive dashboard |
+| `input_data/school_locations.csv` | Geocoordinates for 115 DC public schools (enables map) |
 | `output_data/cohort_growth_detail.csv` | Every cohort transition |
 | `output_data/cohort_growth_summary.csv` | School-level cohort summary |
 | `output_data/cohort_growth_pivot.xlsx` | Excel workbook with pivots |
 | `output_data/equity_gap_detail.csv` | School / subgroup / transition gap metrics |
 | `output_data/equity_gap_summary.csv` | Aggregated equity-gap metrics |
+| `output_data/school_rankings.csv` | Schools ranked by avg PP growth (All Students) |
+| `output_data/school_equity_rankings.csv` | Schools ranked by equity-gap narrowing |
 | `output_data/school_growth_full.csv` | Same-grade growth detail |
 | `output_data/combined_all_years.csv` | Clean combined source data |
 

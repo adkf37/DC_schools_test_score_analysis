@@ -118,3 +118,50 @@ For every matching school–subject–cohort-transition combination, the script 
 - Gaps are computed against the school-level "All Students" row, not the citywide "All Students" average. This means a 0 proficiency gap does not imply equity with the city; it means the subgroup performs at the same level as all students *at that school*.
 - Subgroups suppressed by OSSE (small N) have no rows in the detail file and are therefore absent from the equity analysis.
 - The `is_disadvantaged` flag is based on conventional DC policy categories and is for screening purposes only.
+
+---
+
+## School Rankings (src/generate_school_rankings.py)
+
+### Purpose
+
+Produces two ranked tables that support direct policy comparisons across DC public schools.
+
+### Inputs
+
+- `output_data/cohort_growth_summary.csv` (produced by `src/analyze_cohort_growth.py`)
+- `output_data/equity_gap_summary.csv` (produced by `src/equity_gap_analysis.py`)
+
+### Method
+
+**Overall Growth Rankings (`school_rankings.csv`)**
+
+Filter the cohort growth summary to rows where `Student Group Value` is "All Students". Compute `rank` within each subject (ELA and Math) using `avg_pp_growth` in descending order (rank 1 = highest growth). Schools with ties share the lowest rank in their group.
+
+**Equity Rankings (`school_equity_rankings.csv`)**
+
+Filter the equity gap summary to rows for the five disadvantaged subgroups (Black or African American, Hispanic/Latino of any race, EL Active, Econ Dis, Students with Disabilities). Aggregate across subgroups per school × subject:
+
+| Aggregate column | Source column | Method |
+|-----------------|--------------|--------|
+| `avg_gap_change` | `avg_gap_change` | Mean across subgroups |
+| `avg_growth_gap` | `avg_growth_gap` | Mean across subgroups |
+| `pct_narrowing` | `pct_narrowing` | Mean across subgroups |
+| `n_subgroups` | — | Count of subgroups with data |
+
+Rank schools within each subject by `avg_gap_change` in descending order (`equity_rank` 1 = most gap-narrowing).
+
+### Outputs
+
+| File | Description |
+|------|-------------|
+| `school_rankings.csv` | One row per school × subject. Columns: `School Name`, `Subject`, `avg_pp_growth`, `n_transitions`, `pct_significant_transitions` (if available), `rank`. |
+| `school_equity_rankings.csv` | One row per school × subject (schools with ≥ 1 disadvantaged subgroup in the equity summary). Columns: `School Name`, `Subject`, `avg_gap_change`, `avg_growth_gap`, `pct_narrowing`, `n_subgroups`, `equity_rank`. |
+
+### Caveats
+
+- Rankings are based on the 3-year in-repo wide-format dataset (2021-22 through 2023-24). They do not include 2024-25 data.
+- Schools with fewer than `n_transitions = 1` are excluded automatically because they produce no cohort summary rows.
+- `avg_pp_growth` can be positive or negative. A positive value means students at that school, on average, improved their proficiency rate as they advanced a grade. A negative value does not necessarily imply failure — suppressed cells, small N, or grade-level test-level changes can all affect the metric.
+- Rankings should be interpreted alongside `n_transitions` and `pct_significant_transitions` to assess reliability.
+- Disadvantaged subgroups used for equity rankings: Black or African American, Hispanic/Latino of any race, EL Active, Econ Dis, Students with Disabilities.
