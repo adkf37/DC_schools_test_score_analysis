@@ -9,6 +9,8 @@ output_data/*.txt
 # But keep the directories
 !input_data/.gitkeep
 !output_data/.gitkeep
+# Static reference data committed to the repo
+!input_data/school_locations.csv
 
 # Python
 __pycache__/
