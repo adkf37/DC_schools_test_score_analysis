@@ -164,3 +164,4 @@ Rank schools within each subject by `avg_gap_change` in descending order (`equit
 - Schools with fewer than `n_transitions = 1` are excluded automatically because they produce no cohort summary rows.
 - `avg_pp_growth` can be positive or negative. A positive value means students at that school, on average, improved their proficiency rate as they advanced a grade. A negative value does not necessarily imply failure — suppressed cells, small N, or grade-level test-level changes can all affect the metric.
 - Rankings should be interpreted alongside `n_transitions` and `pct_significant_transitions` to assess reliability.
+- Disadvantaged subgroups used for equity rankings: Black or African American, Hispanic/Latino of any race, EL Active, Econ Dis, Students with Disabilities.
