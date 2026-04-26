@@ -133,3 +133,17 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 2 while explicitly sending the repo back to **Build**.
 - `.squad/review_report.md` becomes the authoritative closeout record for the equity-aware loop.
 - The next Build loop must choose between restoring the normalized-data / 2024-25 path or finishing the remaining manual dashboard checks before another Validate/Closeout pass.
+
+### D-018 — Build Loop 3: School Locations and Rankings Deliverables
+**Date:** 2026-04-26
+**Decision:** Build loop 3 targets two deliverables: (a) `input_data/school_locations.csv` with geocoordinates for 115 DC public schools, and (b) `src/generate_school_rankings.py` that ranks all schools by cohort growth and equity-gap narrowing.
+**Rationale:**
+- The `school_locations.csv` file directly satisfies Task 04's acceptance criterion: "Map view loads without errors when `input_data/school_locations.csv` is present." In all prior loops, the map degraded gracefully but never fully rendered because this file was absent. Adding it completes Task 04.
+- The school rankings script fulfills the explicit backlog goal ("ranking schools by cohort growth") that remained unimplemented after loop 2. It reads already-generated outputs (no new data pipeline changes), making it a low-risk, high-value addition.
+- The normalized 4-workbook / 2024-25 ingestion path is still blocked by missing external OSSE data and is deferred.
+**Consequences:**
+- `input_data/school_locations.csv` contains approximate coordinates based on DC neighborhood geography. They are accurate enough for exploratory dashboard mapping; for precise geocoding, the DC Open Data API (`https://opendata.dc.gov/`) should be used in a future loop.
+- "DC Public Schools" (citywide aggregate row in `combined_all_years.csv`) has no entry in `school_locations.csv` because it is not a physical location. The dashboard map will omit this row, which is the correct behavior.
+- `school_rankings.csv` (192 rows) and `school_equity_rankings.csv` (187 rows) become new policy-analysis artifacts. Rankings are based on the 3-year wide-format dataset and inherit the same limitations (missing 2024-25, OSSE subgroup suppression).
+- Updated smoke test path adds: `python src/generate_school_rankings.py`.
+- Validate loop 3 should confirm: `py_compile src/*.py`, `generate_school_rankings.py` exits 0, and the dashboard map renders data points for the new locations file.
