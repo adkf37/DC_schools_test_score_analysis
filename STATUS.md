@@ -33,7 +33,7 @@ Loop 4 adds:
 | 01 | Ingest raw data | Squad Init | Data Engineer | ✅ Wide-format path now covers 7 in-repo files (2016–2024); normalized 4-workbook path still pending external data |
 | 02 | Clean & standardize data | Squad Review | Data Engineer | ✅ `combined_all_years.csv` regenerated (28,069 rows, 7 years, 251 raw schools / 211 cohort-analysis schools) |
 | 03 | Cohort growth analysis | Build | Statistician | ✅ Task 03 target now met — 12,956 detail rows, **2,560 summary rows** (target ≥ 1,700); all 4 Stuart-Hobson benchmarks pass |
-| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves 7 figures, and the loop-3 `school_locations.csv` path now renders a real map (113 plotted schools in the current 2024 All Students view) |
+| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves 7 figures, and the loop-3 `school_locations.csv` path now renders a real map (113 plotted schools in the current 2024 Math / All Students view) |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
 
@@ -88,7 +88,7 @@ Loop 4 adds:
   7. `python src/generate_school_rankings.py`
   8. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (returns 7 figures, including a real map when `input_data/school_locations.csv` is present)
 - **Loop 4 closeout outcome:** SIGNOFF for the current 7-workbook wide-format loop — handoff docs refreshed, `.squad/review_report.md` updated, and the repo returns to **Build** for remaining scope rather than full project completion.
-- **Loop 4 validation outcome:** PASS — all documented smoke commands exit 0; dashboard endpoints return 200; the 7-output callback returns live figures including a real 2024 Math map backed by `input_data/school_locations.csv` (113 plotted schools in the current All Students view).
+- **Loop 4 validation outcome:** PASS — all documented smoke commands exit 0; dashboard endpoints return 200; the 7-output callback returns live figures including a real 2024 Math map backed by `input_data/school_locations.csv` (113 plotted schools in the current Math / All Students view).
 - **Loop 4 build evidence:**
   - `src/load_wide_format_data.py` now loads all 7 in-repo workbooks: years 2016, 2017, 2018, 2019, 2022, 2023, 2024 (COVID years 2020-21 are absent from the OSSE release schedule).
   - `output_data/combined_all_years.csv`: 28,069 rows (was 12,378)

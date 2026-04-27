@@ -203,7 +203,7 @@ python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 4):**
+**Validated closeout evidence (Loop 4, example callback filters = Subject: Math; Student Group: All Students):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
 - A live `POST /_dash-update-component` request returns all seven figures, including the two equity charts

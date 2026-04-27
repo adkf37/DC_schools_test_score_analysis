@@ -38,7 +38,7 @@ What was validated from a fresh clone:
   - file contains 115 school locations
   - live callback returns a real `School Performance Map`
   - current 2024 Math / All Students view plots 113 schools (the citywide `DC Public Schools` aggregate has no map point)
-- Cohort transitions for consecutive year pairs only: 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024
+- Cohort transitions for consecutive year pairs only: 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. There is no 2019→2022 transition because OSSE did not release comparable annual school-level assessment files for the COVID-disrupted 2020 and 2021 school years.
 
 ### Remaining gaps
 
