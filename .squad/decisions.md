@@ -156,3 +156,23 @@
 - `STATUS.md`, `README.md`, `WORKFLOW.md`, and `.squad/sprint.md` should describe closeout as complete for loop 3 while explicitly sending the repo back to **Build**.
 - `.squad/review_report.md` becomes the authoritative closeout record for the rankings-and-map loop.
 - The next Build loop must choose between restoring the normalized-data / 2024-25 path or finishing the blocked browser-console dashboard review before another Validate/Closeout pass.
+
+### D-020 — Build Loop 4: Ingest Historical PARCC Files (2015-16 through 2018-19)
+**Date:** 2026-04-27
+**Decision:** Extend `src/load_wide_format_data.py` to ingest the four historical PARCC workbooks already committed to the repository (2015-16, 2016-17, 2017-18, 2018-19) alongside the three files already being loaded (2021-22, 2022-23, 2023-24). This resolves the Task 03 summary-row shortfall (1,234 vs. ≥ 1,700 target).
+**Rationale:**
+- All four historical files are already present in `input_data/School and Demographic Group Aggregation/` and share the same wide-format schema (school × grade × ELA/Math columns with pre-computed proficiency counts and percentages).
+- The `FILE_YEAR_MAP` only matched years 2022, 2023, and 2024; the historical files were silently ignored.
+- The older files use different demographic sheet naming conventions (e.g., "Black Students" instead of "BlAfAm", "Econ Disadvantaged Students" instead of "EconDisad") and slightly different MSAA column names in 2015-16/2016-17. Adding these variants to `SHEET_SUBGROUP` and `COL_PATTERNS` is the minimal change needed.
+- Cohort transitions across the 2019–2022 COVID gap are correctly absent because `analyze_cohort_growth.py` only matches `followup_year == baseline_year + 1`.
+**Consequences:**
+- `FILE_YEAR_MAP` now covers years 2016, 2017, 2018, 2019, 2022, 2023, 2024 (7 files).
+- `SHEET_SUBGROUP` gains aliases for all older descriptive sheet names across the 2015-16 through 2018-19 naming evolution.
+- `COL_PATTERNS` gains fallback patterns for the 2015-16/2016-17 MSAA column names.
+- `output_data/combined_all_years.csv`: 28,069 rows (was 12,378; +127%).
+- `output_data/cohort_growth_detail.csv`: 12,956 rows (was 5,391; +140%).
+- `output_data/cohort_growth_summary.csv`: **2,560 rows** (was 1,234; Task 03 ≥ 1,700 target now met).
+- All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
+- School name variations across years (e.g., "Aiton ES" vs. "Aiton Elementary School") may limit cross-era comparisons at the school level but do not affect within-period cohort tracking.
+- The 2017-18 file has no MSAA columns; the 2015-16/2016-17 MSAA columns load correctly with the new patterns.
+- Next step: run Validate/Closeout for loop 4.
