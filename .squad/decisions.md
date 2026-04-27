@@ -147,3 +147,12 @@
 - `school_rankings.csv` (192 rows) and `school_equity_rankings.csv` (187 rows) become new policy-analysis artifacts. Rankings are based on the 3-year wide-format dataset and inherit the same limitations (missing 2024-25, OSSE subgroup suppression).
 - Updated smoke test path adds: `python src/generate_school_rankings.py`.
 - Validate loop 3 should confirm: `py_compile src/*.py`, `generate_school_rankings.py` exits 0, and the dashboard map renders data points for the new locations file.
+
+### D-019 — Closeout Signs Off the Rankings-and-Map Wide-Format Loop and Returns to Build
+**Date:** 2026-04-27
+**Decision:** Closeout approves handoff for the current loop-3 wide-format path, including the school-rankings outputs and the locations-backed dashboard map, and returns the repo to **Build** rather than marking the full project complete.
+**Rationale:** A fresh-clone closeout re-run succeeded end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, and `python src/generate_school_rankings.py` all exited 0. `python app/app_simple.py` also started successfully, `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200, and a live `POST /_dash-update-component` request returned all seven figures with a real map once `input_data/school_locations.csv` was present. The current 2024 All Students map plots 113 schools; `DC Public Schools` is correctly omitted because it is a citywide aggregate row without a physical location. The repo is therefore handoff-ready for the three-year wide-format + equity + rankings + map path, but it still lacks the normalized 4-workbook / 2024-25 data path and still has an environment-blocked browser-console check.
+**Consequences:**
+- `STATUS.md`, `README.md`, `WORKFLOW.md`, and `.squad/sprint.md` should describe closeout as complete for loop 3 while explicitly sending the repo back to **Build**.
+- `.squad/review_report.md` becomes the authoritative closeout record for the rankings-and-map loop.
+- The next Build loop must choose between restoring the normalized-data / 2024-25 path or finishing the blocked browser-console dashboard review before another Validate/Closeout pass.

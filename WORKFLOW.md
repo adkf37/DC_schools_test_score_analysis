@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Closeout Complete for the Equity-Aware Wide-Format Loop
+## ✅ Current Status: Closeout Complete for the Rankings-and-Map Wide-Format Loop
 
-As of the 2026-04-26 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**:
+As of the 2026-04-27 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -10,6 +10,7 @@ As of the 2026-04-26 closeout review, a fresh-clone smoke test with the availabl
 - `python src/load_wide_format_data.py` ✅ ← use this when normalized OSSE files are unavailable
 - `python src/analyze_cohort_growth.py` ✅
 - `python src/equity_gap_analysis.py` ✅
+- `python src/generate_school_rankings.py` ✅
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 **Two data pipeline options:**
@@ -146,7 +147,7 @@ python src/equity_gap_analysis.py
 
 ---
 
-### 3b. School Rankings ✅ NEW IN LOOP 3
+### 3b. School Rankings ✅ VALIDATED IN LOOP 3
 **File**: `src/generate_school_rankings.py`
 
 **What it does:**
@@ -198,11 +199,11 @@ python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 2):**
+**Validated closeout evidence (Loop 3):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
 - A live `POST /_dash-update-component` request returns all seven figures, including the two equity charts
-- Loop 3 adds `input_data/school_locations.csv` so the map now renders all 115 DC schools
+- `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
 
 ---
 
@@ -284,16 +285,16 @@ python app/app_simple.py
 ### Required before the next validation / closeout pass:
 
 1. **Choose the next Build target**
-   - Restore the full normalized-data / 2024-25 ingestion path, or
-   - Extend dashboard validation to the blocked browser-console and locations-file checks
+    - Restore the full normalized-data / 2024-25 ingestion path, or
+    - Extend dashboard validation to the still-blocked browser-console / manual interaction checks
 
 2. **If pursuing the normalized-data path**
    - Update `src/load_clean_data.py` to recognize the repo's actual workbook layout/names, or
    - Place/rename the OSSE files so the documented loader command succeeds
 
 3. **If pursuing the dashboard path**
-    - Run `python app/app_simple.py`
-    - Confirm the browser-console and optional locations-file acceptance criteria against the regenerated CSV and equity outputs
+     - Run `python app/app_simple.py`
+     - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, and map outputs
 
 4. **Re-run evidence checks**
    - Verify Stuart-Hobson benchmark values
