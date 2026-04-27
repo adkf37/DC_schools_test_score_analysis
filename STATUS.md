@@ -2,7 +2,7 @@
 
 ## Current Objective
 
-**Validate loop 4 complete — fresh-clone smoke checks pass against the expanded 7-workbook wide-format pipeline; Closeout is next.**
+**Closeout loop 4 complete — the validated 7-workbook wide-format pipeline is handoff-ready for this loop, and the repo now returns to Build for the remaining normalized-data / 2024-25 and browser-console scope.**
 
 Loop 4 extends the wide-format loader to ingest the four historical PARCC workbooks already committed to the repository (2015-16, 2016-17, 2017-18, 2018-19) in addition to the current three files (2021-22, 2022-23, 2023-24). This resolves the long-standing gap between the actual output (1,234 summary rows) and the Task 03 acceptance criterion (≥ 1,700 rows).
 
@@ -22,7 +22,7 @@ Loop 4 adds:
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete for loops 2-4 — equity gap, school map, rankings, and historical data ingestion |
 | 4 | Validate | ✅ Complete for loops 1-4 — loop 4 smoke checks pass against the 7-workbook wide-format pipeline |
-| 5 | Closeout | ✅ Complete for loops 2-3; loop 4 pending Closeout |
+| 5 | Closeout | ✅ Complete for loops 2-4 — loop 4 signed off for the current 7-workbook wide-format handoff |
 
 ---
 
@@ -59,7 +59,7 @@ Loop 4 adds:
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to 7 figures; map now functional with school_locations.csv |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 4 — 7-workbook smoke validation, dashboard endpoint checks, and blocked browser-console note |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 3 — closeout signoff + return-to-Build recommendation |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 4 — closeout signoff for the 7-workbook path + return-to-Build recommendation |
 
 ---
 
@@ -87,6 +87,7 @@ Loop 4 adds:
   6. `python src/equity_gap_analysis.py`
   7. `python src/generate_school_rankings.py`
   8. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (returns 7 figures, including a real map when `input_data/school_locations.csv` is present)
+- **Loop 4 closeout outcome:** SIGNOFF for the current 7-workbook wide-format loop — handoff docs refreshed, `.squad/review_report.md` updated, and the repo returns to **Build** for remaining scope rather than full project completion.
 - **Loop 4 validation outcome:** PASS — all documented smoke commands exit 0; dashboard endpoints return 200; the 7-output callback returns live figures including a real 2024 Math map backed by `input_data/school_locations.csv` (113 plotted schools in the current All Students view).
 - **Loop 4 build evidence:**
   - `src/load_wide_format_data.py` now loads all 7 in-repo workbooks: years 2016, 2017, 2018, 2019, 2022, 2023, 2024 (COVID years 2020-21 are absent from the OSSE release schedule).
@@ -104,4 +105,4 @@ Loop 4 adds:
 - **School location coordinates** are approximate, based on DC neighborhood geography. They are suitable for exploratory map visualization; for precise geocoding, use the DC Open Data API: https://opendata.dc.gov/
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
 - **Validation blocker still open:** direct browser-console inspection remains blocked because the Playwright browser profile is locked in this environment; no server-side dashboard exceptions were observed during HTTP/callback checks.
-- **Next recommended step:** Run Closeout for loop 4. After closeout, the remaining open items are: (a) 2024-25 data file, (b) normalized 4-workbook ingestion path, and (c) environment-blocked browser-console dashboard check.
+- **Next recommended step:** Start the next **Build** loop and choose one explicit follow-up: (a) restore the normalized 4-workbook / 2024-25 ingestion path, or (b) finish the blocked browser-console / manual dashboard validation work.

@@ -185,3 +185,12 @@
 - `.squad/validation_report.md` becomes the authoritative validation evidence for loop 4.
 - `STATUS.md` should move the repo to **Validate complete / Closeout next** for loop 4.
 - Closeout should decide whether to sign off the current 7-workbook wide-format path and explicitly carry forward the remaining scope: the missing normalized 4-workbook / 2024-25 path and the blocked browser-console check.
+
+### D-022 — Closeout Signs Off Loop 4 and Returns the Repo to Build
+**Date:** 2026-04-27
+**Decision:** Closeout approves handoff for the current 7-workbook wide-format loop and returns the repo to **Build** for the remaining backlog scope rather than marking the whole project complete.
+**Rationale:** Closeout rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, and `WORKFLOW.md`, then reran the documented smoke path in a clean environment: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, and `python src/generate_school_rankings.py`. The rerun regenerated `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), and `school_equity_rankings.csv` (414 rows). `python app/app_simple.py` also started successfully; `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; and a live `POST /_dash-update-component` request returned all seven figures with a real 2024 Math / All Students map backed by `input_data/school_locations.csv` (113 plotted schools). The current loop is therefore handoff-ready, but the repo still lacks the normalized 4-workbook / 2024-25 path and still has an environment-blocked browser-console check.
+**Consequences:**
+- `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 4 while explicitly sending the repo back to **Build** next.
+- `.squad/review_report.md` becomes the authoritative closeout record for the 7-workbook wide-format handoff.
+- The next Build loop must choose one explicit follow-up: restore the normalized 4-workbook / 2024-25 ingestion path, or finish the blocked browser-console / manual dashboard validation work.

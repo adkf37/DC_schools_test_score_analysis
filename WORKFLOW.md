@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Closeout Complete for the Rankings-and-Map Wide-Format Loop
+## ✅ Current Status: Closeout Complete for the Historical-Data Wide-Format Loop
 
-As of the 2026-04-27 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**:
+As of the 2026-04-27 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**, now expanded to all 7 workbooks already committed to the repository:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -18,7 +18,7 @@ As of the 2026-04-27 closeout review, a fresh-clone smoke test with the availabl
 | Script | Input files | Use when |
 |--------|------------|---------|
 | `src/load_clean_data.py` | Normalized OSSE files (4 exact workbook names in `input_data/`) | You have downloaded the normalized school-level PARCC/DCCAPE files from OSSE |
-| `src/load_wide_format_data.py` | Wide-format demographic files in `input_data/School and Demographic Group Aggregation/` | Using files already in the repository (2021-22, 2022-23, 2023-24) |
+| `src/load_wide_format_data.py` | Wide-format demographic files in `input_data/School and Demographic Group Aggregation/` | Using files already in the repository (2015-16 through 2018-19, plus 2021-22 through 2023-24) |
 
 > **Note:** `src/load_clean_data.py` still expects the four normalized OSSE filenames (see Task 01). The wide-format loader (`src/load_wide_format_data.py`) works with the files already committed to the repo.
 
@@ -75,6 +75,10 @@ python src/load_clean_data.py
 - Produces the same `combined_all_years.csv` format as Option A
 
 **Available data:**
+- 2015-16 PARCC (grades 3-8, older descriptive demographic sheet names)
+- 2016-17 PARCC (grades 3-8, older descriptive demographic sheet names)
+- 2017-18 PARCC (grades 3-8, no MSAA columns in source workbook)
+- 2018-19 PARCC (grades 3-8)
 - 2021-22 PARCC (grades 3-8, 13 demographic sheets)
 - 2022-23 PARCC (grades 3-8, 13 demographic sheets)
 - 2023-24 DCCAPE (grades 3-8, 13 demographic sheets)
@@ -84,10 +88,10 @@ python src/load_wide_format_data.py
 ```
 
 **Output**: `output_data/combined_all_years.csv`
-- 3 years of data (2022–2024, using the wide-format option)
-- ~96 schools with cohort-trackable grades (3-8)
+- 7 years of data (2016, 2017, 2018, 2019, 2022, 2023, 2024, using the wide-format option)
+- 211 schools with cohort-trackable grade transitions (212 school names in the filtered cohort input)
 - 2 subjects (ELA, Math)
-- 11 student groups (All Students + demographic breakdowns)
+- 12 student groups (All Students + demographic/program breakdowns)
 
 ### 2. Cohort Growth Analysis ✅ NEW
 **File**: `src/analyze_cohort_growth.py`
@@ -192,18 +196,18 @@ python src/analyze_growth.py
 - **Cohort growth charts** – bar charts and box plots of cohort growth
 - **Equity gap charts** – proficiency gap vs All Students, gap-change analysis
 - Filter by subject, student group, schools, year range
-- Map view (requires `input_data/school_locations.csv` — included in Loop 3)
+- Map view (requires `input_data/school_locations.csv` — included in Loop 3 and still validated in Loop 4)
 
 ```bash
 python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 3):**
+**Validated closeout evidence (Loop 4):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
 - A live `POST /_dash-update-component` request returns all seven figures, including the two equity charts
-- `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
+- `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 Math / All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
 
 ---
 
@@ -327,9 +331,9 @@ python app/app_simple.py
 
 ## 📊 Your Data at a Glance
 
-- **Total Records**: 12,378
-- **Years**: 2022, 2023, 2024 (3 years in repo)
-- **Schools**: 116 unique raw schools / 96 cohort-analysis schools
+- **Total Records**: 28,069
+- **Years**: 2016, 2017, 2018, 2019, 2022, 2023, 2024 (7 in-repo years)
+- **Schools**: 251 unique raw schools / 211 cohort-analysis schools
 - **Subjects**: ELA, Math
 - **Student Groups**: Multiple demographic and program groups
 - **Metrics**: Percent Meeting/Exceeding expectations
