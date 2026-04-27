@@ -31,14 +31,26 @@ OUTPUT_PATH = os.path.join(REPO_ROOT, "output_data")
 # ── File → year / assessment mapping ──────────────────────────────────────────
 # Each tuple: (filename_pattern_keywords, year, assessment_name)
 # Patterns are matched case-insensitively against file basenames.
+# Historical files (2015-16 through 2018-19) are in the same directory and
+# share the same wide-format schema; they extend cohort-tracking coverage
+# back to 2016 (decision D-020).
 FILE_YEAR_MAP = [
-    (["2021-22"],  2022, "PARCC"),
-    (["2022-23"],  2023, "PARCC"),
+    (["2015-16"],              2016, "PARCC"),
+    (["2016-17"],              2017, "PARCC"),
+    (["2017-18"],              2018, "PARCC"),
+    (["2018-19"],              2019, "PARCC"),
+    (["2021-22"],              2022, "PARCC"),
+    (["2022-23"],              2023, "PARCC"),
     (["2023-2024", "2023-24"], 2024, "DCCAPE"),
 ]
 
 # ── Demographic sheet → (Student Group, Student Group Value) ──────────────────
+# Current (2021-22 / 2022-23 / 2023-24) files use short abbreviation sheet names.
+# Historical (2015-16 through 2018-19) files use longer descriptive names that
+# evolved across years.  All variants are mapped to the same standard labels so
+# analyze_cohort_growth.py can track cohorts across the full date range.
 SHEET_SUBGROUP = {
+    # ── Current abbreviated sheet names (2021-22, 2022-23, 2023-24) ──────────
     "Overall":   ("All Students", "All Students"),
     "Female":    ("Gender", "Female"),
     "Male":      ("Gender", "Male"),
@@ -58,6 +70,44 @@ SHEET_SUBGROUP = {
     # These sheets never co-exist in the same year file, so no duplicate rows
     # are produced.
     "AtRisk":    ("Economic Status", "Econ Dis"),
+
+    # ── Historical sheet names: 2015-16 ──────────────────────────────────────
+    # 2015-16 uses "All" instead of "Overall" and longer descriptive names.
+    "All":                             ("All Students", "All Students"),
+    "Special Education Students":      ("Special Education Status", "Students with Disabilities"),
+    "Eng Lang Learner Students":       ("English Learner Status", "EL Active"),
+    "Free-Red Price Meal Students":    ("Economic Status", "Econ Dis"),
+
+    # ── Historical sheet names: 2016-17 and 2017-18 ──────────────────────────
+    # These files append " Students" to each demographic group name.
+    "Female Students":                 ("Gender", "Female"),
+    "Male Students":                   ("Gender", "Male"),
+    "American Indian Students":        ("Race/Ethnicity", "American Indian/Alaska Native"),
+    "Asian Students":                  ("Race/Ethnicity", "Asian"),
+    "Black Students":                  ("Race/Ethnicity", "Black or African American"),
+    "Hispanic Students":               ("Race/Ethnicity", "Hispanic/Latino of any race"),
+    # 2017-18 file has a capitalization typo in the sheet name
+    "HIspanic Students":               ("Race/Ethnicity", "Hispanic/Latino of any race"),
+    "Multiracial Students":            ("Race/Ethnicity", "Two or more races"),
+    "Nat Hawaiian-Pac Islnd Students": ("Race/Ethnicity", "Pacific Islander/Native Hawaiian"),
+    "White Students":                  ("Race/Ethnicity", "White"),
+    "ELL Students (Active & Monitor)": ("English Learner Status", "EL Active"),
+    "EL Students (Active & Monitor)":  ("English Learner Status", "EL Active"),
+    "SPED Students (Active & Monitor)": ("Special Education Status", "Students with Disabilities"),
+    "Econ Disadvantaged Students":     ("Economic Status", "Econ Dis"),
+    "At-Risk Students":                ("Economic Status", "Econ Dis"),
+
+    # ── Historical sheet names: 2018-19 ──────────────────────────────────────
+    # 2018-19 drops " Students" suffix but is otherwise similar.
+    "American Indian":                 ("Race/Ethnicity", "American Indian/Alaska Native"),
+    "Black":                           ("Race/Ethnicity", "Black or African American"),
+    "Hispanic":                        ("Race/Ethnicity", "Hispanic/Latino of any race"),
+    "Multiracial":                     ("Race/Ethnicity", "Two or more races"),
+    "Pac Islander-Nat Hawaiian":       ("Race/Ethnicity", "Pacific Islander/Native Hawaiian"),
+    "White":                           ("Race/Ethnicity", "White"),
+    "EL (Active and Monitored)":       ("English Learner Status", "EL Active"),
+    "SWD (Active)":                    ("Special Education Status", "Students with Disabilities"),
+    "At-Risk":                         ("Economic Status", "Econ Dis"),
 }
 
 # Grades to exclude (school-wide totals rather than a specific cohort grade)
@@ -66,26 +116,31 @@ SKIP_GRADES = {"ALL", "ALL GRADES"}
 # ── Column name patterns for dynamic header lookup ────────────────────────────
 # Each value is a list of substrings to search for (case-insensitive) in the header.
 # The first matching column index is used.
+# Patterns cover both the current (2021+) column names and the older (2015-19)
+# column name variants (decision D-020).
 COL_PATTERNS = {
     "school_code":   ["school code"],
     "school_name":   ["school name"],
     "grade":         ["grade"],
-    # PARCC/DCCAPE ELA
+    # PARCC/DCCAPE ELA — all years use the same column names
     "ela_total":     ["# of english language arts", "# of ela"],
     "ela_prof":      ["ela # proficient", "ela # prof"],
     "ela_pct":       ["ela - % proficient", "ela % proficient"],
-    # PARCC/DCCAPE Math
+    # PARCC/DCCAPE Math — all years use the same column names
     "math_total":    ["# math test takers"],
     "math_prof":     ["math - # proficient", "math # proficient"],
     "math_pct":      ["math - % proficient", "math % proficient"],
-    # MSAA ELA
-    "msaa_ela_total": ["msaa - # of english language arts", "msaa - # of ela"],
-    "msaa_ela_prof":  ["msaa - ela # proficient"],
-    "msaa_ela_pct":   ["msaa - ela - % proficient", "msaa - ela % proficient"],
-    # MSAA Math
-    "msaa_math_total": ["msaa - # of math"],
-    "msaa_math_prof":  ["msaa - math # proficient"],
-    "msaa_math_pct":   ["msaa - math - % proficient", "msaa - math % proficient"],
+    # MSAA ELA — 2018-19+ uses "msaa - …"; 2015-16/2016-17 uses "msaa ela …"
+    "msaa_ela_total": ["msaa - # of english language arts", "msaa - # of ela",
+                       "msaa ela # of test takers"],
+    "msaa_ela_prof":  ["msaa - ela # proficient", "msaa ela - # proficient"],
+    "msaa_ela_pct":   ["msaa - ela - % proficient", "msaa - ela % proficient",
+                       "msaa ela - % proficient"],
+    # MSAA Math — same naming split as ELA
+    "msaa_math_total": ["msaa - # of math", "msaa math - # test takers"],
+    "msaa_math_prof":  ["msaa - math # proficient", "msaa math - # proficient"],
+    "msaa_math_pct":   ["msaa - math - % proficient", "msaa - math % proficient",
+                        "msaa math - % proficient"],
 }
 
 
@@ -321,7 +376,7 @@ def main():
     files = find_files()
     if not files:
         print(f"\nERROR: No matching XLSX files found under {INPUT_PATH}")
-        print("Expected files containing year keywords: 2021-22, 2022-23, 2023-2024")
+        print("Expected files containing year keywords: 2015-16, 2016-17, 2017-18, 2018-19, 2021-22, 2022-23, 2023-2024")
         sys.exit(1)
 
     print(f"\nFound {len(files)} file(s):")
