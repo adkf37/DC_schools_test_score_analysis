@@ -176,3 +176,12 @@
 - School name variations across years (e.g., "Aiton ES" vs. "Aiton Elementary School") may limit cross-era comparisons at the school level but do not affect within-period cohort tracking.
 - The 2017-18 file has no MSAA columns; the 2015-16/2016-17 MSAA columns load correctly with the new patterns.
 - Next step: run Validate/Closeout for loop 4.
+
+### D-021 — Validate Passes Loop 4 and Advances to Closeout
+**Date:** 2026-04-27
+**Decision:** Mark Validate as **PASS** for the loop-4 historical-data wide-format pipeline and advance the repo to **Closeout**.
+**Rationale:** A fresh-clone validation re-ran the documented smoke path end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, and `python src/generate_school_rankings.py` all exited 0. The run regenerated `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), and `school_equity_rankings.csv` (414 rows). `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200, and a live `POST /_dash-update-component` request returned all seven figures, including a real 2024 Math map backed by `input_data/school_locations.csv` (113 plotted schools in the All Students view). Direct browser-console inspection remained blocked because the Playwright browser profile was locked.
+**Consequences:**
+- `.squad/validation_report.md` becomes the authoritative validation evidence for loop 4.
+- `STATUS.md` should move the repo to **Validate complete / Closeout next** for loop 4.
+- Closeout should decide whether to sign off the current 7-workbook wide-format path and explicitly carry forward the remaining scope: the missing normalized 4-workbook / 2024-25 path and the blocked browser-console check.
