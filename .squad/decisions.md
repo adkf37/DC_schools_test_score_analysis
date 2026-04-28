@@ -194,3 +194,19 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 4 while explicitly sending the repo back to **Build** next.
 - `.squad/review_report.md` becomes the authoritative closeout record for the 7-workbook wide-format handoff.
 - The next Build loop must choose one explicit follow-up: restore the normalized 4-workbook / 2024-25 ingestion path, or finish the blocked browser-console / manual dashboard validation work.
+
+### D-023 — Build Loop 5: Proficiency Trend Analysis and Grade × Year Heatmap
+**Date:** 2026-04-28
+**Decision:** Implement `src/proficiency_trend_analysis.py` and extend the dashboard with an 8th figure — a Grade × Year proficiency heatmap.
+**Rationale:**
+- `backlog/phases.md` Phase 3 Build explicitly lists "Add heatmap and scatter-plot visualizations to the dashboard" as unimplemented scope.
+- A Grade × Year heatmap is the most analytically interpretable heatmap for this dataset: it shows how each grade level's proficiency evolves across years at a selected school, or citywide when no school is selected. This directly complements the cohort growth analysis (which tracks students as they move up grades) with a fixed-grade lens.
+- The charter vs. DCPS comparison and 2024-25 normalized-data path remain blocked (no school-type column in existing files; no 2024-25 workbook in repo), so the heatmap is the most impactful feasible deliverable for this loop.
+- The pre-existing `analyze_growth.py` produces a wide-format YoY growth file but is not in the official smoke path and calls `analyze_cohort_growth.py` internally. The new `proficiency_trend_analysis.py` is a lean standalone script that replaces this for the dashboard use case.
+**Consequences:**
+- `src/proficiency_trend_analysis.py` — new standalone script; produces `output_data/proficiency_trends.csv` (25,629 rows: school × year × subject × grade × subgroup).
+- `app/app_simple.py` — callback now returns 8 figures; 8th is a `go.Heatmap` with RdYlGn colour scale centred at 50% proficiency.
+- When a school is selected, the heatmap shows that school's grade-by-year grid; when no school is selected, it shows the citywide average.
+- `proficiency_trends.csv` reveals the COVID learning-loss pattern: citywide ELA avg dropped from 35.2% (2019) to 29.4% (2022) and recovered to 32.1% (2024); Math dropped from 30.9% to 21.2% and recovered to 24.9%.
+- Smoke test path updated: adds `python src/proficiency_trend_analysis.py` as step 8.
+- All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied); no changes to cohort engine.

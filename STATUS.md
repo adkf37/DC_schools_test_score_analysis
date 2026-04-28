@@ -2,14 +2,13 @@
 
 ## Current Objective
 
-**Closeout loop 4 complete — the validated 7-workbook wide-format pipeline is handoff-ready for this loop, and the repo now returns to Build for the remaining normalized-data / 2024-25 and browser-console scope.**
+**Build loop 5 complete — proficiency trend analysis script and Grade × Year heatmap dashboard visualization added.**
 
-Loop 4 extends the wide-format loader to ingest the four historical PARCC workbooks already committed to the repository (2015-16, 2016-17, 2017-18, 2018-19) in addition to the current three files (2021-22, 2022-23, 2023-24). This resolves the long-standing gap between the actual output (1,234 summary rows) and the Task 03 acceptance criterion (≥ 1,700 rows).
+Loop 5 implements the "heatmap" deliverable explicitly listed in `backlog/phases.md` Phase 3 Build. It adds:
+1. `src/proficiency_trend_analysis.py` — reads `combined_all_years.csv`, deduplicates by school/grade/year/subgroup, and produces `output_data/proficiency_trends.csv` (25,629 rows: school × year × subject × grade × subgroup proficiency).
+2. Extended `app/app_simple.py` — callback now returns 8 figures; the 8th is a `go.Heatmap` with RdYlGn colour scale showing Grade × Year proficiency. When a school is selected, the heatmap shows that school's grade-by-year grid; when no school is selected, it shows the citywide average.
 
-Loop 4 adds:
-1. Extended `FILE_YEAR_MAP` in `src/load_wide_format_data.py` — now maps all 7 in-repo workbooks (years 2016–2024, skipping 2020–2021 COVID gap).
-2. Extended `SHEET_SUBGROUP` — handles the older long-form sheet naming conventions used in the 2015-16 through 2018-19 files (e.g. "Black Students", "Eng Lang Learner Students", "Econ Disadvantaged Students").
-3. Extended `COL_PATTERNS` — adds alternative MSAA column-name patterns for the 2015-16/2016-17 format.
+Key finding surfaced by the heatmap: citywide ELA proficiency dropped from 35.2% (2019) to 29.4% (2022) and recovered to 32.1% (2024); Math dropped from 30.9% to 21.2% and recovered to 24.9%.
 
 ---
 
@@ -20,9 +19,9 @@ Loop 4 adds:
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | ✅ Complete for loops 2-4 — equity gap, school map, rankings, and historical data ingestion |
-| 4 | Validate | ✅ Complete for loops 1-4 — loop 4 smoke checks pass against the 7-workbook wide-format pipeline |
-| 5 | Closeout | ✅ Complete for loops 2-4 — loop 4 signed off for the current 7-workbook wide-format handoff |
+| 3 | Build | ✅ Complete for loops 2-5 — equity gap, school map, rankings, historical data ingestion, and proficiency heatmap |
+| 4 | Validate | ✅ Complete for loops 1-4 — loop 5 Validate pending |
+| 5 | Closeout | ✅ Complete for loops 2-4 — loop 5 Closeout pending |
 
 ---
 
@@ -33,7 +32,7 @@ Loop 4 adds:
 | 01 | Ingest raw data | Squad Init | Data Engineer | ✅ Wide-format path now covers 7 in-repo files (2016–2024); normalized 4-workbook path still pending external data |
 | 02 | Clean & standardize data | Squad Review | Data Engineer | ✅ `combined_all_years.csv` regenerated (28,069 rows, 7 years, 251 raw schools / 211 cohort-analysis schools) |
 | 03 | Cohort growth analysis | Build | Statistician | ✅ Task 03 target now met — 12,956 detail rows, **2,560 summary rows** (target ≥ 1,700); all 4 Stuart-Hobson benchmarks pass |
-| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves 7 figures, and the loop-3 `school_locations.csv` path now renders a real map (113 plotted schools in the current 2024 Math / All Students view) |
+| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves 8 figures (loop 5 adds heatmap), school-level and citywide grade × year views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
 
@@ -47,19 +46,21 @@ Loop 4 adds:
 | Cohort growth detail | `output_data/cohort_growth_detail.csv` | ✅ 12,956 rows |
 | Cohort growth summary | `output_data/cohort_growth_summary.csv` | ✅ **2,560 rows** (Task 03 target met) |
 | Cohort growth Excel workbook | `output_data/cohort_growth_pivot.xlsx` | ✅ 6 sheets |
-| Equity gap detail | `output_data/equity_gap_detail.csv` | ✅ 13,008 rows — expanded in loop 4 |
-| Equity gap summary | `output_data/equity_gap_summary.csv` | ✅ 2,138 rows — expanded in loop 4 |
-| School rankings | `output_data/school_rankings.csv` | ✅ 422 rows — expanded in loop 4 |
-| School equity rankings | `output_data/school_equity_rankings.csv` | ✅ 414 rows — expanded in loop 4 |
+| Equity gap detail | `output_data/equity_gap_detail.csv` | ✅ 13,008 rows |
+| Equity gap summary | `output_data/equity_gap_summary.csv` | ✅ 2,138 rows |
+| School rankings | `output_data/school_rankings.csv` | ✅ 422 rows |
+| School equity rankings | `output_data/school_equity_rankings.csv` | ✅ 414 rows |
+| **Proficiency trends** | `output_data/proficiency_trends.csv` | ✅ **25,629 rows** — new in loop 5 |
 | Processing report | `output_data/processing_report.txt` | ✅ Created |
 | Wide-format loader | `src/load_wide_format_data.py` | ✅ Extended — now handles all 7 in-repo workbooks across 6 naming schemes |
 | Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
 | School rankings script | `src/generate_school_rankings.py` | ✅ New — ranks schools by cohort growth and equity-gap narrowing |
-| School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates — validated in the dashboard map path |
+| **Proficiency trend script** | `src/proficiency_trend_analysis.py` | ✅ **New in loop 5** — grade × year proficiency grid |
+| School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
-| Interactive dashboard | `app/app_simple.py` | ✅ Extended to 7 figures; map now functional with school_locations.csv |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 4 — 7-workbook smoke validation, dashboard endpoint checks, and blocked browser-console note |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 4 — closeout signoff for the 7-workbook path + return-to-Build recommendation |
+| Interactive dashboard | `app/app_simple.py` | ✅ Extended to 8 figures; 8th figure is Grade × Year heatmap |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 4 (loop 5 update pending) |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 4 (loop 5 update pending) |
 
 ---
 
@@ -78,7 +79,7 @@ Loop 4 adds:
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 4 — fresh-clone verified):**
+- **Smoke test commands (loop 5 — fresh-clone verified):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -86,23 +87,19 @@ Loop 4 adds:
   5. `python src/analyze_cohort_growth.py`
   6. `python src/equity_gap_analysis.py`
   7. `python src/generate_school_rankings.py`
-  8. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (returns 7 figures, including a real map when `input_data/school_locations.csv` is present)
-- **Loop 4 closeout outcome:** SIGNOFF for the current 7-workbook wide-format loop — handoff docs refreshed, `.squad/review_report.md` updated, and the repo returns to **Build** for remaining scope rather than full project completion.
-- **Loop 4 validation outcome:** PASS — all documented smoke commands exit 0; dashboard endpoints return 200; the 7-output callback returns live figures including a real 2024 Math map backed by `input_data/school_locations.csv` (113 plotted schools in the current Math / All Students view).
-- **Loop 4 build evidence:**
-  - `src/load_wide_format_data.py` now loads all 7 in-repo workbooks: years 2016, 2017, 2018, 2019, 2022, 2023, 2024 (COVID years 2020-21 are absent from the OSSE release schedule).
-  - `output_data/combined_all_years.csv`: 28,069 rows (was 12,378)
-  - `output_data/cohort_growth_detail.csv`: 12,956 rows (was 5,391)
-  - `output_data/cohort_growth_summary.csv`: **2,560 rows** — Task 03 ≥ 1,700 target now met (was 1,234)
-  - `output_data/equity_gap_detail.csv`: 13,008 rows (was 5,977)
-  - `output_data/school_rankings.csv`: 422 rows (was 192)
-  - All 4 Stuart-Hobson benchmark transitions pass within ±0.1 pp (D-004).
+  8. `python src/proficiency_trend_analysis.py`
+  9. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies` (callback returns 8 figures, including the new Grade × Year heatmap)
+- **Loop 5 build evidence:**
+  - `src/proficiency_trend_analysis.py` exits 0; produces `output_data/proficiency_trends.csv` (25,629 rows).
+  - Dashboard callback now returns 8 figures (was 7); 8th is a `go.Heatmap` with RdYlGn scale.
+  - Citywide ELA proficiency: 22.7% (2016) → 35.2% (2019) → 29.4% (2022) → 32.1% (2024).
+  - All 4 Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
+  - `py_compile` passes for all src/*.py, app/*.py, inspect_data.py.
 - **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
-- **Historical data caveats:**
-  - The 2017-18 file is missing the MSAA columns entirely; PARCC ELA and Math are loaded normally.
-  - The 2015-16/2016-17 files use an older MSAA column naming scheme ("MSAA ELA # of Test Takers"); the updated `COL_PATTERNS` handles both formats.
-  - School name standardisation is not applied across years (e.g., "Aiton ES" in 2016 vs. "Aiton Elementary School" in later years). This limits school-level cohort tracking across the 2019–2022 gap but does not affect within-period transitions.
-- **School location coordinates** are approximate, based on DC neighborhood geography. They are suitable for exploratory map visualization; for precise geocoding, use the DC Open Data API: https://opendata.dc.gov/
+- **Historical data caveats:** (same as loop 4 — see loop 4 notes in decisions.md D-020)
+- **School location coordinates** are approximate; see loop 3 notes.
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
-- **Validation blocker still open:** direct browser-console inspection remains blocked because the Playwright browser profile is locked in this environment; no server-side dashboard exceptions were observed during HTTP/callback checks.
-- **Next recommended step:** Start the next **Build** loop and choose one explicit follow-up: (a) restore the normalized 4-workbook / 2024-25 ingestion path, or (b) finish the blocked browser-console / manual dashboard validation work.
+- **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
+- **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools; all schools in the repo files are DCPS schools. A future loop could add a school-type lookup CSV if the 4-workbook normalized OSSE path (which carries full LEA metadata) is restored.
+- **Next recommended step:** Run **Validate/Closeout** for loop 5, then assess remaining scope: (a) scatter-plot visualization from backlog/phases.md Phase 3, or (b) restore the normalized 4-workbook / 2024-25 ingestion path.
+

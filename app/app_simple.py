@@ -95,10 +95,12 @@ locations_df = try_load_school_locations()
 COHORT_DETAIL_FILE = os.path.join(OUTPUT_DIR, 'cohort_growth_detail.csv')
 COHORT_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'cohort_growth_summary.csv')
 EQUITY_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'equity_gap_summary.csv')
+PROFICIENCY_TRENDS_FILE = os.path.join(OUTPUT_DIR, 'proficiency_trends.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
 equity_summary = pd.DataFrame()
+proficiency_trends = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -108,6 +110,9 @@ if os.path.isfile(COHORT_SUMMARY_FILE):
 if os.path.isfile(EQUITY_SUMMARY_FILE):
     equity_summary = pd.read_csv(EQUITY_SUMMARY_FILE)
     print(f"Loaded equity gap summary: {len(equity_summary):,} rows")
+if os.path.isfile(PROFICIENCY_TRENDS_FILE):
+    proficiency_trends = pd.read_csv(PROFICIENCY_TRENDS_FILE)
+    print(f"Loaded proficiency trends: {len(proficiency_trends):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -248,6 +253,25 @@ app.layout = html.Div(
                 dcc.Graph(id='equity-gap-change')
             ]),
         ]),
+
+        html.Hr(),
+
+        # ── Proficiency heatmap section ──────────────────────────────────
+        html.H4("Proficiency Heatmap: Grade × Year", className="mt-3"),
+        html.P(
+            "How does each grade level's proficiency change across years? "
+            "Select a school to see its grade-by-year heatmap, or leave blank "
+            "for the citywide average.",
+            className="text-muted small",
+        ),
+        html.Small(
+            "Run python src/proficiency_trend_analysis.py to generate this data.",
+            className="text-muted",
+            id='heatmap-note',
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='heatmap')
+        ]),
     ]
 )
 
@@ -281,6 +305,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('map', 'figure'),
     Output('equity-gaps', 'figure'),
     Output('equity-gap-change', 'figure'),
+    Output('heatmap', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -574,7 +599,88 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No equity data – run src/equity_gap_analysis.py'
         )
 
-    return fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail, fig_map, fig_equity_gaps, fig_equity_gap_change
+    # ── Proficiency heatmap ──────────────────────────────────────────────
+    fig_heatmap = go.Figure()
+
+    if not proficiency_trends.empty:
+        pt = proficiency_trends.copy()
+        if subject:
+            pt = pt[pt['Subject'] == subject]
+        if subgroup:
+            pt = pt[pt['Student Group Value'] == subgroup]
+        pt = pt[pt['year'].between(year_range[0], year_range[1])]
+
+        # Choose data scope: single school or citywide average
+        if schools:
+            focus_school = schools[0]
+            pt = pt[pt['School Name'] == focus_school]
+            heatmap_title = f'{subject} – {focus_school}: Grade × Year Proficiency (%)'
+        else:
+            # Citywide average across all schools
+            pt = (
+                pt.groupby(['year', 'grade'], as_index=False)
+                  .agg(proficiency_pct=('proficiency_pct', 'mean'))
+            )
+            heatmap_title = f'{subject} – Citywide Average: Grade × Year Proficiency (%)'
+
+        if not pt.empty:
+            # Pivot to grade × year matrix
+            heatmap_pivot = pt.pivot_table(
+                index='grade',
+                columns='year',
+                values='proficiency_pct',
+                aggfunc='mean',
+            )
+
+            # Sort grades numerically (e.g. 'Grade 6' → 6, 'Grade 10' → 10)
+            def _grade_key(g):
+                import re as _re
+                m = _re.search(r'\d+', str(g))
+                return int(m.group()) if m else 99
+
+            sorted_grades = sorted(heatmap_pivot.index.tolist(), key=_grade_key)
+            heatmap_pivot = heatmap_pivot.reindex(sorted_grades)
+            sorted_years = sorted(heatmap_pivot.columns.tolist())
+            heatmap_pivot = heatmap_pivot[sorted_years]
+
+            z = heatmap_pivot.values.tolist()
+            x_labels = [str(int(y)) for y in sorted_years]
+            y_labels = sorted_grades
+
+            # Build text annotations (show value or dash for suppressed/missing cells)
+            text_vals = [
+                [f'{v:.1f}%' if not np.isnan(v) else '—' for v in row]
+                for row in heatmap_pivot.values.tolist()
+            ]
+
+            fig_heatmap = go.Figure(go.Heatmap(
+                z=z,
+                x=x_labels,
+                y=y_labels,
+                text=text_vals,
+                texttemplate='%{text}',
+                colorscale='RdYlGn',
+                zmid=50,
+                colorbar=dict(title='% Proficient'),
+                hoverongaps=False,
+            ))
+            fig_heatmap.update_layout(
+                title=heatmap_title,
+                xaxis_title='Year',
+                yaxis_title='Grade',
+                # 55 pixels per grade row + 120 px for title/axes, minimum 300 px
+                height=max(300, len(y_labels) * 55 + 120),
+            )
+
+    if fig_heatmap.data == ():
+        fig_heatmap.update_layout(
+            title='No trend data – run src/proficiency_trend_analysis.py'
+        )
+
+    return (
+        fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
+        fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
+    )
 
 
 if __name__ == '__main__':
