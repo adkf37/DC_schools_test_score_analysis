@@ -210,3 +210,12 @@
 - `proficiency_trends.csv` reveals the COVID learning-loss pattern: citywide ELA avg dropped from 35.2% (2019) to 29.4% (2022) and recovered to 32.1% (2024); Math dropped from 30.9% to 21.2% and recovered to 24.9%.
 - Smoke test path updated: adds `python src/proficiency_trend_analysis.py` as step 8.
 - All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied); no changes to cohort engine.
+
+### D-024 — Validate Passes Loop 5 and Advances to Closeout
+**Date:** 2026-04-28
+**Decision:** Mark Validate as **PASS** for the loop-5 wide-format pipeline and advance the repo to **Closeout**.
+**Rationale:** A fresh-clone validation reran the documented smoke path end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, and `python src/proficiency_trend_analysis.py` all exited 0. The run regenerated `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), and `proficiency_trends.csv` (25,629 rows). `python app/app_simple.py` also started successfully; `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; and a live `POST /_dash-update-component` request returned all eight figures, including the new Grade × Year heatmap. Direct browser-console inspection remained blocked because the Playwright browser profile was locked.
+**Consequences:**
+- `.squad/validation_report.md` becomes the authoritative validation evidence for loop 5.
+- `STATUS.md` should move the repo to **Validate complete / Closeout next** for loop 5.
+- Closeout should decide whether to sign off the current 7-workbook wide-format + heatmap path and explicitly carry forward the remaining scope: the missing normalized 4-workbook / 2024-25 path, the blocked browser-console check, and any remaining dashboard enhancements such as the backlog scatter plot.

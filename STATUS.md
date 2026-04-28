@@ -2,13 +2,13 @@
 
 ## Current Objective
 
-**Build loop 5 complete — proficiency trend analysis script and Grade × Year heatmap dashboard visualization added.**
+**Validate loop 5 passed — proficiency trend analysis and the Grade × Year heatmap are reproducible from a fresh clone.**
 
-Loop 5 implements the "heatmap" deliverable explicitly listed in `backlog/phases.md` Phase 3 Build. It adds:
-1. `src/proficiency_trend_analysis.py` — reads `combined_all_years.csv`, deduplicates by school/grade/year/subgroup, and produces `output_data/proficiency_trends.csv` (25,629 rows: school × year × subject × grade × subgroup proficiency).
-2. Extended `app/app_simple.py` — callback now returns 8 figures; the 8th is a `go.Heatmap` with RdYlGn colour scale showing Grade × Year proficiency. When a school is selected, the heatmap shows that school's grade-by-year grid; when no school is selected, it shows the citywide average.
-
-Key finding surfaced by the heatmap: citywide ELA proficiency dropped from 35.2% (2019) to 29.4% (2022) and recovered to 32.1% (2024); Math dropped from 30.9% to 21.2% and recovered to 24.9%.
+Loop 5 validation reran the documented smoke path end to end:
+1. `src/proficiency_trend_analysis.py` exits 0 and regenerates `output_data/proficiency_trends.csv` (**25,629 rows**).
+2. `app/app_simple.py` starts cleanly against the regenerated CSVs.
+3. `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, and a live `POST /_dash-update-component` returns **8 figures**, including the new Grade × Year heatmap.
+4. The existing cohort/significance/equity/rankings outputs also regenerate cleanly from the same fresh-clone run.
 
 ---
 
@@ -20,7 +20,7 @@ Key finding surfaced by the heatmap: citywide ELA proficiency dropped from 35.2%
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete for loops 2-5 — equity gap, school map, rankings, historical data ingestion, and proficiency heatmap |
-| 4 | Validate | ✅ Complete for loops 1-4 — loop 5 Validate pending |
+| 4 | Validate | ✅ Complete for loops 1-5 |
 | 5 | Closeout | ✅ Complete for loops 2-4 — loop 5 Closeout pending |
 
 ---
@@ -59,7 +59,7 @@ Key finding surfaced by the heatmap: citywide ELA proficiency dropped from 35.2%
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to 8 figures; 8th figure is Grade × Year heatmap |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 4 (loop 5 update pending) |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 5 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 4 (loop 5 update pending) |
 
 ---
@@ -79,7 +79,7 @@ Key finding surfaced by the heatmap: citywide ELA proficiency dropped from 35.2%
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 5 — fresh-clone verified):**
+- **Smoke test commands (loop 5 — fresh-clone re-verified in Validate):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -89,17 +89,16 @@ Key finding surfaced by the heatmap: citywide ELA proficiency dropped from 35.2%
   7. `python src/generate_school_rankings.py`
   8. `python src/proficiency_trend_analysis.py`
   9. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies` (callback returns 8 figures, including the new Grade × Year heatmap)
-- **Loop 5 build evidence:**
-  - `src/proficiency_trend_analysis.py` exits 0; produces `output_data/proficiency_trends.csv` (25,629 rows).
-  - Dashboard callback now returns 8 figures (was 7); 8th is a `go.Heatmap` with RdYlGn scale.
-  - Citywide ELA proficiency: 22.7% (2016) → 35.2% (2019) → 29.4% (2022) → 32.1% (2024).
+- **Loop 5 validation evidence:**
+  - `src/proficiency_trend_analysis.py` exits 0; produces `output_data/proficiency_trends.csv` (**25,629 rows**).
+  - Dashboard callback now returns **8 figures** (was 7); the 8th is the Grade × Year heatmap.
+  - `GET /`, `/_dash-layout`, and `/_dash-dependencies` all return **200**.
   - All 4 Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
-  - `py_compile` passes for all src/*.py, app/*.py, inspect_data.py.
+  - `py_compile` passes for all `src/*.py`, `app/*.py`, and `inspect_data.py`.
 - **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
 - **Historical data caveats:** (same as loop 4 — see loop 4 notes in decisions.md D-020)
 - **School location coordinates** are approximate; see loop 3 notes.
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
 - **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
 - **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools; all schools in the repo files are DCPS schools. A future loop could add a school-type lookup CSV if the 4-workbook normalized OSSE path (which carries full LEA metadata) is restored.
-- **Next recommended step:** Run **Validate/Closeout** for loop 5, then assess remaining scope: (a) scatter-plot visualization from backlog/phases.md Phase 3, or (b) restore the normalized 4-workbook / 2024-25 ingestion path.
-
+- **Next recommended step:** Run **Closeout** for loop 5, then assess remaining scope: (a) scatter-plot visualization from `backlog/phases.md` Phase 3, or (b) restore the normalized 4-workbook / 2024-25 ingestion path.
