@@ -272,6 +272,22 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='heatmap')
         ]),
+
+        html.Hr(),
+
+        # ── Scatter plot section ─────────────────────────────────────────
+        html.H4("Baseline Proficiency vs. Cohort Growth", className="mt-3"),
+        html.P(
+            "Each point is a school (filtered by subject and student group). "
+            "X-axis: average baseline proficiency %. "
+            "Y-axis: average cohort growth (percentage points). "
+            "Schools in the upper-left quadrant — low baseline but positive growth — "
+            "are 'beating the odds'. Point size reflects the number of cohort transitions.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='scatter')
+        ]),
     ]
 )
 
@@ -306,6 +322,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('equity-gaps', 'figure'),
     Output('equity-gap-change', 'figure'),
     Output('heatmap', 'figure'),
+    Output('scatter', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -677,9 +694,91 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No trend data – run src/proficiency_trend_analysis.py'
         )
 
+    # ── Scatter: baseline proficiency vs. cohort growth ──────────────────
+    fig_scatter = go.Figure()
+
+    if not cohort_summary.empty:
+        sc = cohort_summary.copy()
+        if subject:
+            sc = sc[sc['Subject'] == subject]
+        if subgroup:
+            sc = sc[sc['Student Group Value'] == subgroup]
+        if schools:
+            sc = sc[sc['School Name'].isin(schools)]
+
+        sc = sc.dropna(subset=['avg_baseline_pct', 'avg_pp_growth'])
+
+        if not sc.empty:
+            # Quadrant reference lines and annotation
+            x_mid = 50.0  # reference line at 50% proficiency
+            y_mid = 0.0   # reference line at 0 growth
+
+            fig_scatter = px.scatter(
+                sc,
+                x='avg_baseline_pct',
+                y='avg_pp_growth',
+                size='n_transitions',
+                color='pct_significant_transitions',
+                hover_name='School Name',
+                hover_data={
+                    'avg_baseline_pct': ':.1f',
+                    'avg_pp_growth': ':.2f',
+                    'n_transitions': True,
+                    'pct_significant_transitions': ':.1f',
+                },
+                color_continuous_scale='Blues',
+                size_max=20,
+                title=(
+                    f'{subject} – Baseline Proficiency vs. Cohort Growth'
+                    + (f' ({subgroup})' if subgroup else '')
+                ),
+                labels={
+                    'avg_baseline_pct': 'Avg Baseline Proficiency (%)',
+                    'avg_pp_growth': 'Avg Cohort Growth (pp)',
+                    'n_transitions': '# Transitions',
+                    'pct_significant_transitions': '% Significant',
+                },
+            )
+            # Add quadrant reference lines
+            fig_scatter.add_hline(
+                y=y_mid, line_dash='dash', line_color='grey', line_width=1,
+            )
+            fig_scatter.add_vline(
+                x=x_mid, line_dash='dash', line_color='grey', line_width=1,
+            )
+            # Quadrant labels — positions as 5% / 95% of data range for robustness
+            x_pad = (sc['avg_baseline_pct'].max() - sc['avg_baseline_pct'].min()) * 0.1 or 1.0
+            y_pad = (sc['avg_pp_growth'].max() - sc['avg_pp_growth'].min()) * 0.1 or 1.0
+            x_range = [sc['avg_baseline_pct'].min() - x_pad, sc['avg_baseline_pct'].max() + x_pad]
+            y_range = [sc['avg_pp_growth'].min() - y_pad, sc['avg_pp_growth'].max() + y_pad]
+            x_inner_pad = (x_range[1] - x_range[0]) * 0.05
+            y_inner_pad = (y_range[1] - y_range[0]) * 0.05
+            for annotation in [
+                dict(x=x_range[0] + x_inner_pad, y=y_range[1] - y_inner_pad,
+                     text='Beating the odds', showarrow=False,
+                     font=dict(size=10, color='#388e3c')),
+                dict(x=x_range[1] - x_inner_pad, y=y_range[1] - y_inner_pad,
+                     text='High & growing', showarrow=False,
+                     font=dict(size=10, color='#1565c0')),
+                dict(x=x_range[0] + x_inner_pad, y=y_range[0] + y_inner_pad,
+                     text='Struggling', showarrow=False,
+                     font=dict(size=10, color='#d32f2f')),
+                dict(x=x_range[1] - x_inner_pad, y=y_range[0] + y_inner_pad,
+                     text='High but declining', showarrow=False,
+                     font=dict(size=10, color='#e65100')),
+            ]:
+                fig_scatter.add_annotation(**annotation)
+            fig_scatter.update_layout(height=500)
+
+    if fig_scatter.data == ():
+        fig_scatter.update_layout(
+            title='No cohort data – run src/analyze_cohort_growth.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
+        fig_scatter,
     )
 
 
