@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Closeout Complete for the Historical-Data Wide-Format Loop
+## ✅ Current Status: Closeout Complete for the Historical-Data Wide-Format + Heatmap Loop
 
-As of the 2026-04-27 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**, now expanded to all 7 workbooks already committed to the repository:
+As of the 2026-04-28 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**, now expanded to all 7 workbooks already committed to the repository:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -11,6 +11,7 @@ As of the 2026-04-27 closeout review, a fresh-clone smoke test with the availabl
 - `python src/analyze_cohort_growth.py` ✅
 - `python src/equity_gap_analysis.py` ✅
 - `python src/generate_school_rankings.py` ✅
+- `python src/proficiency_trend_analysis.py` ✅
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 **Two data pipeline options:**
@@ -195,19 +196,38 @@ python src/analyze_growth.py
 - **Same-grade time series** – school performance over time
 - **Cohort growth charts** – bar charts and box plots of cohort growth
 - **Equity gap charts** – proficiency gap vs All Students, gap-change analysis
+- **Grade × Year heatmap** – school-specific or citywide proficiency grid across years
 - Filter by subject, student group, schools, year range
-- Map view (requires `input_data/school_locations.csv` — included in Loop 3 and still validated in Loop 4)
+- Map view (requires `input_data/school_locations.csv` — included in Loop 3 and still validated in Loop 5)
 
 ```bash
 python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 4, example callback filters = Subject: Math; Student Group: All Students):**
+**Validated closeout evidence (Loop 5, example callback filters = Subject: Math; Student Group: All Students):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
-- A live `POST /_dash-update-component` request returns all seven figures, including the two equity charts
+- A live `POST /_dash-update-component` request returns all eight figures, including the Grade × Year heatmap
 - `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 Math / All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
+
+---
+
+### 5b. Proficiency Trend Analysis ✅ VALIDATED IN LOOP 5
+**File**: `src/proficiency_trend_analysis.py`
+
+**What it does:**
+- Reads `combined_all_years.csv`
+- Filters to school-level proficiency rows
+- Produces a long-format grade × year dataset for dashboard heatmaps
+- Supports either school-specific or citywide average views in the dashboard
+
+**Output:**
+- `proficiency_trends.csv` – 25,629 school × year × subject × grade × subgroup rows
+
+```bash
+python src/proficiency_trend_analysis.py
+```
 
 ---
 
@@ -226,10 +246,13 @@ python src/equity_gap_analysis.py
 # 4. Generate school rankings
 python src/generate_school_rankings.py
 
-# 5. (Optional) Run same-grade year-over-year analysis
+# 5. Generate proficiency trends for the dashboard heatmap
+python src/proficiency_trend_analysis.py
+
+# 6. (Optional) Run same-grade year-over-year analysis
 python src/analyze_growth.py
 
-# 6. (Optional) Launch the interactive dashboard
+# 7. (Optional) Launch the interactive dashboard
 python app/app_simple.py
 ```
 
@@ -242,6 +265,7 @@ python app/app_simple.py
 | `src/analyze_cohort_growth.py` | **Cohort growth** (Grade N→N+1) — main analysis |
 | `src/equity_gap_analysis.py` | Equity-gap metrics derived from cohort-growth output |
 | `src/generate_school_rankings.py` | School rankings by cohort growth and equity-gap change |
+| `src/proficiency_trend_analysis.py` | Grade × year proficiency grid used by the dashboard heatmap |
 | `src/analyze_growth.py` | Same-grade YoY growth |
 | `app/app_simple.py` | Interactive dashboard |
 | `input_data/school_locations.csv` | Geocoordinates for 115 DC public schools (enables map) |
@@ -252,6 +276,7 @@ python app/app_simple.py
 | `output_data/equity_gap_summary.csv` | Aggregated equity-gap metrics |
 | `output_data/school_rankings.csv` | Schools ranked by avg PP growth (All Students) |
 | `output_data/school_equity_rankings.csv` | Schools ranked by equity-gap narrowing |
+| `output_data/proficiency_trends.csv` | Grade × year proficiency trends for the heatmap |
 | `output_data/school_growth_full.csv` | Same-grade growth detail |
 | `output_data/combined_all_years.csv` | Clean combined source data |
 
@@ -289,16 +314,17 @@ python app/app_simple.py
 ### Required before the next validation / closeout pass:
 
 1. **Choose the next Build target**
-    - Restore the full normalized-data / 2024-25 ingestion path, or
-    - Extend dashboard validation to the still-blocked browser-console / manual interaction checks
+     - Restore the full normalized-data / 2024-25 ingestion path, or
+     - Extend dashboard validation to the still-blocked browser-console / manual interaction checks, or
+     - Add the remaining scatter-plot dashboard view from `backlog/phases.md`
 
 2. **If pursuing the normalized-data path**
    - Update `src/load_clean_data.py` to recognize the repo's actual workbook layout/names, or
    - Place/rename the OSSE files so the documented loader command succeeds
 
 3. **If pursuing the dashboard path**
-     - Run `python app/app_simple.py`
-     - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, and map outputs
+      - Run `python app/app_simple.py`
+      - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, and heatmap outputs
 
 4. **Re-run evidence checks**
    - Verify Stuart-Hobson benchmark values

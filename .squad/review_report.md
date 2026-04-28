@@ -1,12 +1,12 @@
 # Review Report
 
-**Date:** 2026-04-27
+**Date:** 2026-04-28
 **Reviewer:** Ralph
-**Final Decision:** **CLOSEOUT SIGNOFF FOR THE CURRENT 7-WORKBOOK WIDE-FORMAT LOOP — return to Build for remaining scope**
+**Final Decision:** **CLOSEOUT SIGNOFF FOR THE CURRENT 7-WORKBOOK WIDE-FORMAT + HEATMAP LOOP — return to Build for remaining scope**
 
 ## Scope
 
-Closeout review for loop 4 against the backlog tasks, sprint Definition of Done, current documentation, and the repository's reproducibility requirements from a fresh clone.
+Closeout review for loop 5 against the backlog tasks, sprint Definition of Done, current documentation, and the repository's reproducibility requirements from a fresh clone.
 
 ## Evidence Checked
 
@@ -38,26 +38,27 @@ Closeout review for loop 4 against the backlog tasks, sprint Definition of Done,
 5. `python src/analyze_cohort_growth.py` — ✅ passed
 6. `python src/equity_gap_analysis.py` — ✅ passed
 7. `python src/generate_school_rankings.py` — ✅ passed
-8. `python app/app_simple.py` plus `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` — ✅ passed
+8. `python src/proficiency_trend_analysis.py` — ✅ passed
+9. `python app/app_simple.py` plus `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` — ✅ passed
 
 ## Acceptance Criteria Review
 
 - **Closeout outcome recorded in `STATUS.md`** — ✅ updated in this loop
 - **`.squad/review_report.md` exists and includes an explicit final decision** — ✅
 - **Final closeout notes written to `.squad/decisions.md`** — ✅
-- **Human-facing docs current enough for handoff** — ✅ refreshed to match the validated loop-4 wide-format state
+- **Human-facing docs current enough for handoff** — ✅ refreshed to match the validated loop-5 wide-format + heatmap state
 - **Remaining blockers or follow-up work are explicit** — ✅
 
 ## Findings
 
 1. **Fresh-clone reproducibility succeeds for the repo's documented 7-workbook wide-format path.**
-   `src/load_wide_format_data.py` discovers and loads the seven committed workbooks under `input_data/School and Demographic Group Aggregation/`, covering 2016, 2017, 2018, 2019, 2022, 2023, and 2024. The documented downstream scripts regenerate the analytical outputs without manual intervention.
+    `src/load_wide_format_data.py` discovers and loads the seven committed workbooks under `input_data/School and Demographic Group Aggregation/`, covering 2016, 2017, 2018, 2019, 2022, 2023, and 2024. The documented downstream scripts regenerate the analytical outputs without manual intervention.
 
-2. **Task 03 is now met for the reproducible in-repo path, and Tasks 04 and 05 remain validated.**
-   The closeout rerun regenerated `output_data/combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `cohort_growth_pivot.xlsx` (6 sheets), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), and `school_equity_rankings.csv` (414 rows). The Stuart-Hobson 2022→2023 benchmark rows for `Stuart-Hobson Middle School (Capitol Hill Cluster)` remain within ±0.1 pp of the manual targets, and the significance fields remain present.
+2. **Task 03 is met for the reproducible in-repo path, Task 05 remains validated, and loop 5's new proficiency-trend artifact also reproduces cleanly.**
+   The closeout rerun regenerated `output_data/combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `cohort_growth_pivot.xlsx` (6 sheets), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), and `proficiency_trends.csv` (25,629 rows). The Stuart-Hobson 2022→2023 benchmark rows for `Stuart-Hobson Middle School (Capitol Hill Cluster)` remain within ±0.1 pp of the manual targets, and the significance fields remain present.
 
-3. **The dashboard server path is still handoff-ready for this loop.**
-   `python app/app_simple.py` starts successfully against the regenerated CSVs, `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, and a live multi-output `POST /_dash-update-component` response returns all seven figures. With `input_data/school_locations.csv` present, the current 2024 Math / All Students map view plots 113 schools; the citywide `DC Public Schools` aggregate is correctly omitted because it has no physical location.
+3. **The dashboard server path is handoff-ready for this loop's eight-figure experience.**
+   `python app/app_simple.py` starts successfully against the regenerated CSVs, `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, and a live multi-output `POST /_dash-update-component` response returns all eight figures, including the new Grade × Year heatmap. With `input_data/school_locations.csv` present, the current 2024 Math / All Students map view plots 113 schools; the citywide `DC Public Schools` aggregate is correctly omitted because it has no physical location.
 
 4. **Closeout should sign off the current loop, but not declare the full backlog complete.**
    The handoff artifacts now match the verified state of the historical-data wide-format pipeline, but the original normalized-data / 2024-25 backlog path is still not reproducible from the repo alone, and the environment-blocked browser-console inspection remains unfinished.
@@ -66,21 +67,22 @@ Closeout review for loop 4 against the backlog tasks, sprint Definition of Done,
 
 - The repo currently proves the 7-workbook wide-format path, not the original normalized 4-workbook OSSE ingestion path from Task 01.
 - The 2024-25 source workbook is still absent, so the repo does not yet satisfy the original full-data backlog success criteria from `backlog/README.md`.
+- The backlog's remaining scatter-plot dashboard enhancement is still not implemented.
 - School names vary across eras in the historical workbooks, which can complicate interpretation of long-horizon school-level comparisons even though consecutive-year cohort transitions are valid.
 - The dashboard startup, endpoints, and callback path are validated, but direct browser-console inspection during manual interaction remains blocked in this environment.
 
 ## Recommendation
 
-**Sign off the current 7-workbook wide-format loop for handoff, then return the repository to Build for the remaining backlog scope.**
+**Sign off the current 7-workbook wide-format + heatmap loop for handoff, then return the repository to Build for the remaining backlog scope.**
 
 Required follow-up:
 
-1. Choose the next Build target: restore the normalized-data / 2024-25 ingestion path **or** finish the blocked browser-console / manual dashboard checks.
+1. Choose the next Build target: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console / manual dashboard checks, **or** implement the remaining scatter-plot dashboard view.
 2. If the normalized-data path is chosen, align `src/load_clean_data.py` with the actual input contract or add/document the required OSSE files.
-3. If dashboard work is chosen, validate the browser console during manual interaction against the seven-figure dashboard and decide whether to tighten any remaining map-data coverage mismatches.
+3. If dashboard work is chosen, validate the browser console during manual interaction against the eight-figure dashboard and decide whether to tighten any remaining map-data coverage mismatches.
 4. Re-run Validate/Closeout after the next Build loop changes the evidence or scope.
 
 ## Signoff
 
-**Approved for closeout of the current 7-workbook wide-format loop. Not approved as full project completion.**
-The repository is handoff-ready for a human who needs the verified in-repo historical-data path, regenerated analytical outputs, dashboard endpoint evidence, and explicit remaining limitations, and it should now return to **Build** for the next backlog slice.
+**Approved for closeout of the current 7-workbook wide-format + heatmap loop. Not approved as full project completion.**
+The repository is handoff-ready for a human who needs the verified in-repo historical-data path, regenerated analytical outputs, the new proficiency-trend artifact, dashboard endpoint evidence, and explicit remaining limitations, and it should now return to **Build** for the next backlog slice.

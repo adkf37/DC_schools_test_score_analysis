@@ -2,13 +2,18 @@
 
 ## Current Objective
 
-**Validate loop 5 passed — proficiency trend analysis and the Grade × Year heatmap are reproducible from a fresh clone.**
+**Closeout loop 5 complete — the current 7-workbook wide-format + heatmap path is handoff-ready, and the repo now returns to Build for remaining scope.**
 
-Loop 5 validation reran the documented smoke path end to end:
-1. `src/proficiency_trend_analysis.py` exits 0 and regenerates `output_data/proficiency_trends.csv` (**25,629 rows**).
-2. `app/app_simple.py` starts cleanly against the regenerated CSVs.
-3. `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, and a live `POST /_dash-update-component` returns **8 figures**, including the new Grade × Year heatmap.
-4. The existing cohort/significance/equity/rankings outputs also regenerate cleanly from the same fresh-clone run.
+Loop 5 closeout rechecked the backlog tasks, sprint Definition of Done, validation evidence, and handoff docs, then reran the documented smoke path from a fresh clone:
+1. `python -m pip install -r requirements.txt`
+2. `python -m pip install dash plotly`
+3. `python -m py_compile src/*.py app/*.py inspect_data.py`
+4. `python src/load_wide_format_data.py`
+5. `python src/analyze_cohort_growth.py`
+6. `python src/equity_gap_analysis.py`
+7. `python src/generate_school_rankings.py`
+8. `python src/proficiency_trend_analysis.py`
+9. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (returns **8 figures**, including the Grade × Year heatmap).
 
 ---
 
@@ -21,7 +26,7 @@ Loop 5 validation reran the documented smoke path end to end:
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete for loops 2-5 — equity gap, school map, rankings, historical data ingestion, and proficiency heatmap |
 | 4 | Validate | ✅ Complete for loops 1-5 |
-| 5 | Closeout | ✅ Complete for loops 2-4 — loop 5 Closeout pending |
+| 5 | Closeout | ✅ Complete for loops 2-5 — loop 5 signs off the wide-format + heatmap path and returns the repo to Build |
 
 ---
 
@@ -60,7 +65,7 @@ Loop 5 validation reran the documented smoke path end to end:
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to 8 figures; 8th figure is Grade × Year heatmap |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 5 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 4 (loop 5 update pending) |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 5 |
 
 ---
 
@@ -79,7 +84,7 @@ Loop 5 validation reran the documented smoke path end to end:
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 5 — fresh-clone re-verified in Validate):**
+- **Smoke test commands (loop 5 — fresh-clone re-verified in Closeout):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -89,10 +94,10 @@ Loop 5 validation reran the documented smoke path end to end:
   7. `python src/generate_school_rankings.py`
   8. `python src/proficiency_trend_analysis.py`
   9. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies` (callback returns 8 figures, including the new Grade × Year heatmap)
-- **Loop 5 validation evidence:**
+- **Loop 5 closeout evidence:**
   - `src/proficiency_trend_analysis.py` exits 0; produces `output_data/proficiency_trends.csv` (**25,629 rows**).
   - Dashboard callback now returns **8 figures** (was 7); the 8th is the Grade × Year heatmap.
-  - `GET /`, `/_dash-layout`, and `/_dash-dependencies` all return **200**.
+  - `GET /`, `/_dash-layout`, and `/_dash-dependencies` all return **200**; `POST /_dash-update-component` also returns **200**.
   - All 4 Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
   - `py_compile` passes for all `src/*.py`, `app/*.py`, and `inspect_data.py`.
 - **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
@@ -101,4 +106,4 @@ Loop 5 validation reran the documented smoke path end to end:
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
 - **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
 - **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools; all schools in the repo files are DCPS schools. A future loop could add a school-type lookup CSV if the 4-workbook normalized OSSE path (which carries full LEA metadata) is restored.
-- **Next recommended step:** Run **Closeout** for loop 5, then assess remaining scope: (a) scatter-plot visualization from `backlog/phases.md` Phase 3, or (b) restore the normalized 4-workbook / 2024-25 ingestion path.
+- **Next recommended step:** Return to **Build** and choose the next backlog slice: (a) restore the normalized 4-workbook / 2024-25 ingestion path, (b) finish the blocked browser-console dashboard review, or (c) implement the remaining scatter-plot visualization from `backlog/phases.md` Phase 3.
