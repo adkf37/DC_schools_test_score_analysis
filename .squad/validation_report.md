@@ -2,11 +2,11 @@
 
 **Date:** 2026-04-29  
 **Reviewer:** Ralph  
-**Recommendation:** **PASS — advance loop 8 to Closeout**
+**Recommendation:** **PASS — advance loop 9 to Closeout**
 
 ## Scope
 
-Validate the latest build output against the current sprint commitments for loop 8: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend outputs, the new geographic-equity outputs, the 7-sheet policy summary workbook, and the dashboard HTTP/callback path with the new 10-figure experience.
+Validate the latest build output against the current sprint commitments for loop 9: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend/geographic-equity outputs, the new same-grade YoY growth outputs, the 8-sheet policy summary workbook, and the dashboard HTTP/callback path with the new 11-figure experience.
 
 ## Checks Run
 
@@ -30,6 +30,7 @@ Validate the latest build output against the current sprint commitments for loop
      - `python src/generate_school_rankings.py`
      - `python src/proficiency_trend_analysis.py`
      - `python src/geographic_equity_analysis.py`
+     - `python src/yoy_growth_analysis.py`
      - `python src/generate_summary_report.py`
    - Result: ✅ Passed
    - Evidence:
@@ -45,7 +46,9 @@ Validate the latest build output against the current sprint commitments for loop
      - Wrote `output_data/proficiency_trends.csv` with **25,629 rows**
      - Wrote `output_data/geographic_equity_by_school.csv` with **210 rows**
      - Wrote `output_data/geographic_equity_by_quadrant.csv` with **8 rows**
-     - Wrote `output_data/summary_report.xlsx` with **7 sheets**
+     - Wrote `output_data/yoy_growth_detail.csv` with **14,391 rows**
+     - Wrote `output_data/yoy_growth_summary.csv` with **2,604 rows**
+     - Wrote `output_data/summary_report.xlsx` with **8 sheets**
 
 5. **Schema / benchmark / workbook inspection**
    - Command: inspect regenerated outputs with Python/pandas and `openpyxl`
@@ -54,7 +57,7 @@ Validate the latest build output against the current sprint commitments for loop
      - `cohort_growth_detail.csv` contains Task 03 required columns plus Task 05 fields `p_value` and `significant`
      - `cohort_growth_summary.csv` contains `pct_significant_transitions`
      - `cohort_growth_pivot.xlsx` contains **6** sheets: `All Students Summary`, `Full Summary`, `All Students Detail`, `ELA Cohort Pivot`, `Math Cohort Pivot`, `Full Detail`
-     - `summary_report.xlsx` contains **7** sheets: `Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`, `Geographic Equity`
+     - `summary_report.xlsx` contains **8** sheets: `Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`, `Geographic Equity`, `YoY Growth`
      - Stuart-Hobson 2022→2023 benchmark rows for `Stuart-Hobson Middle School (Capitol Hill Cluster)` remain within ±0.1 pp:
        - ELA Gr6→Gr7: `33.5484% → 40.5405% (+6.9921 pp)`
        - ELA Gr7→Gr8: `36.2500% → 46.5753% (+10.3253 pp)`
@@ -63,6 +66,8 @@ Validate the latest build output against the current sprint commitments for loop
      - `geographic_equity_by_quadrant.csv` confirms the loop-8 quadrant findings:
        - ELA: NW `42.71%` avg proficiency / `+4.85 pp` avg growth vs. NE `24.09%` / `+3.13 pp` and SE `20.15%` / `+4.51 pp`
        - Math: NW `38.41%` avg proficiency vs. NE `15.29%` and SE `16.18%`
+     - `yoy_growth_detail.csv` contains the expected consecutive transitions only: `2016→2017`, `2017→2018`, `2018→2019`, `2022→2023`, `2023→2024`
+     - `yoy_growth_summary.csv` contains **2,604** rows and supports the documented citywide pattern, including the 2017→2018 Math dip
 
 6. **Dashboard startup / endpoint / callback smoke test**
    - Commands:
@@ -71,12 +76,13 @@ Validate the latest build output against the current sprint commitments for loop
      - `GET http://127.0.0.1:8050/_dash-layout`
      - `GET http://127.0.0.1:8050/_dash-dependencies`
      - `POST http://127.0.0.1:8050/_dash-update-component`
+     - `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,2200 --screenshot=/tmp/loop9-dashboard.png http://127.0.0.1:8050/`
    - Result: ✅ Passed
    - Evidence:
      - App startup loaded regenerated CSVs without exceptions and exposed filters for **7 years**, **2 subjects**, **12 subgroups**, and **251 schools**
      - `GET /`, `GET /_dash-layout`, and `GET /_dash-dependencies` all returned **200**
-     - `/_dash-dependencies` advertised the expected **10-output** callback
-     - A live callback request returned all ten figures:
+     - `/_dash-dependencies` advertised the expected **11-output** callback
+     - A live callback request returned all eleven figures:
        - `timeseries`: `Math - Percent Meeting/Exceeding Over Time`
        - `bars`: `Math - Year 2024: Top Schools`
        - `cohort-bars`: `Math – Avg Cohort Growth (pp)`
@@ -87,6 +93,8 @@ Validate the latest build output against the current sprint commitments for loop
        - `heatmap`: `Math – Citywide Average: Grade × Year Proficiency (%)`
        - `scatter`: `Math – Baseline Proficiency vs. Cohort Growth (All Students)`
        - `geo-equity`: `Math – Average Proficiency & Cohort Growth by DC Quadrant`
+       - `yoy-growth`: `Math – Citywide Same-Grade YoY Growth by Grade Level`
+     - Captured a headless dashboard screenshot at `/tmp/loop9-dashboard.png` to confirm the UI renders in this environment
 
 ## Acceptance-Criteria Status
 
@@ -106,10 +114,10 @@ Validate the latest build output against the current sprint commitments for loop
 
 - **Task 04 — Interactive dashboard**
   - `python app/app_simple.py` starts without errors with regenerated CSV inputs — ✅
-  - Dashboard callback returns at least five figures — ✅ (returns **10**)
+  - Dashboard callback returns at least five figures — ✅ (returns **11**)
   - Subject / subgroup / school / year-range interaction path responds without server-side errors — ✅
   - Map view loads without errors when `input_data/school_locations.csv` is present — ✅
-  - Geographic-equity chart is present in the callback output — ✅
+  - YoY growth chart is present in the callback output — ✅
   - No unhandled browser-console exceptions during manual interaction — ⚠️ **Blocked in this environment**
 
 - **Task 05 + loop deliverables**
@@ -118,14 +126,16 @@ Validate the latest build output against the current sprint commitments for loop
   - Rankings outputs regenerate — ✅
   - Proficiency trend output regenerates — ✅
   - Geographic equity outputs regenerate — ✅
-  - Formatted Excel summary report regenerates with 7 expected sheets — ✅
+  - YoY growth outputs regenerate — ✅
+  - Formatted Excel summary report regenerates with 8 expected sheets — ✅
 
 ## Blocked Checks / Remaining Follow-up
 
-- **Browser-console inspection is still blocked.** This validation pass confirmed server startup, Dash endpoints, and a live 10-figure callback response, but it did not produce direct browser-console evidence from an interactive session in this sandbox.
+- **Browser-console inspection is still blocked.** This validation pass confirmed server startup, Dash endpoints, a live 11-figure callback response, and a rendered headless screenshot, but it did not produce direct browser-console evidence from an interactive session in this sandbox.
 - **Original normalized-data backlog scope is still open.** The repo validates the reproducible 7-workbook wide-format path, but `src/load_clean_data.py` still depends on external normalized OSSE workbooks, including 2024-25, that are not committed here.
-- **Closeout still needs to decide final project handoff status.** This validate pass proves the current loop-8 geographic-equity path is reproducible; Closeout must explicitly sign off or return the repo to Build for remaining backlog scope.
+- **Charter-vs.-DCPS analysis remains unimplemented.** The wide-format files still do not include an LEA-type field that would separate DCPS from charter schools.
+- **Closeout still needs to decide final project handoff status.** This validate pass proves the current loop-9 YoY-aware path is reproducible; Closeout must explicitly sign off or return the repo to Build for remaining backlog scope.
 
 ## Conclusion
 
-Validation passes for the current loop-8 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the analytical outputs regenerate cleanly, the new geographic-equity CSVs and dashboard figure are present, and `summary_report.xlsx` is produced with all seven expected sheets. The next phase should be **Closeout**.
+Validation passes for the current loop-9 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the analytical outputs regenerate cleanly, the new YoY CSVs and dashboard figure are present, and `summary_report.xlsx` is produced with all eight expected sheets. The next phase should be **Closeout**.

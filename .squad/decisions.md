@@ -350,3 +350,17 @@
 - All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
 - Smoke path updated: adds `python src/yoy_growth_analysis.py` as step 10 (after `geographic_equity_analysis.py`, before `generate_summary_report.py`).
 - Next step: run Validate/Closeout for loop 9.
+
+### D-036 — Validate Passes Loop 9 and Advances to Closeout
+**Date:** 2026-04-29
+**Decision:** Mark Validate as **PASS** for the loop-9 wide-format pipeline and advance the repo to **Closeout**.
+**Rationale:**
+- Re-ran the documented fresh-clone smoke path: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`, `python src/yoy_growth_analysis.py`, and `python src/generate_summary_report.py`. All commands exited 0.
+- The rerun regenerated `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows), and `summary_report.xlsx` (8 sheets).
+- Workbook/schema inspection confirmed Task 03 and Task 05 still pass: the Stuart-Hobson 2022→2023 benchmark remains within ±0.1 pp, `cohort_growth_detail.csv` still includes `p_value` and `significant`, `cohort_growth_summary.csv` still includes `pct_significant_transitions`, and `summary_report.xlsx` now includes the `YoY Growth` sheet.
+- `python app/app_simple.py` started successfully; `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; Dash advertised an 11-output callback; and a live `POST /_dash-update-component` returned all eleven figures, including the new YoY growth chart. A headless Chromium screenshot confirmed the dashboard renders in this environment.
+- The browser-console inspection remains environment-blocked, and the normalized 4-workbook / 2024-25 path remains outside the reproducible in-repo scope.
+**Consequences:**
+- `.squad/validation_report.md` becomes the authoritative validation record for the loop-9 YoY-aware handoff.
+- `STATUS.md` should move the repo to **Validate complete / Closeout next** for loop 9.
+- Closeout must decide whether the current in-repo handoff is sufficient despite the still-blocked browser-console review and missing normalized-data ingestion path.
