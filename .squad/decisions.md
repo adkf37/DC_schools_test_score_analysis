@@ -394,3 +394,17 @@
 - Smoke path updated: adds `python src/covid_recovery_analysis.py` as step 11 (after `yoy_growth_analysis.py`, before `generate_summary_report.py`).
 - All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
 - Next step: run Validate/Closeout for loop 10.
+
+### D-039 — Validate Passes Loop 10 and Advances to Closeout
+**Date:** 2026-04-29
+**Decision:** Mark Validate as **PASS** for the loop-10 wide-format pipeline and advance the repo to **Closeout**.
+**Rationale:**
+- Re-ran the documented fresh-clone smoke path end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`, `python src/yoy_growth_analysis.py`, `python src/covid_recovery_analysis.py`, and `python src/generate_summary_report.py`. All commands exited 0.
+- The rerun regenerated `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows), `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows), and `summary_report.xlsx` (9 sheets).
+- Workbook/schema inspection confirmed Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, `summary_report.xlsx` includes the `COVID Recovery` sheet, the expected YoY transitions remain present, and the Stuart-Hobson 2022→2023 benchmark remains within ±0.1 pp.
+- `python app/app_simple.py` started successfully; `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; Dash advertised a 12-output callback; and a live `POST /_dash-update-component` returned all twelve figures, including the new COVID recovery chart. A headless Chromium screenshot confirmed the dashboard renders in this environment; the screenshot viewport height was raised to 3600 px to capture the taller 12-figure loop-10 page in one pass.
+- The browser-console inspection remains environment-blocked, and the normalized 4-workbook / 2024-25 path remains outside the reproducible in-repo scope.
+**Consequences:**
+- `.squad/validation_report.md` becomes the authoritative validation record for the loop-10 COVID-recovery-aware handoff.
+- `STATUS.md` should move the repo to **Validate complete / Closeout next** for loop 10.
+- Closeout must decide whether the current in-repo handoff is sufficient despite the still-blocked browser-console review and missing normalized-data ingestion path.
