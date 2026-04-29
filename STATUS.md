@@ -2,14 +2,15 @@
 
 ## Current Objective
 
-**Validate loop 7 complete — formatted Excel policy summary report and dashboard smoke path passed; Closeout next.**
+**Closeout loop 7 complete — the reproducible 7-workbook wide-format pipeline is handoff-ready, and the repo returns to Build for the remaining backlog scope.**
 
-`src/generate_summary_report.py` has now been validated end to end: the documented loop-7 smoke path exits 0, regenerates the analytical CSV/XLSX outputs, produces `output_data/summary_report.xlsx` with 6 sheets, and preserves the 9-figure dashboard callback path.
+Closeout rechecked the backlog tasks, sprint commitments, validation evidence, and handoff docs, then reran the documented loop-7 smoke path. The reproducible in-repo path still exits 0 end to end, regenerates the analytical CSV/XLSX outputs, produces `output_data/summary_report.xlsx` with 6 sheets, and preserves the 9-figure dashboard callback path.
 
-Loop 7 validation completed:
+Loop 7 closeout completed:
 1. Re-ran the fresh-clone smoke path: `load_wide_format_data` → `analyze_cohort_growth` → `equity_gap_analysis` → `generate_school_rankings` → `proficiency_trend_analysis` → `generate_summary_report` — all exit 0.
 2. Confirmed `output_data/summary_report.xlsx` is regenerated with 6 sheets (`Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`).
-3. Confirmed `python app/app_simple.py` still starts cleanly and a live callback returns all 9 figures.
+3. Confirmed `python app/app_simple.py` still starts cleanly; `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200; and a live callback returns all 9 figures.
+4. Signed off the current loop for handoff while explicitly carrying forward the remaining normalized-data / 2024-25 ingestion work and the blocked browser-console inspection.
 
 ---
 
@@ -22,7 +23,7 @@ Loop 7 validation completed:
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 7 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, and summary report |
 | 4 | Validate | ✅ Complete for loops 1-7 |
-| 5 | Closeout | ✅ Complete for loops 2-6; 🔲 Pending for loop 7 signoff |
+| 5 | Closeout | ✅ Complete for loops 2-7 |
 
 ---
 
@@ -36,7 +37,7 @@ Loop 7 validation completed:
 | 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **9 figures** (loop 6 adds scatter plot), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Validate | Statistician | ✅ Validated — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with 6 sheets |
+| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Closed out — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with 6 sheets |
 
 ---
 
@@ -64,7 +65,7 @@ Loop 7 validation completed:
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **9 figures**; 9th figure is Baseline Proficiency vs. Cohort Growth scatter plot |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 7 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 6 |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 7 |
 
 ---
 
@@ -102,4 +103,4 @@ Loop 7 validation completed:
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
 - **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
 - **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run **Closeout** for loop 7 — use this validation evidence to decide signoff vs. return-to-Build.
+- **Next recommended step:** Start the next **Build** loop — either restore the normalized 4-workbook / 2024-25 ingestion path or complete the blocked browser-console / manual dashboard review.

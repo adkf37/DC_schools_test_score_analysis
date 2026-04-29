@@ -1,6 +1,6 @@
 # Sprint Plan
 
-## Current Phase: Build loop 7 in progress → Validate/Closeout next
+## Current Phase: Closeout loop 7 complete → Build next
 
 Loop 7 adds `src/generate_summary_report.py`, a formatted 6-sheet Excel policy-summary workbook (`output_data/summary_report.xlsx`). This fulfills the "Generate formatted Excel/PDF summary reports" item from `backlog/phases.md` Phase 3 Build that remained open after loop 6. No new pipeline dependencies are required; the report reads from already-generated output CSVs.
 
@@ -30,5 +30,4 @@ Loop 7 adds `src/generate_summary_report.py`, a formatted 6-sheet Excel policy-s
 - `proficiency_trends.csv` has 25,629 rows covering school × year × subject × grade × subgroup proficiency.
 - Citywide avg proficiency (All Students): ELA rose from 22.7% (2016) to 35.2% (2019), dropped to 29.4% (2022), and recovered to 32.1% (2024); Math followed a similar pattern.
 - `summary_report.xlsx` has 6 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory.
-- Next action: run Validate/Closeout for loop 7.
-
+- Next action: start the next Build loop for the remaining backlog scope (normalized 4-workbook / 2024-25 ingestion or blocked browser-console review).

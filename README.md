@@ -4,7 +4,7 @@ This repository is intended to analyze DC OSSE assessment files across the 2021�
 
 ## Current project state
 
-**As of 2026-04-29, loop 7 Build is in progress: `src/generate_summary_report.py` has been added, producing a 6-sheet formatted Excel policy-summary workbook (`output_data/summary_report.xlsx`). Validate/Closeout for loop 7 is the next step.**
+**As of 2026-04-29, loop 7 Closeout is complete: the reproducible 7-workbook wide-format pipeline now includes `src/generate_summary_report.py`, and the repo returns to Build for the remaining backlog scope.**
 
 What was validated from a fresh clone:
 
@@ -16,6 +16,7 @@ What was validated from a fresh clone:
 - `python src/equity_gap_analysis.py` ✅
 - `python src/generate_school_rankings.py` ✅
 - `python src/proficiency_trend_analysis.py` ✅
+- `python src/generate_summary_report.py` ✅
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 ### What this signoff covers
@@ -119,9 +120,9 @@ The current closeout review regenerated these files from a fresh clone via the w
 
 ## Next steps
 
-**Loop 7 (in progress):** `src/generate_summary_report.py` added — run Validate/Closeout for loop 7 next.
+**Loop 7 (closed out):** `src/generate_summary_report.py` is validated and handoff-ready for the reproducible in-repo path.
 
 **Future Build loops:**
-1. Run Validate + Closeout to sign off the loop-7 summary-report deliverable.
-2. Restore the full normalized-data / 2024-25 ingestion path (requires downloading OSSE workbooks).
-3. Confirm browser-console cleanliness during manual interaction with the nine-figure dashboard.
+1. Restore the full normalized-data / 2024-25 ingestion path (requires downloading OSSE workbooks).
+2. Confirm browser-console cleanliness during manual interaction with the nine-figure dashboard.
+3. Re-run Validate + Closeout after the next Build loop changes the evidence or scope.
