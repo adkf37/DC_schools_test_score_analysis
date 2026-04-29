@@ -297,3 +297,20 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 7 while explicitly sending the repo back to **Build** next.
 - `.squad/review_report.md` becomes the authoritative closeout record for the 7-workbook wide-format + summary-report handoff.
 - The next Build loop must choose an explicit follow-up: restore the normalized 4-workbook / 2024-25 ingestion path or finish the blocked browser-console / manual dashboard review.
+
+### D-032 — Build Loop 8: Geographic Equity Analysis
+**Date:** 2026-04-29
+**Decision:** Implement `src/geographic_equity_analysis.py` to compute and visualize school performance by DC geographic quadrant (NE / NW / SE / SW), add a 10th dashboard figure, and add a "Geographic Equity" sheet to `summary_report.xlsx`.
+**Rationale:**
+- `backlog/phases.md` Phase 3 Build lists "Implement charter vs. traditional public school comparison" as remaining scope; however, this is blocked because the wide-format OSSE files do not include an LEA-type column. Geographic equity analysis is the most impactful feasible alternative: `input_data/school_locations.csv` already provides Neighborhood and Quadrant for 115 DC schools, and DC has well-documented geographic performance disparities (NW vs. East-of-Rock-Creek) that are highly relevant to policy stakeholders.
+- The 2024-25 data path remains blocked (external data not in repo), and the browser-console check is blocked in this environment.
+- Geographic equity analysis adds new analytical value (quadrant-level proficiency + growth comparison, gap-vs-NW metric) without requiring new pipeline data or external downloads.
+**Consequences:**
+- `src/geographic_equity_analysis.py` — new standalone script; run after `proficiency_trend_analysis.py`.
+- School name normalization bridges the 95/115 direct-match gap using abbreviation expansion + normalized-key matching; 95 schools are matched to growth/trends data.
+- Outputs: `geographic_equity_by_school.csv` (210 rows: school × subject with Quadrant and Neighborhood) and `geographic_equity_by_quadrant.csv` (8 rows: 4 quadrants × 2 subjects).
+- Key finding: NW avg ELA proficiency 42.7% vs. NE 24.1%, SE 20.1% (−18 pp to −23 pp gap). NW also leads cohort growth (+4.85 pp ELA). SE schools face the largest baseline-proficiency shortfall and below-citywide cohort growth. Math shows a similar geographic divide.
+- Dashboard (`app/app_simple.py`) extended to load `geographic_equity_by_quadrant.csv` and render a 10th figure: dual-axis bar+line chart of avg proficiency (left axis) and avg cohort growth (right axis) by quadrant.
+- `src/generate_summary_report.py` extended to write Sheet 7 "Geographic Equity" to `summary_report.xlsx` when `geographic_equity_by_quadrant.csv` is present; gracefully skips the sheet if the file is absent.
+- Smoke path updated: adds `python src/geographic_equity_analysis.py` as step 9 (before `generate_summary_report.py`).
+- Next step: Validate loop 8 (smoke path, 10 figures, 7 sheets), then Closeout.

@@ -2,15 +2,15 @@
 
 ## Current Objective
 
-**Closeout loop 7 complete — the reproducible 7-workbook wide-format pipeline is handoff-ready, and the repo returns to Build for the remaining backlog scope.**
+**Loop 8 build complete — Geographic Equity Analysis added; pipeline now exits 0 through `geographic_equity_analysis.py`; dashboard returns 10 figures; `summary_report.xlsx` has 7 sheets.**
 
-Closeout rechecked the backlog tasks, sprint commitments, validation evidence, and handoff docs, then reran the documented loop-7 smoke path. The reproducible in-repo path still exits 0 end to end, regenerates the analytical CSV/XLSX outputs, produces `output_data/summary_report.xlsx` with 6 sheets, and preserves the 9-figure dashboard callback path.
+Loop 8 adds `src/geographic_equity_analysis.py`, which joins school location data (Neighborhood, Quadrant) with proficiency and cohort growth outputs to surface geographic disparities across DC's four quadrants.  Key findings: NW schools average 42.7% ELA proficiency vs. 24.1% (NE) and 20.1% (SE) — an 18–23 pp geographic gap that mirrors the citywide equity gap.
 
-Loop 7 closeout completed:
-1. Re-ran the fresh-clone smoke path: `load_wide_format_data` → `analyze_cohort_growth` → `equity_gap_analysis` → `generate_school_rankings` → `proficiency_trend_analysis` → `generate_summary_report` — all exit 0.
-2. Confirmed `output_data/summary_report.xlsx` is regenerated with 6 sheets (`Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`).
-3. Confirmed `python app/app_simple.py` still starts cleanly; `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200; and a live callback returns all 9 figures.
-4. Signed off the current loop for handoff while explicitly carrying forward the remaining normalized-data / 2024-25 ingestion work and the blocked browser-console inspection.
+Loop 8 build completed:
+1. Created `src/geographic_equity_analysis.py` — joins `school_locations.csv` with `proficiency_trends.csv` and `cohort_growth_summary.csv`; outputs `geographic_equity_by_school.csv` and `geographic_equity_by_quadrant.csv`.
+2. Extended `app/app_simple.py` to load `geographic_equity_by_quadrant.csv` and render a 10th figure (avg proficiency + cohort growth by DC quadrant, dual-axis bar+line chart).
+3. Extended `src/generate_summary_report.py` to produce a 7th "Geographic Equity" sheet in `output_data/summary_report.xlsx`.
+4. Full smoke path (10 pipeline steps) exits 0 end-to-end.
 
 ---
 
@@ -21,9 +21,9 @@ Loop 7 closeout completed:
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | ✅ Complete through loop 7 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, and summary report |
-| 4 | Validate | ✅ Complete for loops 1-7 |
-| 5 | Closeout | ✅ Complete for loops 2-7 |
+| 3 | Build | ✅ Complete through loop 8 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, and geographic equity |
+| 4 | Validate | ✅ Complete for loops 1-7; loop 8 pending |
+| 5 | Closeout | ✅ Complete for loops 2-7; loop 8 pending |
 
 ---
 
@@ -34,10 +34,10 @@ Loop 7 closeout completed:
 | 01 | Ingest raw data | Squad Init | Data Engineer | ✅ Wide-format path now covers 7 in-repo files (2016–2024); normalized 4-workbook path still pending external data |
 | 02 | Clean & standardize data | Squad Review | Data Engineer | ✅ `combined_all_years.csv` regenerated (28,069 rows, 7 years, 251 raw schools / 211 cohort-analysis schools) |
 | 03 | Cohort growth analysis | Build | Statistician | ✅ Task 03 target now met — 12,956 detail rows, **2,560 summary rows** (target ≥ 1,700); all 4 Stuart-Hobson benchmarks pass |
-| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **9 figures** (loop 6 adds scatter plot), school-level and citywide views functional |
+| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **10 figures** (loop 8 adds geographic equity chart), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Closed out — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with 6 sheets |
+| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Closed out — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **7 sheets** (adds Geographic Equity in loop 8) |
 
 ---
 
@@ -54,18 +54,21 @@ Loop 7 closeout completed:
 | School rankings | `output_data/school_rankings.csv` | ✅ 422 rows |
 | School equity rankings | `output_data/school_equity_rankings.csv` | ✅ 414 rows |
 | **Proficiency trends** | `output_data/proficiency_trends.csv` | ✅ **25,629 rows** — new in loop 5 |
-| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **Validated in loop 7** — 6 formatted sheets for stakeholders |
+| **Geographic equity (school)** | `output_data/geographic_equity_by_school.csv` | ✅ **New in loop 8** — 210 rows (school × subject, with Quadrant/Neighborhood) |
+| **Geographic equity (quadrant)** | `output_data/geographic_equity_by_quadrant.csv` | ✅ **New in loop 8** — 8 rows (4 quadrants × 2 subjects) |
+| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **7 sheets** — adds Geographic Equity sheet in loop 8 |
 | Processing report | `output_data/processing_report.txt` | ✅ Created |
 | Wide-format loader | `src/load_wide_format_data.py` | ✅ Extended — now handles all 7 in-repo workbooks across 6 naming schemes |
 | Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
 | School rankings script | `src/generate_school_rankings.py` | ✅ New — ranks schools by cohort growth and equity-gap narrowing |
 | **Proficiency trend script** | `src/proficiency_trend_analysis.py` | ✅ **New in loop 5** — grade × year proficiency grid |
-| **Summary report script** | `src/generate_summary_report.py` | ✅ **Validated in loop 7** — 6-sheet formatted Excel workbook |
+| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 8** — now produces 7-sheet Excel workbook |
+| **Geographic equity script** | `src/geographic_equity_analysis.py` | ✅ **New in loop 8** — joins school locations with performance data by DC quadrant |
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
-| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **9 figures**; 9th figure is Baseline Proficiency vs. Cohort Growth scatter plot |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 7 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 7 |
+| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **10 figures**; 10th figure is Geographic Equity bar+line chart by DC quadrant |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 7 (loop 8 validation pending) |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 7 (loop 8 review pending) |
 
 ---
 
@@ -84,7 +87,7 @@ Loop 7 closeout completed:
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 7 — updated):**
+- **Smoke test commands (loop 8 — updated):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -93,14 +96,15 @@ Loop 7 closeout completed:
   6. `python src/equity_gap_analysis.py`
   7. `python src/generate_school_rankings.py`
   8. `python src/proficiency_trend_analysis.py`
-  9. `python src/generate_summary_report.py`
-  10. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **9 figures**, including the scatter plot)
-- **Loop 6 closeout evidence (still valid):** all prior scripts exit 0; dashboard callback returns 9 figures; Stuart-Hobson benchmarks remain within ±0.1 pp.
-- **Loop 7 validation evidence:** smoke path exits 0 through `generate_summary_report.py`; `output_data/summary_report.xlsx` is regenerated with 6 sheets (Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory); dashboard callback still returns 9 figures.
+  9. `python src/geographic_equity_analysis.py`
+  10. `python src/generate_summary_report.py`
+  11. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **10 figures**, including the geographic equity chart)
+- **Loop 8 geographic equity findings:** NW avg ELA proficiency 42.7% vs. NE 24.1%, SE 20.1% (−18 pp to −23 pp gap). NW also leads in cohort growth (+4.85 pp ELA). SE schools show the largest gap vs. NW citywide. Math shows a similar pattern (NW 38.4% vs. NE/SE ~15%).
+- **Loop 7 validation evidence:** smoke path exits 0 through `generate_summary_report.py`; `output_data/summary_report.xlsx` is regenerated with 6 sheets; dashboard callback still returns 9 figures.
+- **Loop 8 name-matching note:** 95/115 location schools match directly to growth/trends data. 20 unmatched schools are primarily high schools (no cohort transitions) and schools not represented in the 7 in-repo workbooks.
 - **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
 - **Historical data caveats:** (same as loop 4 — see loop 4 notes in decisions.md D-020)
-- **School location coordinates** are approximate; see loop 3 notes.
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
 - **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
 - **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Start the next **Build** loop — either restore the normalized 4-workbook / 2024-25 ingestion path or complete the blocked browser-console / manual dashboard review.
+- **Next recommended step:** Validate loop 8 outputs (run smoke path, confirm 10 figures, 7 sheets), then either advance to Closeout for loop 8 or begin the next Build loop.
