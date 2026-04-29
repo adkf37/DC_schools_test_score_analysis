@@ -4,7 +4,7 @@ This repository is intended to analyze DC OSSE assessment files across the 2021�
 
 ## Current project state
 
-**As of 2026-04-28, closeout is complete for the validated loop-5 wide-format path: the historical-data ingestion expansion, cohort analysis, equity outputs, school rankings, proficiency trends, and the eight-figure dashboard (including the Grade × Year heatmap) are all reproducible from a fresh clone. The repo now returns to Build for remaining scope.**
+**As of 2026-04-29, closeout is complete for the validated loop-6 wide-format path: the historical-data ingestion expansion, cohort analysis, equity outputs, school rankings, proficiency trends, and the nine-figure dashboard (including the Grade × Year heatmap and Baseline Proficiency vs. Cohort Growth scatter plot) are all reproducible from a fresh clone. The repo now returns to Build for the remaining backlog scope.**
 
 What was validated from a fresh clone:
 
@@ -32,7 +32,7 @@ What was validated from a fresh clone:
   - `output_data/proficiency_trends.csv` (25,629 rows)
 - Stuart-Hobson benchmark transitions staying within ±0.1 pp
 - Task 05 significance fields (`p_value`, `significant`, `pct_significant_transitions`)
-- Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all eight figures
+- Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all nine figures
 - Loop 3 policy-analysis outputs on the expanded historical dataset:
   - `output_data/school_rankings.csv` (422 rows)
   - `output_data/school_equity_rankings.csv` (414 rows)
@@ -48,7 +48,6 @@ What was validated from a fresh clone:
 - The 2024-25 source workbook is still missing from the in-repo dataset, so the original full-data backlog target is not met.
 - The original normalized-data success criteria in `backlog/README.md` are still open: four exact OSSE workbooks are not all present in-repo, `load_clean_data.py` is not reproducible here, and the repo therefore does not meet the full ≥395,000-row ingestion target.
 - Direct browser-console inspection during manual interaction remains blocked in this environment.
-- The backlog's remaining scatter-plot dashboard enhancement is still unimplemented.
 - Historical school names vary across eras (for example shortened vs. full school names), so cross-era school comparisons should be interpreted carefully even though within-pair cohort transitions are valid.
 
 ## Expected pipeline
@@ -118,9 +117,8 @@ The current closeout review regenerated these files from a fresh clone via the w
 ## Next steps for the next Build loop
 
 1. Choose the next Build target:
-   - restore the full normalized-data / 2024-25 ingestion path,
-   - extend dashboard validation to the remaining blocked browser-console / manual interaction checks, or
-   - implement the remaining scatter-plot dashboard enhancement from `backlog/phases.md`.
+   - restore the full normalized-data / 2024-25 ingestion path, or
+   - extend dashboard validation to the remaining blocked browser-console / manual interaction checks.
 2. If pursuing the normalized-data path, align `src/load_clean_data.py` with the actual input contract or add/document the required OSSE files.
-3. If pursuing dashboard work, confirm there are no unhandled browser-console errors during manual interaction with the eight-figure dashboard and decide whether to tighten any map-data coverage gaps.
+3. If pursuing dashboard work, confirm there are no unhandled browser-console errors during manual interaction with the nine-figure dashboard and decide whether to tighten any map-data coverage gaps.
 4. Re-run Validate and Closeout after the next Build loop changes the scope or evidence.

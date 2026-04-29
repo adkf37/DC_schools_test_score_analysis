@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Closeout Complete for the Historical-Data Wide-Format + Heatmap Loop
+## ✅ Current Status: Closeout Complete for the Historical-Data Wide-Format + Scatter Loop
 
-As of the 2026-04-28 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**, now expanded to all 7 workbooks already committed to the repository:
+As of the 2026-04-29 closeout review, a fresh-clone smoke test with the available in-repo data completes successfully using the **wide-format alternative loader**, now expanded to all 7 workbooks already committed to the repository:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -197,6 +197,7 @@ python src/analyze_growth.py
 - **Cohort growth charts** – bar charts and box plots of cohort growth
 - **Equity gap charts** – proficiency gap vs All Students, gap-change analysis
 - **Grade × Year heatmap** – school-specific or citywide proficiency grid across years
+- **Baseline Proficiency vs. Cohort Growth scatter** – school-level baseline-vs-growth view with significance/transition context
 - Filter by subject, student group, schools, year range
 - Map view (requires `input_data/school_locations.csv` — included in Loop 3 and still validated in Loop 5)
 
@@ -205,10 +206,10 @@ python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 5, example callback filters = Subject: Math; Student Group: All Students):**
+**Validated closeout evidence (Loop 6, example callback filters = Subject: Math; Student Group: All Students):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
-- A live `POST /_dash-update-component` request returns all eight figures, including the Grade × Year heatmap
+- A live `POST /_dash-update-component` request returns all nine figures, including the Grade × Year heatmap and Baseline Proficiency vs. Cohort Growth scatter plot
 - `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 Math / All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
 
 ---
@@ -314,17 +315,16 @@ python app/app_simple.py
 ### Required before the next validation / closeout pass:
 
 1. **Choose the next Build target**
-     - Restore the full normalized-data / 2024-25 ingestion path, or
-     - Extend dashboard validation to the still-blocked browser-console / manual interaction checks, or
-     - Add the remaining scatter-plot dashboard view from `backlog/phases.md`
+      - Restore the full normalized-data / 2024-25 ingestion path, or
+      - Finish the still-blocked browser-console / manual dashboard checks for the current nine-figure dashboard
 
 2. **If pursuing the normalized-data path**
    - Update `src/load_clean_data.py` to recognize the repo's actual workbook layout/names, or
    - Place/rename the OSSE files so the documented loader command succeeds
 
 3. **If pursuing the dashboard path**
-      - Run `python app/app_simple.py`
-      - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, and heatmap outputs
+       - Run `python app/app_simple.py`
+       - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, heatmap, and scatter outputs
 
 4. **Re-run evidence checks**
    - Verify Stuart-Hobson benchmark values

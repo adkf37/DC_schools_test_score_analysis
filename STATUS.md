@@ -2,11 +2,11 @@
 
 ## Current Objective
 
-**Validate loop 6 complete — 9-figure scatter-plot dashboard path passes smoke validation. Repo ready for Closeout.**
+**Closeout loop 6 complete — the validated 9-figure scatter-plot dashboard path is signed off, and the repo returns to Build for the remaining backlog scope.**
 
-Loop 6 validation reran the documented smoke path from a fresh clone and confirmed the new Baseline Proficiency vs. Cohort Growth scatter plot is live as the 9th dashboard figure. The analytical outputs regenerated cleanly, the dashboard callback returned all 9 figures, and only the long-standing browser-console inspection remains environment-blocked.
+Closeout rechecked the backlog tasks, sprint Definition of Done, prior validation evidence, and human-facing docs, then reran the documented smoke path from a fresh clone. The current in-repo 7-workbook wide-format pipeline remains reproducible, the dashboard callback returns all 9 figures including the Baseline Proficiency vs. Cohort Growth scatter plot, and the repo is handoff-ready for this loop even though the original normalized-data / 2024-25 backlog path and browser-console inspection remain open.
 
-Loop 6 validation reran:
+Loop 6 closeout reran:
 1. `python -m pip install -r requirements.txt`
 2. `python -m pip install dash plotly`
 3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -28,7 +28,7 @@ Loop 6 validation reran:
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete for loops 2-6 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, and scatter plot |
 | 4 | Validate | ✅ Complete for loops 1-6 |
-| 5 | Closeout | ✅ Complete for loops 2-5; loop 6 pending |
+| 5 | Closeout | ✅ Complete for loops 2-6 |
 
 ---
 
@@ -67,7 +67,7 @@ Loop 6 validation reran:
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **9 figures**; 9th figure is Baseline Proficiency vs. Cohort Growth scatter plot |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 6 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 5 |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 6 |
 
 ---
 
@@ -86,7 +86,7 @@ Loop 6 validation reran:
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 6 — verified in Validate):**
+- **Smoke test commands (loop 6 — rechecked in Closeout):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -96,10 +96,10 @@ Loop 6 validation reran:
   7. `python src/generate_school_rankings.py`
   8. `python src/proficiency_trend_analysis.py`
   9. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **9 figures**, including the new scatter plot)
-- **Loop 6 validation evidence:**
+- **Loop 6 closeout evidence:**
   - `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, and `python src/proficiency_trend_analysis.py` all exit 0.
   - Regenerated outputs match the expected loop-6 counts: `combined_all_years.csv` 28,069 rows; `cohort_growth_detail.csv` 12,956; `cohort_growth_summary.csv` 2,560; `equity_gap_detail.csv` 13,008; `equity_gap_summary.csv` 2,138; `school_rankings.csv` 422; `school_equity_rankings.csv` 414; `proficiency_trends.csv` 25,629.
-  - `/_dash-dependencies` confirms 9 figure outputs in the single callback, and a live `POST /_dash-update-component` returns all 9 figure titles.
+  - `GET /`, `/_dash-layout`, and `/_dash-dependencies` all return 200; `/_dash-dependencies` confirms 9 figure outputs in the single callback; and a live `POST /_dash-update-component` returns all 9 figure titles.
   - Scatter plot (9th figure) shows Baseline Proficiency vs. Cohort Growth; each point is a school; quadrant reference lines at x=50% and y=0; colour encodes % significant transitions; size encodes # transitions.
   - All 4 Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
 - **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
@@ -108,4 +108,5 @@ Loop 6 validation reran:
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
 - **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
 - **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools; all schools in the repo files are DCPS schools. A future loop could add a school-type lookup CSV if the 4-workbook normalized OSSE path (which carries full LEA metadata) is restored.
-- **Next recommended step:** Run **Closeout** for loop 6, then return to Build for: (a) restore the normalized 4-workbook / 2024-25 ingestion path, or (b) finish the blocked browser-console dashboard review.
+- **Closeout outcome:** approved for handoff of the current 7-workbook wide-format + scatter path; not approved as full project completion.
+- **Next recommended step:** Return to **Build** for: (a) restore the normalized 4-workbook / 2024-25 ingestion path, or (b) finish the blocked browser-console dashboard review.
