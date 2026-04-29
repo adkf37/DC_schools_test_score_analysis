@@ -3,7 +3,10 @@ COVID Recovery Analysis for DC Schools.
 
 This script quantifies the pandemic's effect on DC school test performance and
 measures how well each school has recovered by using the 2019 school year as a
-pre-COVID benchmark and the 2022, 2023, and 2024 data as the post-COVID years.
+pre-COVID benchmark and 2022 and 2024 as the post-COVID reference years.
+The 2023 school year is present in the dataset but is not used in this analysis;
+the script specifically compares 2019 (pre-COVID) → 2022 (immediate post-COVID
+impact) → 2024 (latest available, as a recovery endpoint).
 
 Key metrics computed for every school × subject × student-subgroup combination:
 
