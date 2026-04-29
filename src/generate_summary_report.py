@@ -1,0 +1,579 @@
+"""
+Formatted Excel Summary Report — DC Schools Test Score Analysis.
+
+Reads from existing output CSVs and produces a formatted multi-sheet Excel
+workbook that summarises key findings for policy stakeholders.
+
+Sheets produced:
+  1. Executive Summary    — Citywide headline statistics
+  2. Top Growth (ELA)     — Top schools by avg cohort growth, ELA, All Students
+  3. Top Growth (Math)    — Top schools by avg cohort growth, Math, All Students
+  4. Top Equity Schools   — Schools most effective at narrowing equity gaps
+  5. Proficiency Trends   — Citywide avg proficiency by year and subject
+  6. School Directory     — All schools with combined growth + equity metrics
+
+Output:
+    output_data/summary_report.xlsx
+
+Usage:
+    python src/generate_summary_report.py
+
+Dependencies:
+    - output_data/cohort_growth_summary.csv  (produced by analyze_cohort_growth.py)
+    - output_data/school_rankings.csv        (produced by generate_school_rankings.py)
+    - output_data/school_equity_rankings.csv (produced by generate_school_rankings.py)
+    - output_data/equity_gap_summary.csv     (produced by equity_gap_analysis.py)
+    - output_data/proficiency_trends.csv     (produced by proficiency_trend_analysis.py)
+"""
+import os
+import sys
+import pandas as pd
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+OUTPUT_PATH = os.path.abspath(os.path.join(CURRENT_PATH, '..', 'output_data'))
+
+COHORT_SUMMARY_FILE = os.path.join(OUTPUT_PATH, 'cohort_growth_summary.csv')
+RANKINGS_FILE = os.path.join(OUTPUT_PATH, 'school_rankings.csv')
+EQUITY_RANKINGS_FILE = os.path.join(OUTPUT_PATH, 'school_equity_rankings.csv')
+EQUITY_SUMMARY_FILE = os.path.join(OUTPUT_PATH, 'equity_gap_summary.csv')
+TRENDS_FILE = os.path.join(OUTPUT_PATH, 'proficiency_trends.csv')
+REPORT_FILE = os.path.join(OUTPUT_PATH, 'summary_report.xlsx')
+
+# Top-N schools per subject shown in sheet 2 & 3
+TOP_N = 25
+
+# Colour palette
+HEADER_BG = '1F4E79'      # dark blue
+HEADER_FG = 'FFFFFF'      # white text
+ALT_ROW_BG = 'D6E4F0'     # light blue alternating row
+POSITIVE_FG = '1E6823'    # dark green — positive growth
+NEGATIVE_FG = 'A50026'    # dark red — negative growth
+TITLE_BG = '2E75B6'       # medium blue — section headers
+TITLE_FG = 'FFFFFF'       # white
+SUBHEADER_BG = 'BDD7EE'   # pale blue — subheader rows
+
+ALL_STUDENTS_LABELS = {'All Students', 'All', 'Total'}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Data loading helpers
+# ═════════════════════════════════════════════════════════════════════════════
+
+def _load(path: str, label: str) -> pd.DataFrame:
+    if not os.path.isfile(path):
+        print(f'ERROR: {path} not found.\nRun the pipeline scripts first.')
+        sys.exit(1)
+    df = pd.read_csv(path)
+    print(f'  Loaded {label}: {len(df):,} rows')
+    return df
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Sheet builders
+# ═════════════════════════════════════════════════════════════════════════════
+
+def _build_exec_summary(cohort_summary: pd.DataFrame,
+                        rankings: pd.DataFrame,
+                        equity_rankings: pd.DataFrame,
+                        trends: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute a set of citywide headline statistics to place on the
+    Executive Summary sheet.
+    """
+    rows = []
+
+    # ── Dataset scope ──────────────────────────────────────────────────────
+    rows.append(('Section', 'Dataset Scope', ''))
+    n_schools = cohort_summary['School Name'].nunique()
+    rows.append(('', 'Schools with cohort data', n_schools))
+
+    if 'latest_baseline_year' in cohort_summary.columns:
+        min_yr = int(cohort_summary['latest_baseline_year'].min())
+        max_yr = int(cohort_summary['latest_followup_year'].max())
+        rows.append(('', 'Year range', f'{min_yr} – {max_yr}'))
+
+    total_transitions = int(cohort_summary['n_transitions'].sum())
+    rows.append(('', 'Total cohort transitions analysed', f'{total_transitions:,}'))
+
+    # ── Citywide growth ────────────────────────────────────────────────────
+    rows.append(('', '', ''))
+    rows.append(('Section', 'Citywide Cohort Growth (All Students)', ''))
+
+    all_students_mask = cohort_summary['Student Group Value'].isin(ALL_STUDENTS_LABELS)
+    city_df = cohort_summary[all_students_mask]
+
+    for subj in ('ELA', 'Math'):
+        sub = city_df[city_df['Subject'] == subj]
+        if sub.empty:
+            continue
+        avg = sub['avg_pp_growth'].mean()
+        pct_pos = (sub['avg_pp_growth'] > 0).mean() * 100
+        rows.append(('', f'{subj} — avg cohort growth (pp)', f'{avg:+.1f}'))
+        rows.append(('', f'{subj} — schools with positive growth', f'{pct_pos:.0f}%'))
+
+    # ── Statistical significance ───────────────────────────────────────────
+    rows.append(('', '', ''))
+    rows.append(('Section', 'Statistical Significance', ''))
+    if 'pct_significant_transitions' in cohort_summary.columns:
+        for subj in ('ELA', 'Math'):
+            sub = city_df[city_df['Subject'] == subj]
+            if sub.empty:
+                continue
+            pct_sig = sub['pct_significant_transitions'].mean()
+            rows.append(('', f'{subj} — avg % significant transitions (p < 0.05)',
+                         f'{pct_sig:.0f}%'))
+
+    # ── Equity gap ─────────────────────────────────────────────────────────
+    if not equity_rankings.empty and 'avg_gap_change' in equity_rankings.columns:
+        rows.append(('', '', ''))
+        rows.append(('Section', 'Equity Gap Summary', ''))
+        for subj in ('ELA', 'Math'):
+            sub = equity_rankings[equity_rankings['Subject'] == subj]
+            if sub.empty:
+                continue
+            n_narrowing = (sub['avg_gap_change'] > 0).sum()
+            pct_narrowing = n_narrowing / len(sub) * 100
+            rows.append(('', f'{subj} — schools narrowing equity gaps',
+                         f'{n_narrowing} / {len(sub)} ({pct_narrowing:.0f}%)'))
+
+    # ── Proficiency trends ────────────────────────────────────────────────
+    if not trends.empty:
+        rows.append(('', '', ''))
+        rows.append(('Section', 'Citywide Proficiency Trends (All Students)', ''))
+        city_trends = trends[trends['School Name'] == 'DC Public Schools']
+        if city_trends.empty:
+            city_trends = trends[trends['Student Group Value'].isin(ALL_STUDENTS_LABELS)]
+
+        for subj in ('ELA', 'Math'):
+            sub = city_trends[city_trends['Subject'] == subj]
+            if sub.empty:
+                continue
+            by_year = (sub.groupby('year')['proficiency_pct']
+                         .mean()
+                         .sort_index()
+                         .dropna())
+            if len(by_year) >= 2:
+                years = list(by_year.index)
+                vals = list(by_year.values)
+                rows.append(('', f'{subj} — {int(years[0])} proficiency',
+                             f'{vals[0]:.1f}%'))
+                rows.append(('', f'{subj} — {int(years[-1])} proficiency',
+                             f'{vals[-1]:.1f}%'))
+                delta = vals[-1] - vals[0]
+                rows.append(('', f'{subj} — change over period',
+                             f'{delta:+.1f} pp'))
+
+    # ── Data caveats ──────────────────────────────────────────────────────
+    rows.append(('', '', ''))
+    rows.append(('Section', 'Data Notes and Caveats', ''))
+    rows.append(('', 'Source', 'DC OSSE wide-format workbooks 2015-16 – 2023-24'))
+    rows.append(('', 'Minimum cohort size', 'N >= 10 students per transition'))
+    rows.append(('', 'Significance test', 'Two-proportion z-test, alpha = 0.05 (no multiple-comparison correction)'))
+    rows.append(('', 'School-year gap', 'No 2019–2022 transitions (COVID-19 disruption)'))
+    rows.append(('', 'Coverage caveat', '2024-25 data not yet in repo; charter vs. DCPS split not available'))
+
+    return pd.DataFrame(rows, columns=['Type', 'Metric', 'Value'])
+
+
+def _build_top_growth(rankings: pd.DataFrame, subject: str, n: int) -> pd.DataFrame:
+    """Top-N schools by avg cohort growth for a given subject."""
+    sub = rankings[rankings['Subject'] == subject].copy()
+    sub = sub.sort_values('avg_pp_growth', ascending=False).head(n)
+    sub = sub.reset_index(drop=True)
+
+    out_cols = ['rank', 'School Name', 'avg_pp_growth', 'n_transitions']
+    if 'pct_significant_transitions' in sub.columns:
+        out_cols.append('pct_significant_transitions')
+
+    out = sub[[c for c in out_cols if c in sub.columns]].copy()
+
+    rename = {
+        'rank': 'Rank',
+        'School Name': 'School Name',
+        'avg_pp_growth': 'Avg Growth (pp)',
+        'n_transitions': 'No. Transitions',
+        'pct_significant_transitions': '% Significant',
+    }
+    out = out.rename(columns=rename)
+    out['Avg Growth (pp)'] = out['Avg Growth (pp)'].round(1)
+    if '% Significant' in out.columns:
+        out['% Significant'] = out['% Significant'].round(0)
+    return out
+
+
+def _build_equity_sheet(equity_rankings: pd.DataFrame, n: int = 25) -> pd.DataFrame:
+    """Top equity schools across both subjects."""
+    if equity_rankings.empty:
+        return pd.DataFrame()
+
+    frames = []
+    for subj in ('ELA', 'Math'):
+        sub = equity_rankings[equity_rankings['Subject'] == subj].copy()
+        if 'avg_gap_change' in sub.columns:
+            sub = sub.sort_values('avg_gap_change', ascending=False)
+        sub = sub.head(n).reset_index(drop=True)
+        # 'Subject' column already present in equity_rankings — no insert needed
+        frames.append(sub)
+
+    if not frames:
+        return pd.DataFrame()
+
+    out = pd.concat(frames, ignore_index=True)
+    rename = {
+        'equity_rank': 'Equity Rank',
+        'School Name': 'School Name',
+        'avg_gap_change': 'Avg Gap Change (pp)',
+        'avg_growth_gap': 'Avg Growth Gap (pp)',
+        'n_subgroups': 'No. Subgroups',
+        'pct_narrowing': '% Transitions Narrowing',
+    }
+    out = out.rename(columns={k: v for k, v in rename.items() if k in out.columns})
+    for col in ('Avg Gap Change (pp)', 'Avg Growth Gap (pp)', '% Transitions Narrowing'):
+        if col in out.columns:
+            out[col] = pd.to_numeric(out[col], errors='coerce').round(1)
+    return out
+
+
+def _build_trends_sheet(trends: pd.DataFrame) -> pd.DataFrame:
+    """Citywide avg proficiency by year × subject for All Students."""
+    mask = trends['Student Group Value'].isin(ALL_STUDENTS_LABELS)
+    city = trends[mask].groupby(['year', 'Subject'])['proficiency_pct'].mean().reset_index()
+    city = city.sort_values(['Subject', 'year'])
+    city['proficiency_pct'] = city['proficiency_pct'].round(1)
+    city = city.rename(columns={
+        'year': 'Year',
+        'Subject': 'Subject',
+        'proficiency_pct': 'Avg Proficiency (%)',
+    })
+
+    # Pivot to wide for readability
+    pivot = city.pivot(index='Year', columns='Subject', values='Avg Proficiency (%)')
+    pivot = pivot.reset_index()
+    pivot.columns.name = None
+    return pivot
+
+
+def _build_directory(rankings: pd.DataFrame,
+                     equity_rankings: pd.DataFrame) -> pd.DataFrame:
+    """Combined school directory with growth + equity metrics for all schools."""
+    frames = []
+    for subj in ('ELA', 'Math'):
+        gr = rankings[rankings['Subject'] == subj].copy() if not rankings.empty else pd.DataFrame()
+        eq = equity_rankings[equity_rankings['Subject'] == subj].copy() if not equity_rankings.empty else pd.DataFrame()
+
+        if gr.empty and eq.empty:
+            continue
+
+        if not gr.empty and not eq.empty:
+            merged = gr.merge(
+                eq[['School Name', 'equity_rank', 'avg_gap_change',
+                    'pct_narrowing', 'n_subgroups']].rename(columns={
+                    'equity_rank': 'Equity Rank',
+                    'avg_gap_change': 'Avg Gap Change (pp)',
+                    'pct_narrowing': '% Transitions Narrowing',
+                    'n_subgroups': 'No. Equity Subgroups',
+                }),
+                on='School Name', how='outer'
+            )
+        elif not gr.empty:
+            merged = gr.copy()
+        else:
+            merged = eq.copy()
+
+        merged['Subject'] = subj
+        frames.append(merged)
+
+    if not frames:
+        return pd.DataFrame()
+
+    out = pd.concat(frames, ignore_index=True)
+    out = out.sort_values(['Subject', 'rank'] if 'rank' in out.columns else ['Subject'])
+    out = out.reset_index(drop=True)
+
+    rename = {
+        'rank': 'Growth Rank',
+        'School Name': 'School Name',
+        'avg_pp_growth': 'Avg Growth (pp)',
+        'n_transitions': 'No. Transitions',
+        'pct_significant_transitions': '% Significant',
+    }
+    out = out.rename(columns={k: v for k, v in rename.items() if k in out.columns})
+    for col in ('Avg Growth (pp)', 'Avg Gap Change (pp)'):
+        if col in out.columns:
+            out[col] = pd.to_numeric(out[col], errors='coerce').round(1)
+    return out
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Excel formatting helpers
+# ═════════════════════════════════════════════════════════════════════════════
+
+def _hex_to_argb(hex_color: str) -> str:
+    """Convert 6-digit hex to openpyxl ARGB string."""
+    return 'FF' + hex_color.upper()
+
+
+def _apply_header_style(ws, row_idx: int, n_cols: int,
+                        bg: str = HEADER_BG, fg: str = HEADER_FG,
+                        bold: bool = True, font_size: int = 11) -> None:
+    """Bold, coloured header row."""
+    try:
+        from openpyxl.styles import PatternFill, Font, Alignment
+    except ImportError:
+        return
+
+    fill = PatternFill(fill_type='solid', fgColor=_hex_to_argb(bg))
+    font = Font(bold=bold, color=_hex_to_argb(fg), size=font_size)
+    align = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    for col_idx in range(1, n_cols + 1):
+        cell = ws.cell(row=row_idx, column=col_idx)
+        cell.fill = fill
+        cell.font = font
+        cell.alignment = align
+
+
+def _apply_alt_row_style(ws, start_row: int, n_data_rows: int,
+                         n_cols: int, growth_col: int = None) -> None:
+    """Alternating row shading + optional green/red colouring for a growth column."""
+    try:
+        from openpyxl.styles import PatternFill, Font, Alignment
+    except ImportError:
+        return
+
+    alt_fill = PatternFill(fill_type='solid', fgColor=_hex_to_argb(ALT_ROW_BG))
+    pos_font = Font(color=_hex_to_argb(POSITIVE_FG), bold=True)
+    neg_font = Font(color=_hex_to_argb(NEGATIVE_FG), bold=True)
+    center = Alignment(horizontal='center', vertical='center')
+    left = Alignment(horizontal='left', vertical='center')
+
+    for r in range(start_row, start_row + n_data_rows):
+        is_alt = (r - start_row) % 2 == 1
+        for c in range(1, n_cols + 1):
+            cell = ws.cell(row=r, column=c)
+            if is_alt:
+                cell.fill = alt_fill
+            align = left if c == 2 else center
+            cell.alignment = align
+            if growth_col and c == growth_col:
+                val = cell.value
+                if isinstance(val, (int, float)):
+                    cell.font = pos_font if val > 0 else neg_font
+
+
+def _set_col_widths(ws, widths: list) -> None:
+    """Set column widths by index (1-based)."""
+    try:
+        from openpyxl.utils import get_column_letter
+    except ImportError:
+        return
+    for i, w in enumerate(widths, start=1):
+        ws.column_dimensions[get_column_letter(i)].width = w
+
+
+def _freeze_top_row(ws) -> None:
+    ws.freeze_panes = ws['A2']
+
+
+def _write_df_to_sheet(ws, df: pd.DataFrame,
+                       start_row: int = 1,
+                       growth_col_name: str = None) -> None:
+    """Write a DataFrame to an openpyxl worksheet with formatting."""
+    try:
+        from openpyxl.styles import PatternFill, Font, Alignment
+    except ImportError:
+        # Fallback: no formatting
+        for r_idx, row in enumerate(df.itertuples(index=False), start=start_row + 1):
+            for c_idx, val in enumerate(row, start=1):
+                ws.cell(row=r_idx, column=c_idx, value=val)
+        return
+
+    n_cols = len(df.columns)
+
+    # Write header
+    for c_idx, col_name in enumerate(df.columns, start=1):
+        ws.cell(row=start_row, column=c_idx, value=str(col_name))
+    _apply_header_style(ws, start_row, n_cols)
+
+    # Find growth column index (1-based)
+    growth_col = None
+    if growth_col_name and growth_col_name in df.columns:
+        growth_col = list(df.columns).index(growth_col_name) + 1
+
+    # Write data rows
+    for r_idx, row in enumerate(df.itertuples(index=False), start=start_row + 1):
+        for c_idx, val in enumerate(row, start=1):
+            ws.cell(row=r_idx, column=c_idx, value=val)
+
+    _apply_alt_row_style(ws, start_row + 1, len(df), n_cols, growth_col)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Executive Summary sheet (special layout)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def _write_exec_summary(ws, exec_df: pd.DataFrame) -> None:
+    """Write the executive summary with section banners and value cells."""
+    try:
+        from openpyxl.styles import PatternFill, Font, Alignment
+    except ImportError:
+        for r, row in enumerate(exec_df.itertuples(index=False), start=1):
+            ws.cell(row=r, column=1, value=row.Metric)
+            ws.cell(row=r, column=2, value=row.Value)
+        return
+
+    title_fill = PatternFill(fill_type='solid', fgColor=_hex_to_argb(TITLE_BG))
+    title_font = Font(bold=True, color=_hex_to_argb(TITLE_FG), size=12)
+    title_align = Alignment(horizontal='left', vertical='center')
+
+    metric_font = Font(bold=False, size=11)
+    value_font = Font(bold=True, size=11)
+    metric_align = Alignment(horizontal='left', vertical='center', indent=2)
+    value_align = Alignment(horizontal='right', vertical='center')
+
+    ws.column_dimensions['A'].width = 55
+    ws.column_dimensions['B'].width = 30
+
+    current_row = 1
+    for _, row in exec_df.iterrows():
+        row_type = str(row['Type'])
+        metric = str(row['Metric'])
+        value = str(row['Value'])
+
+        if row_type == 'Section':
+            # Section banner
+            cell_a = ws.cell(row=current_row, column=1, value=metric)
+            cell_b = ws.cell(row=current_row, column=2, value='')
+            cell_a.fill = title_fill
+            cell_a.font = title_font
+            cell_a.alignment = title_align
+            cell_b.fill = title_fill
+        elif metric == '' and value == '':
+            # Blank spacer row
+            pass
+        else:
+            cell_a = ws.cell(row=current_row, column=1, value=metric)
+            cell_b = ws.cell(row=current_row, column=2, value=value)
+            cell_a.font = metric_font
+            cell_a.alignment = metric_align
+            cell_b.font = value_font
+            cell_b.alignment = value_align
+
+            # Alternating light background for non-section rows
+            if (current_row % 2) == 0:
+                try:
+                    from openpyxl.styles import PatternFill
+                    alt_fill = PatternFill(fill_type='solid',
+                                          fgColor=_hex_to_argb(ALT_ROW_BG))
+                    cell_a.fill = alt_fill
+                    cell_b.fill = alt_fill
+                except Exception:
+                    pass
+
+        current_row += 1
+
+    ws.freeze_panes = None
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Main
+# ═════════════════════════════════════════════════════════════════════════════
+
+def main() -> None:
+    print('=' * 70)
+    print('GENERATING SUMMARY REPORT — DC Schools Test Score Analysis')
+    print('=' * 70)
+    print()
+
+    # ── Load inputs ────────────────────────────────────────────────────────
+    cohort_summary = _load(COHORT_SUMMARY_FILE, 'cohort_growth_summary.csv')
+    rankings = _load(RANKINGS_FILE, 'school_rankings.csv')
+    equity_rankings = _load(EQUITY_RANKINGS_FILE, 'school_equity_rankings.csv')
+    equity_summary = _load(EQUITY_SUMMARY_FILE, 'equity_gap_summary.csv')
+    trends = _load(TRENDS_FILE, 'proficiency_trends.csv')
+    print()
+
+    # ── Build sheet data ───────────────────────────────────────────────────
+    exec_df = _build_exec_summary(cohort_summary, rankings, equity_rankings, trends)
+    top_ela = _build_top_growth(rankings, 'ELA', TOP_N)
+    top_math = _build_top_growth(rankings, 'Math', TOP_N)
+    equity_sheet = _build_equity_sheet(equity_rankings, TOP_N)
+    trends_sheet = _build_trends_sheet(trends)
+    directory = _build_directory(rankings, equity_rankings)
+
+    # ── Write workbook ─────────────────────────────────────────────────────
+    try:
+        import openpyxl
+        from openpyxl import Workbook
+        from openpyxl.styles import PatternFill, Font, Alignment
+        _has_openpyxl = True
+    except ImportError:
+        _has_openpyxl = False
+        print('WARNING: openpyxl not installed — writing plain CSV fallback.')
+
+    if _has_openpyxl:
+        wb = Workbook()
+        # Remove default sheet
+        wb.remove(wb.active)
+
+        # Sheet 1 — Executive Summary
+        ws1 = wb.create_sheet('Executive Summary')
+        _write_exec_summary(ws1, exec_df)
+        print('  ✓ Sheet 1: Executive Summary')
+
+        # Sheet 2 — Top Growth ELA
+        ws2 = wb.create_sheet('Top Growth (ELA)')
+        _write_df_to_sheet(ws2, top_ela, growth_col_name='Avg Growth (pp)')
+        _set_col_widths(ws2, [8, 45, 16, 16, 14])
+        _freeze_top_row(ws2)
+        print(f'  ✓ Sheet 2: Top Growth (ELA) — {len(top_ela)} schools')
+
+        # Sheet 3 — Top Growth Math
+        ws3 = wb.create_sheet('Top Growth (Math)')
+        _write_df_to_sheet(ws3, top_math, growth_col_name='Avg Growth (pp)')
+        _set_col_widths(ws3, [8, 45, 16, 16, 14])
+        _freeze_top_row(ws3)
+        print(f'  ✓ Sheet 3: Top Growth (Math) — {len(top_math)} schools')
+
+        # Sheet 4 — Top Equity Schools
+        ws4 = wb.create_sheet('Top Equity Schools')
+        if not equity_sheet.empty:
+            _write_df_to_sheet(ws4, equity_sheet, growth_col_name='Avg Gap Change (pp)')
+            _set_col_widths(ws4, [8, 8, 45, 10, 20, 20, 20, 24])
+            _freeze_top_row(ws4)
+        print(f'  ✓ Sheet 4: Top Equity Schools — {len(equity_sheet)} rows')
+
+        # Sheet 5 — Proficiency Trends
+        ws5 = wb.create_sheet('Proficiency Trends')
+        _write_df_to_sheet(ws5, trends_sheet)
+        _set_col_widths(ws5, [8, 18, 18])
+        _freeze_top_row(ws5)
+        print(f'  ✓ Sheet 5: Proficiency Trends — {len(trends_sheet)} year rows')
+
+        # Sheet 6 — School Directory
+        ws6 = wb.create_sheet('School Directory')
+        if not directory.empty:
+            _write_df_to_sheet(ws6, directory, growth_col_name='Avg Growth (pp)')
+            _set_col_widths(ws6, [8, 12, 45, 16, 16, 14, 12, 20, 20, 24])
+            _freeze_top_row(ws6)
+        print(f'  ✓ Sheet 6: School Directory — {len(directory)} rows')
+
+        wb.save(REPORT_FILE)
+        print(f'\n✓ Saved: {REPORT_FILE}')
+
+    else:
+        # Fallback: write CSVs if openpyxl is not available
+        fallback_base = REPORT_FILE.replace('.xlsx', '')
+        exec_df[['Metric', 'Value']].to_csv(fallback_base + '_exec.csv', index=False)
+        top_ela.to_csv(fallback_base + '_top_ela.csv', index=False)
+        top_math.to_csv(fallback_base + '_top_math.csv', index=False)
+        print(f'  Fallback CSV files written with prefix {fallback_base}_*')
+
+    print()
+    print('=' * 70)
+    print('SUMMARY REPORT COMPLETE!')
+    print('=' * 70)
+
+
+if __name__ == '__main__':
+    main()

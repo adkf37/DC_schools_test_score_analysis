@@ -4,7 +4,7 @@ This repository is intended to analyze DC OSSE assessment files across the 2021�
 
 ## Current project state
 
-**As of 2026-04-29, closeout is complete for the validated loop-6 wide-format path: the historical-data ingestion expansion, cohort analysis, equity outputs, school rankings, proficiency trends, and the nine-figure dashboard (including the Grade × Year heatmap and Baseline Proficiency vs. Cohort Growth scatter plot) are all reproducible from a fresh clone. The repo now returns to Build for the remaining backlog scope.**
+**As of 2026-04-29, loop 7 Build is in progress: `src/generate_summary_report.py` has been added, producing a 6-sheet formatted Excel policy-summary workbook (`output_data/summary_report.xlsx`). Validate/Closeout for loop 7 is the next step.**
 
 What was validated from a fresh clone:
 
@@ -30,6 +30,7 @@ What was validated from a fresh clone:
   - `output_data/equity_gap_detail.csv` (13,008 rows)
   - `output_data/equity_gap_summary.csv` (2,138 rows)
   - `output_data/proficiency_trends.csv` (25,629 rows)
+  - `output_data/summary_report.xlsx` (6-sheet Excel policy summary)
 - Stuart-Hobson benchmark transitions staying within ±0.1 pp
 - Task 05 significance fields (`p_value`, `significant`, `pct_significant_transitions`)
 - Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all nine figures
@@ -61,6 +62,7 @@ python src/analyze_cohort_growth.py
 python src/equity_gap_analysis.py
 python src/generate_school_rankings.py
 python src/proficiency_trend_analysis.py
+python src/generate_summary_report.py
 ```
 
 If you want to run the dashboard after the analytical outputs are regenerated:
@@ -104,6 +106,7 @@ If the loader and cohort analysis run successfully, the project should produce:
 - `output_data/school_rankings.csv`
 - `output_data/school_equity_rankings.csv`
 - `output_data/proficiency_trends.csv`
+- `output_data/summary_report.xlsx`
 
 The current closeout review regenerated these files from a fresh clone via the wide-format loader path listed above.
 
@@ -114,11 +117,11 @@ The current closeout review regenerated these files from a fresh clone via the w
 - `.squad/review_report.md` — closeout decision and explicit return-to-work recommendation
 - `docs/methods.md` — cohort-growth and statistical-significance methodology
 
-## Next steps for the next Build loop
+## Next steps
 
-1. Choose the next Build target:
-   - restore the full normalized-data / 2024-25 ingestion path, or
-   - extend dashboard validation to the remaining blocked browser-console / manual interaction checks.
-2. If pursuing the normalized-data path, align `src/load_clean_data.py` with the actual input contract or add/document the required OSSE files.
-3. If pursuing dashboard work, confirm there are no unhandled browser-console errors during manual interaction with the nine-figure dashboard and decide whether to tighten any map-data coverage gaps.
-4. Re-run Validate and Closeout after the next Build loop changes the scope or evidence.
+**Loop 7 (in progress):** `src/generate_summary_report.py` added — run Validate/Closeout for loop 7 next.
+
+**Future Build loops:**
+1. Run Validate + Closeout to sign off the loop-7 summary-report deliverable.
+2. Restore the full normalized-data / 2024-25 ingestion path (requires downloading OSSE workbooks).
+3. Confirm browser-console cleanliness during manual interaction with the nine-figure dashboard.

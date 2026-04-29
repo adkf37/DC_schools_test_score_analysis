@@ -262,3 +262,19 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 6 while explicitly sending the repo back to **Build** next.
 - `.squad/review_report.md` becomes the authoritative closeout record for the 7-workbook wide-format + scatter handoff.
 - The next Build loop must choose an explicit follow-up: restore the normalized 4-workbook / 2024-25 ingestion path or finish the blocked browser-console / manual dashboard review.
+
+### D-029 — Build Loop 7: Formatted Excel Policy Summary Report
+**Date:** 2026-04-29
+**Decision:** Implement `src/generate_summary_report.py` to produce a formatted 6-sheet Excel workbook (`output_data/summary_report.xlsx`) for policy stakeholders.
+**Rationale:**
+- `backlog/phases.md` Phase 3 Build explicitly lists "Generate formatted Excel/PDF summary reports" as unimplemented scope that remained open after loop 6.
+- All analytical outputs (cohort growth, equity gaps, school rankings, proficiency trends) already exist as CSVs; the summary report simply assembles them into a stakeholder-ready document without requiring new pipeline data.
+- The charter vs. DCPS comparison remains blocked (no LEA-type column in wide-format OSSE files); the normalized 4-workbook / 2024-25 path requires external data. The summary report is therefore the most impactful feasible deliverable for this loop.
+**Consequences:**
+- `src/generate_summary_report.py` — new standalone script; run it after all other pipeline scripts.
+- Reads: `cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`.
+- Writes: `output_data/summary_report.xlsx` with 6 formatted sheets — Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory.
+- Formatting uses openpyxl: dark-blue header rows, alternating row shading, green/red font for positive/negative growth values, frozen first row, auto-set column widths.
+- Falls back to plain CSV exports if openpyxl is not installed (openpyxl is already in requirements.txt via pandas, so this should not occur in practice).
+- Smoke test path updated: adds `python src/generate_summary_report.py` as step 9 (before dashboard startup).
+- Next step: run Validate/Closeout for loop 7.
