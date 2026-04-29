@@ -96,11 +96,13 @@ COHORT_DETAIL_FILE = os.path.join(OUTPUT_DIR, 'cohort_growth_detail.csv')
 COHORT_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'cohort_growth_summary.csv')
 EQUITY_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'equity_gap_summary.csv')
 PROFICIENCY_TRENDS_FILE = os.path.join(OUTPUT_DIR, 'proficiency_trends.csv')
+GEO_EQUITY_FILE = os.path.join(OUTPUT_DIR, 'geographic_equity_by_quadrant.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
 equity_summary = pd.DataFrame()
 proficiency_trends = pd.DataFrame()
+geo_equity = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -113,6 +115,9 @@ if os.path.isfile(EQUITY_SUMMARY_FILE):
 if os.path.isfile(PROFICIENCY_TRENDS_FILE):
     proficiency_trends = pd.read_csv(PROFICIENCY_TRENDS_FILE)
     print(f"Loaded proficiency trends: {len(proficiency_trends):,} rows")
+if os.path.isfile(GEO_EQUITY_FILE):
+    geo_equity = pd.read_csv(GEO_EQUITY_FILE)
+    print(f"Loaded geographic equity: {len(geo_equity):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -288,6 +293,25 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='scatter')
         ]),
+
+        html.Hr(),
+
+        # ── Geographic equity section ────────────────────────────────────
+        html.H4("Geographic Equity: Performance by DC Quadrant", className="mt-3"),
+        html.P(
+            "Average proficiency and cohort growth by DC geographic quadrant "
+            "(NE / NW / SE / SW). Reveals persistent geographic disparities across "
+            "the city. Run python src/geographic_equity_analysis.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Small(
+            "Run python src/geographic_equity_analysis.py to generate this data.",
+            className="text-muted",
+            id='geo-equity-note',
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='geo-equity')
+        ]),
     ]
 )
 
@@ -323,6 +347,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('equity-gap-change', 'figure'),
     Output('heatmap', 'figure'),
     Output('scatter', 'figure'),
+    Output('geo-equity', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -775,10 +800,54 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No cohort data – run src/analyze_cohort_growth.py'
         )
 
+    # ── Geographic equity bar chart ───────────────────────────────────────
+    fig_geo = go.Figure()
+    if not geo_equity.empty:
+        gq = geo_equity.copy()
+        if subject:
+            gq = gq[gq['Subject'] == subject]
+        if not gq.empty:
+            quadrant_order = ['NE', 'NW', 'SE', 'SW']
+            gq['Quadrant'] = pd.Categorical(gq['Quadrant'], categories=quadrant_order, ordered=True)
+            gq = gq.sort_values('Quadrant')
+
+            fig_geo = go.Figure()
+            fig_geo.add_trace(go.Bar(
+                name='Avg Proficiency (%)',
+                x=gq['Quadrant'],
+                y=gq['avg_mean_proficiency'],
+                marker_color='#1976d2',
+                text=gq['avg_mean_proficiency'].round(1).astype(str) + '%',
+                textposition='outside',
+                yaxis='y',
+            ))
+            fig_geo.add_trace(go.Scatter(
+                name='Avg Cohort Growth (pp)',
+                x=gq['Quadrant'],
+                y=gq['avg_pp_growth'],
+                mode='markers+lines',
+                marker=dict(size=10, color='#e65100'),
+                line=dict(color='#e65100', width=2),
+                yaxis='y2',
+            ))
+            fig_geo.update_layout(
+                title=f'{subject} – Average Proficiency & Cohort Growth by DC Quadrant' if subject else 'Average Proficiency & Cohort Growth by DC Quadrant',
+                xaxis_title='DC Quadrant',
+                yaxis=dict(title='Avg Proficiency (%)', side='left'),
+                yaxis2=dict(title='Avg Cohort Growth (pp)', overlaying='y', side='right', zeroline=True),
+                legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
+                height=400,
+                barmode='group',
+            )
+    if not fig_geo.data:
+        fig_geo.update_layout(
+            title='No geographic equity data – run src/geographic_equity_analysis.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
-        fig_scatter,
+        fig_scatter, fig_geo,
     )
 
 

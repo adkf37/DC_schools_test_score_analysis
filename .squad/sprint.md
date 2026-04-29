@@ -1,6 +1,8 @@
 # Sprint Plan
 
-## Current Phase: Closeout loop 7 complete → Build next
+## Current Phase: Loop 8 Build complete → Validate next
+
+Loop 8 adds `src/geographic_equity_analysis.py`, which joins school location data with cohort growth and proficiency trends to surface performance disparities by DC geographic quadrant (NE / NW / SE / SW).  Key finding: NW schools average 42.7% ELA proficiency vs. 20–24% in NE/SE, a 18–23 pp geographic gap.  The dashboard now renders 10 figures; `summary_report.xlsx` now has 7 sheets (adds "Geographic Equity" sheet).
 
 Loop 7 adds `src/generate_summary_report.py`, a formatted 6-sheet Excel policy-summary workbook (`output_data/summary_report.xlsx`). This fulfills the "Generate formatted Excel/PDF summary reports" item from `backlog/phases.md` Phase 3 Build that remained open after loop 6. No new pipeline dependencies are required; the report reads from already-generated output CSVs.
 
@@ -20,14 +22,16 @@ Loop 7 adds `src/generate_summary_report.py`, a formatted 6-sheet Excel policy-s
 | 10 | [Loop 5] Proficiency trend analysis + heatmap | Statistician | Task 02 | ✅ Built — `proficiency_trend_analysis.py` exits 0; dashboard now returns 8 figures including Grade × Year heatmap |
 | 11 | [Loop 6] Baseline Proficiency vs. Cohort Growth scatter plot | Statistician | Task 03 | ✅ Built — dashboard now returns **9 figures**; scatter uses `cohort_growth_summary.csv` |
 | 12 | [Loop 7] Formatted Excel policy summary report | Statistician | Tasks 03, 06, rankings, trends | ✅ Built — `generate_summary_report.py` exits 0; produces `output_data/summary_report.xlsx` (6 sheets) |
+| 13 | [Loop 8] Geographic equity analysis | Statistician | school_locations.csv, trends, growth | ✅ Built — `geographic_equity_analysis.py` exits 0; dashboard returns **10 figures**; `summary_report.xlsx` has **7 sheets** |
 
 ## Notes
 
-- Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python src/equity_gap_analysis.py` → `python src/generate_school_rankings.py` → `python src/proficiency_trend_analysis.py` → `python src/generate_summary_report.py` → `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies` (9 figures)
+- Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python src/equity_gap_analysis.py` → `python src/generate_school_rankings.py` → `python src/proficiency_trend_analysis.py` → `python src/geographic_equity_analysis.py` → `python src/generate_summary_report.py` → `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies` (10 figures)
 - `load_clean_data.py` still requires normalized OSSE files (download from OSSE website) — use `load_wide_format_data.py` for the files already in the repo.
 - `cohort_growth_summary.csv` now has 2,560 rows (Task 03 target was ≥ 1,700 — **target met** in loop 4).
 - No cohort transitions cross the 2019–2022 COVID gap; only within-year-pair transitions (2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024) are produced.
 - `proficiency_trends.csv` has 25,629 rows covering school × year × subject × grade × subgroup proficiency.
 - Citywide avg proficiency (All Students): ELA rose from 22.7% (2016) to 35.2% (2019), dropped to 29.4% (2022), and recovered to 32.1% (2024); Math followed a similar pattern.
-- `summary_report.xlsx` has 6 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory.
-- Next action: start the next Build loop for the remaining backlog scope (normalized 4-workbook / 2024-25 ingestion or blocked browser-console review).
+- `summary_report.xlsx` has 7 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, **Geographic Equity**.
+- Geographic equity key finding: NW avg ELA proficiency 42.7% vs. NE 24.1%, SE 20.1% (18–23 pp gap). NW also leads cohort growth. SE schools face both low baseline proficiency and below-citywide growth.
+- Next action: validate loop 8 outputs (run smoke path, confirm 10 figures, 7 sheets), then Closeout loop 8.
