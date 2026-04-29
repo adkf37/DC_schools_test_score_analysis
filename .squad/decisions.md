@@ -314,3 +314,12 @@
 - `src/generate_summary_report.py` extended to write Sheet 7 "Geographic Equity" to `summary_report.xlsx` when `geographic_equity_by_quadrant.csv` is present; gracefully skips the sheet if the file is absent.
 - Smoke path updated: adds `python src/geographic_equity_analysis.py` as step 9 (before `generate_summary_report.py`).
 - Next step: Validate loop 8 (smoke path, 10 figures, 7 sheets), then Closeout.
+
+### D-033 — Validate Passes Loop 8 and Advances to Closeout
+**Date:** 2026-04-29
+**Decision:** Mark Validate as **PASS** for the loop-8 wide-format pipeline and advance the repo to **Closeout**.
+**Rationale:** A fresh-clone validation reran the documented smoke path end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`, and `python src/generate_summary_report.py` all exited 0. The run regenerated `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), and `summary_report.xlsx` (7 sheets). `python app/app_simple.py` also started successfully; `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; and a live `POST /_dash-update-component` request returned all ten figures, including the new geographic-equity chart. Direct browser-console inspection remained blocked in this sandbox, but the server-side dashboard path showed no exceptions.
+**Consequences:**
+- `.squad/validation_report.md` becomes the authoritative validation evidence for loop 8.
+- `STATUS.md` should move the repo to **Validate complete / Closeout next** for loop 8.
+- Closeout should decide whether to sign off the current 7-workbook wide-format + geographic-equity + summary-report loop and explicitly carry forward the remaining scope: the missing normalized 4-workbook / 2024-25 path and the blocked browser-console check.
