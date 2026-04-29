@@ -8,6 +8,7 @@ Provides:
   - Map view (when school_locations.csv is available)
 """
 import os
+import re
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -97,12 +98,14 @@ COHORT_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'cohort_growth_summary.csv')
 EQUITY_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'equity_gap_summary.csv')
 PROFICIENCY_TRENDS_FILE = os.path.join(OUTPUT_DIR, 'proficiency_trends.csv')
 GEO_EQUITY_FILE = os.path.join(OUTPUT_DIR, 'geographic_equity_by_quadrant.csv')
+YOY_DETAIL_FILE = os.path.join(OUTPUT_DIR, 'yoy_growth_detail.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
 equity_summary = pd.DataFrame()
 proficiency_trends = pd.DataFrame()
 geo_equity = pd.DataFrame()
+yoy_detail = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -118,6 +121,9 @@ if os.path.isfile(PROFICIENCY_TRENDS_FILE):
 if os.path.isfile(GEO_EQUITY_FILE):
     geo_equity = pd.read_csv(GEO_EQUITY_FILE)
     print(f"Loaded geographic equity: {len(geo_equity):,} rows")
+if os.path.isfile(YOY_DETAIL_FILE):
+    yoy_detail = pd.read_csv(YOY_DETAIL_FILE)
+    print(f"Loaded YoY growth detail: {len(yoy_detail):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -312,6 +318,22 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='geo-equity')
         ]),
+
+        html.Hr(),
+
+        # ── Same-grade YoY growth section ────────────────────────────────
+        html.H4("Same-Grade Year-over-Year Growth", className="mt-3"),
+        html.P(
+            "How is each grade level improving at the same school year after year? "
+            "Unlike cohort growth (which tracks the same students moving up a grade), "
+            "same-grade YoY growth shows whether instruction at a given grade is "
+            "improving over time. "
+            "Run python src/yoy_growth_analysis.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='yoy-growth')
+        ]),
     ]
 )
 
@@ -348,6 +370,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('heatmap', 'figure'),
     Output('scatter', 'figure'),
     Output('geo-equity', 'figure'),
+    Output('yoy-growth', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -676,8 +699,7 @@ def update_figures(subject, subgroup, schools, year_range):
 
             # Sort grades numerically (e.g. 'Grade 6' → 6, 'Grade 10' → 10)
             def _grade_key(g):
-                import re as _re
-                m = _re.search(r'\d+', str(g))
+                m = re.search(r'\d+', str(g))
                 return int(m.group()) if m else 99
 
             sorted_grades = sorted(heatmap_pivot.index.tolist(), key=_grade_key)
@@ -843,10 +865,83 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No geographic equity data – run src/geographic_equity_analysis.py'
         )
 
+    # ── Same-grade YoY growth line chart ─────────────────────────────────
+    fig_yoy = go.Figure()
+
+    if not yoy_detail.empty:
+        yd = yoy_detail.copy()
+        if subject:
+            yd = yd[yd['Subject'] == subject]
+        if subgroup:
+            yd = yd[yd['Student Group Value'] == subgroup]
+        if schools:
+            yd = yd[yd['School Name'].isin(schools)]
+
+        if not yd.empty:
+            if schools:
+                # School view: one line per selected school, avg over grades per transition
+                yd_agg = (
+                    yd.groupby(['School Name', 'transition_label'], as_index=False)
+                    .agg(avg_pp_change=('pp_change', 'mean'))
+                    .sort_values('transition_label')
+                )
+                for school_name in yd_agg['School Name'].unique():
+                    school_data = yd_agg[yd_agg['School Name'] == school_name]
+                    fig_yoy.add_trace(go.Scatter(
+                        x=school_data['transition_label'],
+                        y=school_data['avg_pp_change'],
+                        mode='lines+markers',
+                        name=school_name,
+                    ))
+                fig_yoy.update_layout(
+                    title=f'{subject} – Same-Grade YoY Growth by Transition',
+                    xaxis_title='Transition Period',
+                    yaxis_title='Avg pp Change (same grade, year over year)',
+                )
+            else:
+                # Citywide view: one line per grade level (All Students subgroup only)
+                yd_all = yd[yd['Student Group Value'] == 'All Students'] if 'All Students' in yd['Student Group Value'].values else yd
+                yd_agg = (
+                    yd_all.groupby(['grade', 'transition_label'], as_index=False)
+                    .agg(avg_pp_change=('pp_change', 'mean'))
+                    .sort_values('transition_label')
+                )
+
+                # Sort grades numerically for legend order
+                def _grade_key_yoy(g):
+                    m = re.search(r'\d+', str(g))
+                    return int(m.group()) if m else 99
+
+                sorted_grades_yoy = sorted(yd_agg['grade'].unique(), key=_grade_key_yoy)
+
+                for grade_name in sorted_grades_yoy:
+                    gdata = yd_agg[yd_agg['grade'] == grade_name].sort_values('transition_label')
+                    fig_yoy.add_trace(go.Scatter(
+                        x=gdata['transition_label'],
+                        y=gdata['avg_pp_change'],
+                        mode='lines+markers',
+                        name=grade_name,
+                    ))
+                fig_yoy.add_hline(
+                    y=0, line_dash='dash', line_color='grey', line_width=1,
+                )
+                fig_yoy.update_layout(
+                    title=f'{subject} – Citywide Same-Grade YoY Growth by Grade Level',
+                    xaxis_title='Transition Period',
+                    yaxis_title='Avg pp Change (same grade, year over year)',
+                    legend_title='Grade',
+                    height=450,
+                )
+
+    if not fig_yoy.data:
+        fig_yoy.update_layout(
+            title='No YoY data – run src/yoy_growth_analysis.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
-        fig_scatter, fig_geo,
+        fig_scatter, fig_geo, fig_yoy,
     )
 
 
