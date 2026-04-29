@@ -126,7 +126,7 @@ def run() -> None:
     grade_col = "Grade of Enrollment"
     df = df[~df[grade_col].str.upper().str.strip().isin(SKIP_GRADES)]
 
-    # Normalise grade strings  (e.g., "Grade 06" → "Grade 6")
+    # Normalize grade strings  (e.g., "Grade 06" → "Grade 6")
     df[grade_col] = df[grade_col].str.strip()
 
     print(f"  After filtering: {len(df):,} rows")
@@ -174,7 +174,7 @@ def run() -> None:
     joined["transition_label"] = (
         joined["baseline_year"].astype(str) + "→" + joined["followup_year"].astype(str)
     )
-    joined = joined.rename(columns={grade_col: "grade", "Student Group Value": "Student Group Value"})
+    joined = joined.rename(columns={grade_col: "grade"})
 
     detail = joined[
         [

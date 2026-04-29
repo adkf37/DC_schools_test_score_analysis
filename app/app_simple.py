@@ -8,6 +8,7 @@ Provides:
   - Map view (when school_locations.csv is available)
 """
 import os
+import re
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -329,11 +330,6 @@ app.layout = html.Div(
             "improving over time. "
             "Run python src/yoy_growth_analysis.py to generate this data.",
             className="text-muted small",
-        ),
-        html.Small(
-            "Run python src/yoy_growth_analysis.py to generate this data.",
-            className="text-muted",
-            id='yoy-note',
         ),
         html.Div(className="mt-1", children=[
             dcc.Graph(id='yoy-growth')
@@ -703,8 +699,7 @@ def update_figures(subject, subgroup, schools, year_range):
 
             # Sort grades numerically (e.g. 'Grade 6' → 6, 'Grade 10' → 10)
             def _grade_key(g):
-                import re as _re
-                m = _re.search(r'\d+', str(g))
+                m = re.search(r'\d+', str(g))
                 return int(m.group()) if m else 99
 
             sorted_grades = sorted(heatmap_pivot.index.tolist(), key=_grade_key)
@@ -913,10 +908,8 @@ def update_figures(subject, subgroup, schools, year_range):
                 )
 
                 # Sort grades numerically for legend order
-                import re as _re_yoy
-
                 def _grade_key_yoy(g):
-                    m = _re_yoy.search(r'\d+', str(g))
+                    m = re.search(r'\d+', str(g))
                     return int(m.group()) if m else 99
 
                 sorted_grades_yoy = sorted(yd_agg['grade'].unique(), key=_grade_key_yoy)
