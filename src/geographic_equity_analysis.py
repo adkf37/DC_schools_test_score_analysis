@@ -153,18 +153,27 @@ def run() -> None:
     )
 
     # Latest year proficiency from trends (All Students, all grades)
-    trends_all = (
-        trends[trends["Student Group Value"] == "All Students"]
-        .groupby(["School Name", "Subject"], as_index=False)
-        .agg(
-            latest_proficiency_pct=(
-                "proficiency_pct",
-                lambda x: x[trends.loc[x.index, "year"] == trends.loc[x.index, "year"].max()].mean()
-                if len(x) else np.nan,
-            ),
-            mean_proficiency_pct=("proficiency_pct", "mean"),
-        )
+    # Step 1: identify the max year per school × subject group
+    trends_all_students = trends[trends["Student Group Value"] == "All Students"].copy()
+    max_year_per_group = (
+        trends_all_students.groupby(["School Name", "Subject"])["year"]
+        .max()
+        .reset_index()
+        .rename(columns={"year": "max_year"})
     )
+    trends_latest = trends_all_students.merge(max_year_per_group, on=["School Name", "Subject"])
+    trends_latest = trends_latest[trends_latest["year"] == trends_latest["max_year"]]
+
+    # Step 2: aggregate over all grades in the latest year and over all years
+    trends_all = (
+        trends_all_students.groupby(["School Name", "Subject"], as_index=False)
+        .agg(mean_proficiency_pct=("proficiency_pct", "mean"))
+    )
+    latest_pct = (
+        trends_latest.groupby(["School Name", "Subject"], as_index=False)
+        .agg(latest_proficiency_pct=("proficiency_pct", "mean"))
+    )
+    trends_all = trends_all.merge(latest_pct, on=["School Name", "Subject"], how="left")
 
     # Build a base locations table with both mapping keys
     locs_base = locs[

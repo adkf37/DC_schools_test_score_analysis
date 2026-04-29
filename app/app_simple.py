@@ -811,7 +811,6 @@ def update_figures(subject, subgroup, schools, year_range):
             gq['Quadrant'] = pd.Categorical(gq['Quadrant'], categories=quadrant_order, ordered=True)
             gq = gq.sort_values('Quadrant')
 
-            fig_geo = go.Figure()
             fig_geo.add_trace(go.Bar(
                 name='Avg Proficiency (%)',
                 x=gq['Quadrant'],
