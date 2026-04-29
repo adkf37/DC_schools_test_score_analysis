@@ -2,11 +2,11 @@
 
 ## Current Objective
 
-**Build loop 6 complete — scatter-plot visualization added (9th figure). Repo ready for Validate/Closeout.**
+**Validate loop 6 complete — 9-figure scatter-plot dashboard path passes smoke validation. Repo ready for Closeout.**
 
-Loop 6 added a Baseline Proficiency vs. Cohort Growth scatter plot to the dashboard as the 9th figure, fulfilling the "scatter-plot visualization" item from `backlog/phases.md` Phase 3 Build. The smoke path now confirms 9 figures.
+Loop 6 validation reran the documented smoke path from a fresh clone and confirmed the new Baseline Proficiency vs. Cohort Growth scatter plot is live as the 9th dashboard figure. The analytical outputs regenerated cleanly, the dashboard callback returned all 9 figures, and only the long-standing browser-console inspection remains environment-blocked.
 
-Loop 5 closeout rechecked the backlog tasks, sprint Definition of Done, validation evidence, and handoff docs, then reran the documented smoke path from a fresh clone:
+Loop 6 validation reran:
 1. `python -m pip install -r requirements.txt`
 2. `python -m pip install dash plotly`
 3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -15,7 +15,7 @@ Loop 5 closeout rechecked the backlog tasks, sprint Definition of Done, validati
 6. `python src/equity_gap_analysis.py`
 7. `python src/generate_school_rankings.py`
 8. `python src/proficiency_trend_analysis.py`
-9. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies` (callback returns **9 figures**: time-series, bar, cohort-bar, cohort-detail, map, equity-gaps, equity-gap-change, heatmap, **scatter**).
+9. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **9 figures**: time-series, bar, cohort-bar, cohort-detail, map, equity-gaps, equity-gap-change, heatmap, **scatter**).
 
 ---
 
@@ -27,7 +27,7 @@ Loop 5 closeout rechecked the backlog tasks, sprint Definition of Done, validati
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete for loops 2-6 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, and scatter plot |
-| 4 | Validate | ✅ Complete for loops 1-5; loop 6 pending |
+| 4 | Validate | ✅ Complete for loops 1-6 |
 | 5 | Closeout | ✅ Complete for loops 2-5; loop 6 pending |
 
 ---
@@ -66,7 +66,7 @@ Loop 5 closeout rechecked the backlog tasks, sprint Definition of Done, validati
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **9 figures**; 9th figure is Baseline Proficiency vs. Cohort Growth scatter plot |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 5 |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 6 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 5 |
 
 ---
@@ -86,7 +86,7 @@ Loop 5 closeout rechecked the backlog tasks, sprint Definition of Done, validati
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 6 — verified in Build):**
+- **Smoke test commands (loop 6 — verified in Validate):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -95,12 +95,12 @@ Loop 5 closeout rechecked the backlog tasks, sprint Definition of Done, validati
   6. `python src/equity_gap_analysis.py`
   7. `python src/generate_school_rankings.py`
   8. `python src/proficiency_trend_analysis.py`
-  9. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies` (callback returns **9 figures**, including the new scatter plot)
-- **Loop 6 build evidence:**
-  - `py_compile app/app_simple.py` exits 0.
-  - `/_dash-dependencies` confirms 9 figure outputs in the single callback.
+  9. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **9 figures**, including the new scatter plot)
+- **Loop 6 validation evidence:**
+  - `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, and `python src/proficiency_trend_analysis.py` all exit 0.
+  - Regenerated outputs match the expected loop-6 counts: `combined_all_years.csv` 28,069 rows; `cohort_growth_detail.csv` 12,956; `cohort_growth_summary.csv` 2,560; `equity_gap_detail.csv` 13,008; `equity_gap_summary.csv` 2,138; `school_rankings.csv` 422; `school_equity_rankings.csv` 414; `proficiency_trends.csv` 25,629.
+  - `/_dash-dependencies` confirms 9 figure outputs in the single callback, and a live `POST /_dash-update-component` returns all 9 figure titles.
   - Scatter plot (9th figure) shows Baseline Proficiency vs. Cohort Growth; each point is a school; quadrant reference lines at x=50% and y=0; colour encodes % significant transitions; size encodes # transitions.
-  - All prior outputs (cohort CSVs, equity CSVs, rankings, proficiency_trends) unchanged.
   - All 4 Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
 - **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
 - **Historical data caveats:** (same as loop 4 — see loop 4 notes in decisions.md D-020)
@@ -108,4 +108,4 @@ Loop 5 closeout rechecked the backlog tasks, sprint Definition of Done, validati
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
 - **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
 - **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools; all schools in the repo files are DCPS schools. A future loop could add a school-type lookup CSV if the 4-workbook normalized OSSE path (which carries full LEA metadata) is restored.
-- **Next recommended step:** Run **Validate/Closeout** for loop 6 (scatter plot), then return to Build for: (a) restore the normalized 4-workbook / 2024-25 ingestion path, or (b) finish the blocked browser-console dashboard review.
+- **Next recommended step:** Run **Closeout** for loop 6, then return to Build for: (a) restore the normalized 4-workbook / 2024-25 ingestion path, or (b) finish the blocked browser-console dashboard review.

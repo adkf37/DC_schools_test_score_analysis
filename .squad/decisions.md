@@ -244,3 +244,12 @@
 - `/_dash-dependencies` confirms 9 outputs in the single update callback.
 - Smoke test path unchanged (no new standalone scripts); dashboard step now confirms 9 figures.
 - Next recommended step: run Validate/Closeout for loop 6.
+
+### D-027 — Validate Passes Loop 6 and Advances to Closeout
+**Date:** 2026-04-29
+**Decision:** Mark Validate as **PASS** for the loop-6 wide-format pipeline and advance the repo to **Closeout**.
+**Rationale:** A fresh-clone validation reran the documented smoke path end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, and `python src/proficiency_trend_analysis.py` all exited 0. The run regenerated `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), and `proficiency_trends.csv` (25,629 rows). `python app/app_simple.py` also started successfully; `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; and a live `POST /_dash-update-component` request returned all nine figures, including the new Baseline Proficiency vs. Cohort Growth scatter plot. Direct browser-console inspection remained blocked because the Playwright browser profile was locked.
+**Consequences:**
+- `.squad/validation_report.md` becomes the authoritative validation evidence for loop 6.
+- `STATUS.md` should move the repo to **Validate complete / Closeout next** for loop 6.
+- Closeout should decide whether to sign off the current 7-workbook wide-format + scatter path and explicitly carry forward the remaining scope: the missing normalized 4-workbook / 2024-25 path and the blocked browser-console check.
