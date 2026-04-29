@@ -228,3 +228,19 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 5 while explicitly sending the repo back to **Build** next.
 - `.squad/review_report.md` becomes the authoritative closeout record for the 7-workbook wide-format + heatmap handoff.
 - The next Build loop must choose an explicit follow-up: restore the normalized 4-workbook / 2024-25 ingestion path, finish the blocked browser-console / manual dashboard validation work, or add the remaining scatter-plot dashboard view.
+
+### D-026 — Build Loop 6: Baseline Proficiency vs. Cohort Growth Scatter Plot
+**Date:** 2026-04-28
+**Decision:** Extend `app/app_simple.py` with a 9th figure — a Baseline Proficiency vs. Cohort Growth scatter plot — fulfilling the remaining "scatter-plot visualization" item from `backlog/phases.md` Phase 3 Build.
+**Rationale:**
+- All prior loops completed the heatmap but left the scatter-plot item unimplemented.
+- A Baseline Proficiency vs. Cohort Growth scatter is the most analytically interpretable scatter for this dataset: each point is a school, the x-axis shows where students started (avg baseline proficiency %), the y-axis shows how much they grew (avg cohort growth in pp), and quadrant reference lines separate "beating the odds" (low baseline, positive growth) from struggling, high-and-growing, and high-but-declining schools.
+- This directly advances the project goal of "ranking schools by cohort growth" by showing the growth-vs-baseline relationship at a glance, complementing the existing bar charts.
+- The chart reads from the already-generated `cohort_growth_summary.csv` with no new pipeline scripts.
+**Consequences:**
+- `app/app_simple.py` callback now returns **9 figures** (was 8); the 9th is the scatter plot.
+- Scatter uses `px.scatter` with: size = n_transitions, colour = pct_significant_transitions (Blues scale), quadrant reference lines (dashed grey) at x=50% and y=0, and four quadrant labels ("Beating the odds", "High & growing", "Struggling", "High but declining").
+- Respects all existing filters: subject, student group, school selection, year range.
+- `/_dash-dependencies` confirms 9 outputs in the single update callback.
+- Smoke test path unchanged (no new standalone scripts); dashboard step now confirms 9 figures.
+- Next recommended step: run Validate/Closeout for loop 6.

@@ -1,8 +1,8 @@
 # Sprint Plan
 
-## Current Phase: Build loop 5 complete → Validate/Closeout next
+## Current Phase: Build loop 6 complete → Validate/Closeout next
 
-Loop 5 adds a proficiency trend analysis script and a heatmap visualization to the dashboard. The new script (`src/proficiency_trend_analysis.py`) produces `output_data/proficiency_trends.csv` (25,629 rows) — a grade × year proficiency grid for all schools. The dashboard now renders 8 figures, the 8th being a Grade × Year heatmap using RdYlGn colour scale. This directly addresses the "heatmap" deliverable listed in `backlog/phases.md` Phase 3 Build.
+Loop 6 adds a Baseline Proficiency vs. Cohort Growth scatter plot to the dashboard as the 9th figure. This fulfills the "scatter-plot visualization" item from `backlog/phases.md` Phase 3 Build that remained open after loop 5. No new standalone scripts are required; the scatter reads from the already-generated `cohort_growth_summary.csv`.
 
 ## Ordered Execution Plan
 
@@ -18,14 +18,16 @@ Loop 5 adds a proficiency trend analysis script and a heatmap visualization to t
 | 8 | [Loop 3] Locations-backed dashboard map | Data Engineer | Task 04 | ✅ Verified — `school_locations.csv` present and live callback returns a real map with 113 plotted schools |
 | 9 | [Loop 4] Ingest historical PARCC files (2015-16 through 2018-19) | Statistician | Task 01 | ✅ Built — `load_wide_format_data.py` now loads all 7 in-repo workbooks; summary rows = 2,560 (target ≥ 1,700 met) |
 | 10 | [Loop 5] Proficiency trend analysis + heatmap | Statistician | Task 02 | ✅ Built — `proficiency_trend_analysis.py` exits 0; dashboard now returns 8 figures including Grade × Year heatmap |
+| 11 | [Loop 6] Baseline Proficiency vs. Cohort Growth scatter plot | Statistician | Task 03 | ✅ Built — dashboard now returns **9 figures**; scatter uses `cohort_growth_summary.csv` |
 
 ## Notes
 
-- Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python src/equity_gap_analysis.py` → `python src/generate_school_rankings.py` → `python src/proficiency_trend_analysis.py` → `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`
+- Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python src/equity_gap_analysis.py` → `python src/generate_school_rankings.py` → `python src/proficiency_trend_analysis.py` → `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies` (9 figures)
 - `load_clean_data.py` still requires normalized OSSE files (download from OSSE website) — use `load_wide_format_data.py` for the files already in the repo.
 - `cohort_growth_summary.csv` now has 2,560 rows (Task 03 target was ≥ 1,700 — **target met** in loop 4).
 - No cohort transitions cross the 2019–2022 COVID gap; only within-year-pair transitions (2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024) are produced.
 - `proficiency_trends.csv` has 25,629 rows covering school × year × subject × grade × subgroup proficiency.
 - Citywide avg proficiency (All Students): ELA rose from 22.7% (2016) to 35.2% (2019), dropped to 29.4% (2022), and recovered to 32.1% (2024); Math followed a similar pattern.
-- Next action: run Validate/Closeout for loop 5.
+- Scatter plot (9th figure) reads from `cohort_growth_summary.csv`; no new pipeline scripts needed.
+- Next action: run Validate/Closeout for loop 6.
 
