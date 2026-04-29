@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Closeout Loop 7 Complete — Summary Report Added, Repo Returns to Build
+## ✅ Current Status: Closeout Loop 8 Complete — Geographic Equity Added, Repo Returns to Build
 
-As of 2026-04-29, loop 7 has passed Validate and Closeout for the reproducible in-repo path. `src/generate_summary_report.py` is now part of the documented smoke path:
+As of 2026-04-29, loop 8 has passed Validate and Closeout for the reproducible in-repo path. `src/geographic_equity_analysis.py` and the 7-sheet `summary_report.xlsx` are now part of the documented smoke path:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -12,7 +12,8 @@ As of 2026-04-29, loop 7 has passed Validate and Closeout for the reproducible i
 - `python src/equity_gap_analysis.py` ✅
 - `python src/generate_school_rankings.py` ✅
 - `python src/proficiency_trend_analysis.py` ✅
-- `python src/generate_summary_report.py` ✅ ← **new in loop 7**
+- `python src/geographic_equity_analysis.py` ✅ ← **new in loop 8**
+- `python src/generate_summary_report.py` ✅ ← updated to 7 sheets in loop 8
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 **Two data pipeline options:**
@@ -207,10 +208,10 @@ python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 6, example callback filters = Subject: Math; Student Group: All Students):**
+**Validated closeout evidence (Loop 8, example callback filters = Subject: Math; Student Group: All Students):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
-- A live `POST /_dash-update-component` request returns all nine figures, including the Grade × Year heatmap and Baseline Proficiency vs. Cohort Growth scatter plot
+- A live `POST /_dash-update-component` request returns all ten figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, and Geographic Equity chart
 - `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 Math / All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
 
 ---
@@ -233,20 +234,41 @@ python src/proficiency_trend_analysis.py
 
 ---
 
-### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 7
+### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 8
 **File**: `src/generate_summary_report.py`
 
 **What it does:**
-- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`)
-- Produces a formatted 6-sheet Excel workbook for policy stakeholders
+- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`)
+- Produces a formatted 7-sheet Excel workbook for policy stakeholders
 - Applies header formatting, alternating row shading, and colour-coded growth values
 
 **Output:**
-- `summary_report.xlsx` — 6 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory
+- `summary_report.xlsx` — 7 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity
 
 ```bash
 python src/generate_summary_report.py
 ```
+
+---
+
+### 5d. Geographic Equity Analysis ✅ VALIDATED IN LOOP 8
+**File**: `src/geographic_equity_analysis.py`
+
+**What it does:**
+- Joins `input_data/school_locations.csv` to the proficiency-trend and cohort-growth outputs
+- Produces school-level and quadrant-level geographic equity comparisons for NE / NW / SE / SW
+- Computes gap-vs-NW metrics and feeds both the dashboard and the summary workbook
+
+**Outputs:**
+- `geographic_equity_by_school.csv` – 210 school × subject rows with Quadrant and Neighborhood
+- `geographic_equity_by_quadrant.csv` – 8 quadrant × subject rows with proficiency and cohort-growth summaries
+
+```bash
+python src/geographic_equity_analysis.py
+```
+
+**Current handoff finding:**
+- NW average ELA proficiency is 42.71% versus 24.09% in NE and 20.15% in SE.
 
 ---
 
@@ -268,13 +290,16 @@ python src/generate_school_rankings.py
 # 5. Generate proficiency trends for the dashboard heatmap
 python src/proficiency_trend_analysis.py
 
-# 6. Generate formatted Excel policy summary report
+# 6. Generate geographic equity outputs
+python src/geographic_equity_analysis.py
+
+# 7. Generate formatted Excel policy summary report
 python src/generate_summary_report.py
 
-# 7. (Optional) Run same-grade year-over-year analysis
+# 8. (Optional) Run same-grade year-over-year analysis
 python src/analyze_growth.py
 
-# 7. (Optional) Launch the interactive dashboard
+# 9. (Optional) Launch the interactive dashboard
 python app/app_simple.py
 ```
 
@@ -288,7 +313,8 @@ python app/app_simple.py
 | `src/equity_gap_analysis.py` | Equity-gap metrics derived from cohort-growth output |
 | `src/generate_school_rankings.py` | School rankings by cohort growth and equity-gap change |
 | `src/proficiency_trend_analysis.py` | Grade × year proficiency grid used by the dashboard heatmap |
-| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (6-sheet workbook) |
+| `src/geographic_equity_analysis.py` | Geographic equity outputs and quadrant comparisons |
+| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (7-sheet workbook) |
 | `src/analyze_growth.py` | Same-grade YoY growth |
 | `app/app_simple.py` | Interactive dashboard |
 | `input_data/school_locations.csv` | Geocoordinates for 115 DC public schools (enables map) |
@@ -300,7 +326,9 @@ python app/app_simple.py
 | `output_data/school_rankings.csv` | Schools ranked by avg PP growth (All Students) |
 | `output_data/school_equity_rankings.csv` | Schools ranked by equity-gap narrowing |
 | `output_data/proficiency_trends.csv` | Grade × year proficiency trends for the heatmap |
-| `output_data/summary_report.xlsx` | **Policy summary workbook — 6 formatted sheets** |
+| `output_data/geographic_equity_by_school.csv` | School × subject geographic equity output |
+| `output_data/geographic_equity_by_quadrant.csv` | Quadrant × subject geographic equity summary |
+| `output_data/summary_report.xlsx` | **Policy summary workbook — 7 formatted sheets** |
 | `output_data/school_growth_full.csv` | Same-grade growth detail |
 | `output_data/combined_all_years.csv` | Clean combined source data |
 
@@ -339,7 +367,7 @@ python app/app_simple.py
 
 1. **Choose the next Build target**
       - Restore the full normalized-data / 2024-25 ingestion path, or
-      - Finish the still-blocked browser-console / manual dashboard checks for the current nine-figure dashboard
+       - Finish the still-blocked browser-console / manual dashboard checks for the current 10-figure dashboard
 
 2. **If pursuing the normalized-data path**
    - Update `src/load_clean_data.py` to recognize the repo's actual workbook layout/names, or

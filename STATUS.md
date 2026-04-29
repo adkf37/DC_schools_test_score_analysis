@@ -2,15 +2,16 @@
 
 ## Current Objective
 
-**Loop 8 validation complete — Geographic Equity Analysis build is reproducible; full smoke path exits 0; dashboard returns 10 figures; `summary_report.xlsx` has 7 sheets.**
+**Loop 8 closeout complete — the current 7-workbook wide-format + geographic-equity + summary-report handoff is approved; the repo now returns to Build for the remaining normalized-data / 2024-25 scope and the blocked browser-console review.**
 
-Loop 8 validates `src/geographic_equity_analysis.py`, which joins school location data (Neighborhood, Quadrant) with proficiency and cohort growth outputs to surface geographic disparities across DC's four quadrants. Key findings remain stable: NW schools average 42.7% ELA proficiency vs. 24.1% (NE) and 20.1% (SE) — an 18–23 pp geographic gap that mirrors the citywide equity gap.
+Loop 8 closeout rechecked the backlog tasks, sprint plan, decision log, validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path and dashboard callback path. The current handoff is approved for the reproducible in-repo path, but the full backlog is still not complete because `src/load_clean_data.py` still depends on external normalized OSSE files and direct browser-console inspection remains blocked in this environment.
 
-Loop 8 validate completed:
+Loop 8 closeout completed:
 1. Re-ran the full smoke path from a fresh clone: dependencies, `py_compile`, `load_wide_format_data.py`, `analyze_cohort_growth.py`, `equity_gap_analysis.py`, `generate_school_rankings.py`, `proficiency_trend_analysis.py`, `geographic_equity_analysis.py`, and `generate_summary_report.py` — all exit 0.
 2. Confirmed regenerated outputs: `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), and `summary_report.xlsx` (7 sheets).
 3. Confirmed dashboard server path: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, and `POST /_dash-update-component` returns **10 figures**, including the geographic-equity chart.
 4. Confirmed Task 03 regression benchmark still passes: all four Stuart-Hobson 2022→2023 transitions remain within ±0.1 pp.
+5. Recorded closeout signoff in `.squad/review_report.md` and `.squad/decisions.md`, with explicit follow-up to return to **Build**.
 
 ---
 
@@ -23,7 +24,7 @@ Loop 8 validate completed:
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 8 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, and geographic equity |
 | 4 | Validate | ✅ Complete for loops 1-8 |
-| 5 | Closeout | ✅ Complete for loops 2-7; loop 8 pending |
+| 5 | Closeout | ✅ Complete for loops 2-8 |
 
 ---
 
@@ -68,7 +69,7 @@ Loop 8 validate completed:
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **10 figures**; 10th figure is Geographic Equity bar+line chart by DC quadrant |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 8 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 7 (loop 8 review pending) |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 8 |
 
 ---
 
@@ -99,7 +100,7 @@ Loop 8 validate completed:
   9. `python src/geographic_equity_analysis.py`
   10. `python src/generate_summary_report.py`
   11. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **10 figures**, including the geographic equity chart)
-- **Loop 8 validation evidence:** smoke path exits 0 through `generate_summary_report.py`; `output_data/summary_report.xlsx` is regenerated with 7 sheets; dashboard callback returns 10 figures including the geographic-equity chart.
+- **Loop 8 closeout evidence:** fresh-clone smoke path exits 0 through `generate_summary_report.py`; `output_data/summary_report.xlsx` is regenerated with 7 sheets; dashboard callback returns 10 figures including the geographic-equity chart; `.squad/review_report.md` signs off the current handoff and returns the repo to Build.
 - **Loop 8 geographic equity findings:** NW avg ELA proficiency 42.7% vs. NE 24.1%, SE 20.1% (−18 pp to −23 pp gap). NW also leads in cohort growth (+4.85 pp ELA). SE schools show the largest gap vs. NW citywide. Math shows a similar pattern (NW 38.4% vs. NE/SE ~15%).
 - **Loop 8 name-matching note:** 95/115 location schools match directly to growth/trends data. 20 unmatched schools are primarily high schools (no cohort transitions) and schools not represented in the 7 in-repo workbooks.
 - **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
@@ -107,4 +108,4 @@ Loop 8 validate completed:
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
 - **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
 - **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run Closeout for loop 8. If closeout signs off the current handoff, return the repo to Build for the remaining normalized-data / 2024-25 scope and the blocked browser-console review.
+- **Next recommended step:** Return to **Build** and choose the next backlog slice: restore the normalized-data / 2024-25 ingestion path or finish the blocked browser-console review for the current 10-figure dashboard.
