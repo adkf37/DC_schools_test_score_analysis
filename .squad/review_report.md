@@ -2,11 +2,11 @@
 
 **Date:** 2026-04-29
 **Reviewer:** Ralph
-**Final Decision:** **CLOSEOUT SIGNOFF FOR THE CURRENT 7-WORKBOOK WIDE-FORMAT + SUMMARY-REPORT LOOP — return to Build for remaining scope**
+**Final Decision:** **CLOSEOUT SIGNOFF FOR THE CURRENT 7-WORKBOOK WIDE-FORMAT + GEOGRAPHIC-EQUITY + SUMMARY-REPORT LOOP — return to Build for remaining scope**
 
 ## Scope
 
-Closeout review for loop 7 against the backlog tasks, sprint Definition of Done, current documentation, and the repository's reproducibility requirements from a fresh clone.
+Closeout review for loop 8 against the backlog tasks, sprint Definition of Done, current documentation, and the repository's reproducibility requirements from a fresh clone.
 
 ## Evidence Checked
 
@@ -39,15 +39,16 @@ Closeout review for loop 7 against the backlog tasks, sprint Definition of Done,
 6. `python src/equity_gap_analysis.py` — ✅ passed
 7. `python src/generate_school_rankings.py` — ✅ passed
 8. `python src/proficiency_trend_analysis.py` — ✅ passed
-9. `python src/generate_summary_report.py` — ✅ passed
-10. `python app/app_simple.py` plus `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` — ✅ passed
+9. `python src/geographic_equity_analysis.py` — ✅ passed
+10. `python src/generate_summary_report.py` — ✅ passed
+11. `python app/app_simple.py` plus `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` — ✅ passed
 
 ## Acceptance Criteria Review
 
 - **Closeout outcome recorded in `STATUS.md`** — ✅ updated in this loop
 - **`.squad/review_report.md` exists and includes an explicit final decision** — ✅
 - **Final closeout notes written to `.squad/decisions.md`** — ✅
-- **Human-facing docs current enough for handoff** — ✅ refreshed to match the validated loop-7 wide-format + summary-report state
+- **Human-facing docs current enough for handoff** — ✅ refreshed to match the validated loop-8 wide-format + geographic-equity + summary-report state
 - **Remaining blockers or follow-up work are explicit** — ✅
 
 ## Findings
@@ -55,11 +56,11 @@ Closeout review for loop 7 against the backlog tasks, sprint Definition of Done,
 1. **Fresh-clone reproducibility succeeds for the repo's documented 7-workbook wide-format path.**
     `src/load_wide_format_data.py` discovers and loads the seven committed workbooks under `input_data/School and Demographic Group Aggregation/`, covering 2016, 2017, 2018, 2019, 2022, 2023, and 2024. The documented downstream scripts regenerate the analytical outputs without manual intervention.
 
-2. **Task 03 is met for the reproducible in-repo path, Task 05 remains validated, and the loop-7 analytical artifact set still reproduces cleanly.**
-    The closeout rerun regenerated `output_data/combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `cohort_growth_pivot.xlsx` (6 sheets), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), and `summary_report.xlsx` (6 sheets). The Stuart-Hobson 2022→2023 benchmark rows for `Stuart-Hobson Middle School (Capitol Hill Cluster)` remain within ±0.1 pp of the manual targets, and the significance fields remain present.
+2. **Task 03 is met for the reproducible in-repo path, Task 05 remains validated, and the loop-8 analytical artifact set still reproduces cleanly.**
+    The closeout rerun regenerated `output_data/combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `cohort_growth_pivot.xlsx` (6 sheets), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), and `summary_report.xlsx` (7 sheets). The Stuart-Hobson 2022→2023 benchmark rows for `Stuart-Hobson Middle School (Capitol Hill Cluster)` remain within ±0.1 pp of the manual targets, and the significance fields remain present.
 
-3. **The policy-summary workbook and dashboard server path are handoff-ready for this loop.**
-   `python src/generate_summary_report.py` regenerates `output_data/summary_report.xlsx` with all six expected sheets (`Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`). `python app/app_simple.py` starts successfully against the regenerated CSVs, `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, and a live multi-output `POST /_dash-update-component` response returns all nine figures, including the Grade × Year heatmap and the Baseline Proficiency vs. Cohort Growth scatter plot. With `input_data/school_locations.csv` present, the current 2024 Math / All Students map view plots 113 schools; the citywide `DC Public Schools` aggregate is correctly omitted because it has no physical location.
+3. **The new geographic-equity artifact set, policy-summary workbook, and dashboard server path are handoff-ready for this loop.**
+   `python src/geographic_equity_analysis.py` regenerates the quadrant summary with the documented loop-8 findings: NW average ELA proficiency is 42.71% versus 24.09% in NE and 20.15% in SE, while NW also leads ELA cohort growth at +4.85 pp. `python src/generate_summary_report.py` regenerates `output_data/summary_report.xlsx` with all seven expected sheets (`Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`, `Geographic Equity`). `python app/app_simple.py` starts successfully against the regenerated CSVs, `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, and a live multi-output `POST /_dash-update-component` response returns all ten figures, including the Grade × Year heatmap, the Baseline Proficiency vs. Cohort Growth scatter plot, and the Geographic Equity chart. With `input_data/school_locations.csv` present, the current 2024 Math / All Students map view plots 113 schools; the citywide `DC Public Schools` aggregate is correctly omitted because it has no physical location.
 
 4. **Closeout should sign off the current loop, but not declare the full backlog complete.**
    The handoff artifacts now match the verified state of the historical-data wide-format pipeline, but the original normalized-data / 2024-25 backlog path is still not reproducible from the repo alone, and the environment-blocked browser-console inspection remains unfinished.
@@ -73,16 +74,16 @@ Closeout review for loop 7 against the backlog tasks, sprint Definition of Done,
 
 ## Recommendation
 
-**Sign off the current 7-workbook wide-format + summary-report loop for handoff, then return the repository to Build for the remaining backlog scope.**
+**Sign off the current 7-workbook wide-format + geographic-equity + summary-report loop for handoff, then return the repository to Build for the remaining backlog scope.**
 
 Required follow-up:
 
-1. Choose the next Build target: restore the normalized-data / 2024-25 ingestion path **or** finish the blocked browser-console / manual dashboard checks for the current nine-figure dashboard.
+1. Choose the next Build target: restore the normalized-data / 2024-25 ingestion path **or** finish the blocked browser-console / manual dashboard checks for the current 10-figure dashboard.
 2. If the normalized-data path is chosen, align `src/load_clean_data.py` with the actual input contract or add/document the required OSSE files.
-3. If dashboard work is chosen, validate the browser console during manual interaction against the nine-figure dashboard and decide whether to tighten any remaining map-data coverage mismatches.
+3. If dashboard work is chosen, validate the browser console during manual interaction against the 10-figure dashboard and decide whether to tighten any remaining map-data coverage mismatches.
 4. Re-run Validate/Closeout after the next Build loop changes the evidence or scope.
 
 ## Signoff
 
-**Approved for closeout of the current 7-workbook wide-format + summary-report loop. Not approved as full project completion.**
-The repository is handoff-ready for a human who needs the verified in-repo historical-data path, regenerated analytical outputs, the formatted summary workbook, the nine-figure dashboard evidence, and explicit remaining limitations, and it should now return to **Build** for the next backlog slice.
+**Approved for closeout of the current 7-workbook wide-format + geographic-equity + summary-report loop. Not approved as full project completion.**
+The repository is handoff-ready for a human who needs the verified in-repo historical-data path, regenerated analytical outputs, the geographic-equity findings, the formatted summary workbook, the 10-figure dashboard evidence, and explicit remaining limitations, and it should now return to **Build** for the next backlog slice.
