@@ -2,16 +2,16 @@
 
 ## Current Objective
 
-**Loop 10 Validate complete — COVID Recovery Analysis path is reproducible; advance to Closeout next.**
+**Loop 10 Closeout complete — sign off the current 7-workbook wide-format + COVID-recovery-aware handoff; return to Build for the remaining backlog scope.**
 
-Loop 10 Validate rechecked the latest COVID recovery build against the sprint plan and backlog acceptance criteria. The fresh-clone smoke path is reproducible end to end: the 7-workbook ingestion path, cohort/significance/equity/rankings/proficiency-trend/geographic-equity/YoY scripts, the new `src/covid_recovery_analysis.py`, and `src/generate_summary_report.py` all exit 0; the dashboard serves the updated **12-figure** callback; and `summary_report.xlsx` now regenerates with **9 sheets** including `COVID Recovery`.
+Loop 10 Closeout rechecked the backlog tasks, sprint Definition of Done, decision log, validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path plus the dashboard HTTP/callback path. The current in-repo handoff is approved for the reproducible 7-workbook path: `src/covid_recovery_analysis.py` exits 0, the dashboard now serves **12 figures**, and `summary_report.xlsx` regenerates with **9 sheets** including `COVID Recovery`. The repo is handoff-ready for this loop, but the original normalized-data / 2024-25 path and direct browser-console inspection remain open and send the project back to **Build** next.
 
-Loop 10 Validate confirmed:
+Loop 10 Closeout confirmed:
 1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
 2. The full smoke path through `python src/generate_summary_report.py` exits 0 and regenerates the documented outputs, including `covid_recovery_detail.csv` (**1,239 rows**), `covid_recovery_summary.csv` (**200 rows**), and `summary_report.xlsx` (**9 sheets**).
 3. Workbook/schema inspection confirms Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, and the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp.
 4. The dashboard HTTP path is live: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200; Dash advertises a **12-output** callback; and a live `POST /_dash-update-component` returns all 12 figures, including the COVID recovery chart.
-5. A headless Chromium screenshot at `/tmp/loop10-dashboard.png` confirms the dashboard renders in this environment.
+5. A headless Chromium screenshot at `/tmp/loop10-closeout-dashboard.png` confirms the dashboard renders in this environment.
 6. Direct browser-console inspection remains blocked in this sandbox, and the normalized-data / 2024-25 path remains outside the reproducible in-repo scope.
 
 Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path plus the dashboard HTTP/callback path. The same-grade year-over-year (YoY) growth deliverable remains reproducible end to end: citywide ELA YoY growth averaged +4.82 pp (2016→2017), +0.94 pp (2017→2018), +4.91 pp (2018→2019), +2.02 pp (2022→2023), +0.48 pp (2023→2024); Math shows a similar pattern with a 2017→2018 dip (avg −4.32 pp) and recovery in 2022→2023 (+3.25 pp). The dashboard renders **11 figures**; `summary_report.xlsx` now has **8 sheets** (adds "YoY Growth" sheet); the current in-repo handoff is approved, but the original normalized-data / 2024-25 path and direct browser-console inspection remain open.
@@ -27,7 +27,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 10 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis |
 | 4 | Validate | ✅ Complete for loops 1-10 |
-| 5 | Closeout | ✅ Complete for loops 2-9; loop 10 pending |
+| 5 | Closeout | ✅ Complete for loops 2-10 |
 
 ---
 
@@ -78,7 +78,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **12 figures**; 12th figure is COVID Recovery scatter/grouped-bar chart |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 10 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 9 |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 10 |
 
 ---
 
@@ -111,7 +111,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
   11. `python src/covid_recovery_analysis.py`
   12. `python src/generate_summary_report.py`
   13. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **12 figures**, including the COVID recovery chart)
-- **Loop 10 Validate evidence:** reran the full smoke path from a fresh clone; all scripts exit 0. Regenerated `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows), and `summary_report.xlsx` (9 sheets); dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; a live callback returned **12 figures**; screenshot captured at `/tmp/loop10-dashboard.png`.
+- **Loop 10 Closeout evidence:** re-ran the full smoke path from a fresh clone; all scripts exit 0. Regenerated `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows), and `summary_report.xlsx` (9 sheets); dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; a live callback returned **12 figures**; closeout screenshot captured at `/tmp/loop10-closeout-dashboard.png`.
 - **Loop 10 COVID recovery findings:** citywide ELA avg COVID impact −3.94 pp (2019→2022), recovery +1.75 pp (2022→2024), net vs. pre-COVID −2.15 pp. Math was hit harder: −8.56 pp impact, +3.17 pp recovery, net −5.43 pp. Recovery status: 38% Partially Recovered, 25% Still Below Pre-COVID, 24% Exceeded Pre-COVID, 12% Fully Recovered, 2% No 2024 Data (200 school/subject observations, All Students).
 - **Loop 9 YoY growth findings:** citywide ELA YoY avg was +4.82 pp (2016→2017), +0.94 pp (2017→2018), +4.91 pp (2018→2019), +2.02 pp (2022→2023), +0.48 pp (2023→2024). Math: +2.07 pp (2016→2017), −4.32 pp (2017→2018), +2.42 pp (2018→2019), +3.25 pp (2022→2023), +0.35 pp (2023→2024). COVID gap (2019→2022) is excluded — these reflect only consecutive-year within-period comparisons.
 - **Loop 8 geographic equity findings:** NW avg ELA proficiency 42.7% vs. NE 24.1%, SE 20.1% (−18 pp to −23 pp gap). NW also leads in cohort growth (+4.85 pp ELA). SE schools show the largest gap vs. NW citywide. Math shows a similar pattern (NW 38.4% vs. NE/SE ~15%).
@@ -121,7 +121,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run **Closeout** for loop 10 — review the updated validation evidence, decide whether the current in-repo handoff is sufficient, and either sign off or return to **Build** for the remaining normalized-data / browser-console scope.
+- **Next recommended step:** Return to **Build** and choose the next backlog slice: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the 12-figure dashboard, or explicitly narrow the project scope to the verified in-repo wide-format path.
 
 ---
 
