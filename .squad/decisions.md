@@ -376,3 +376,21 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 9 while explicitly sending the repo back to **Build** next.
 - `.squad/review_report.md` becomes the authoritative closeout record for the loop-9 YoY-aware handoff.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 11-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
+
+### D-038 — Build Loop 10: COVID Recovery Analysis
+**Date:** 2026-04-29
+**Decision:** Implement `src/covid_recovery_analysis.py` as a standalone script computing the 2019→2022 COVID impact and 2022→2024 recovery trajectory for every school, subject, and student subgroup; extend the dashboard with a 12th figure; and add Sheet 9 "COVID Recovery" to `summary_report.xlsx`.
+**Rationale:**
+- The repo contains data for 2019 (pre-COVID) and 2022, 2023, 2024 (post-COVID), making a COVID recovery analysis directly possible with no new data dependencies.
+- This answers a high-priority policy question: "Which schools have recovered to pre-COVID performance levels, and which are still below?" The answer directly informs resource-allocation and intervention decisions.
+- The normalized 4-workbook / 2024-25 data path remains blocked (external files not in repo). The browser-console check remains blocked in this environment. Charter vs. DCPS comparison is blocked (no LEA-type column in wide-format files). COVID recovery is therefore the highest-value feasible deliverable for loop 10.
+- Minimum-N=10 filter is applied throughout; same suppression handling as existing scripts.
+**Consequences:**
+- `src/covid_recovery_analysis.py` — new standalone script; run it after `yoy_growth_analysis.py` and before `generate_summary_report.py`.
+- Outputs: `output_data/covid_recovery_detail.csv` (1,239 rows: school × subject × subgroup with 2019/2022/2024 metrics) and `output_data/covid_recovery_summary.csv` (200 rows: school × subject, All Students only, with recovery status).
+- Key findings: citywide ELA avg COVID impact −3.94 pp (2019→2022), recovery +1.75 pp (2022→2024), net vs. pre-COVID −2.15 pp. Math was hit harder: −8.56 pp impact, +3.17 pp recovery, net −5.43 pp. Recovery status distribution (200 school/subject observations): 38% Partially Recovered, 25% Still Below, 24% Exceeded, 12% Fully Recovered, 2% No 2024 Data.
+- Dashboard (`app/app_simple.py`) extended to load `covid_recovery_summary.csv` and render a 12th figure: in citywide mode, a scatter plot of COVID Impact vs. Recovery progress (colour-coded by recovery status); in school-selection mode, a grouped bar chart comparing 2019/2022/2024 proficiency.
+- `src/generate_summary_report.py` extended to write Sheet 9 "COVID Recovery" to `summary_report.xlsx` when `covid_recovery_summary.csv` is present; gracefully skips the sheet if the file is absent.
+- Smoke path updated: adds `python src/covid_recovery_analysis.py` as step 11 (after `yoy_growth_analysis.py`, before `generate_summary_report.py`).
+- All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
+- Next step: run Validate/Closeout for loop 10.

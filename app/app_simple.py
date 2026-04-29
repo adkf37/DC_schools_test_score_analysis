@@ -99,6 +99,7 @@ EQUITY_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'equity_gap_summary.csv')
 PROFICIENCY_TRENDS_FILE = os.path.join(OUTPUT_DIR, 'proficiency_trends.csv')
 GEO_EQUITY_FILE = os.path.join(OUTPUT_DIR, 'geographic_equity_by_quadrant.csv')
 YOY_DETAIL_FILE = os.path.join(OUTPUT_DIR, 'yoy_growth_detail.csv')
+COVID_RECOVERY_FILE = os.path.join(OUTPUT_DIR, 'covid_recovery_summary.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
@@ -106,6 +107,7 @@ equity_summary = pd.DataFrame()
 proficiency_trends = pd.DataFrame()
 geo_equity = pd.DataFrame()
 yoy_detail = pd.DataFrame()
+covid_recovery = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -124,6 +126,9 @@ if os.path.isfile(GEO_EQUITY_FILE):
 if os.path.isfile(YOY_DETAIL_FILE):
     yoy_detail = pd.read_csv(YOY_DETAIL_FILE)
     print(f"Loaded YoY growth detail: {len(yoy_detail):,} rows")
+if os.path.isfile(COVID_RECOVERY_FILE):
+    covid_recovery = pd.read_csv(COVID_RECOVERY_FILE)
+    print(f"Loaded COVID recovery summary: {len(covid_recovery):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -334,6 +339,22 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='yoy-growth')
         ]),
+
+        html.Hr(),
+
+        # ── COVID Recovery section ───────────────────────────────────────
+        html.H4("COVID Recovery Analysis (2019 → 2022 → 2024)", className="mt-3"),
+        html.P(
+            "How did each school's proficiency change from the pre-COVID 2019 baseline "
+            "to the COVID-impacted 2022 year, and how much has it recovered by 2024? "
+            "Schools are classified as: Exceeded Pre-COVID, Fully Recovered, "
+            "Partially Recovered, or Still Below Pre-COVID. "
+            "Run python src/covid_recovery_analysis.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='covid-recovery')
+        ]),
     ]
 )
 
@@ -371,6 +392,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('scatter', 'figure'),
     Output('geo-equity', 'figure'),
     Output('yoy-growth', 'figure'),
+    Output('covid-recovery', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -938,10 +960,98 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No YoY data – run src/yoy_growth_analysis.py'
         )
 
+    # ── COVID Recovery grouped bar chart ─────────────────────────────────
+    fig_covid = go.Figure()
+
+    if not covid_recovery.empty:
+        cr = covid_recovery.copy()
+        if subject:
+            cr = cr[cr['Subject'] == subject]
+        if schools:
+            cr = cr[cr['School Name'].isin(schools)]
+
+        if not cr.empty:
+            if schools:
+                # School view: grouped bar showing 2019/2022/2024 proficiency
+                cr_sel = cr.dropna(subset=['pct_2019'])
+                cr_sel = cr_sel.sort_values('net_vs_precovid_pp', ascending=True)
+                fig_covid.add_trace(go.Bar(
+                    name='2019 (Pre-COVID)',
+                    x=cr_sel['School Name'],
+                    y=cr_sel['pct_2019'],
+                    marker_color='#1565c0',
+                ))
+                fig_covid.add_trace(go.Bar(
+                    name='2022 (COVID Impact)',
+                    x=cr_sel['School Name'],
+                    y=cr_sel['pct_2022'],
+                    marker_color='#d32f2f',
+                ))
+                fig_covid.add_trace(go.Bar(
+                    name='2024 (Recovery)',
+                    x=cr_sel['School Name'],
+                    y=cr_sel['pct_2024'],
+                    marker_color='#388e3c',
+                ))
+                fig_covid.update_layout(
+                    title=f'{subject} – Proficiency: 2019 vs 2022 vs 2024',
+                    xaxis_title='School',
+                    yaxis_title='Proficiency (%)',
+                    barmode='group',
+                    height=max(400, len(cr_sel) * 30),
+                )
+            else:
+                # Citywide view: scatter of COVID impact vs. recovery
+                cr_plot = cr.dropna(subset=['covid_impact_pp', 'recovery_pp'])
+                status_colors = {
+                    'Exceeded Pre-COVID': '#1a9641',
+                    'Fully Recovered': '#a6d96a',
+                    'Partially Recovered': '#fdae61',
+                    'Still Below Pre-COVID': '#d7191c',
+                    'No 2024 Data': '#bdbdbd',
+                    'Unknown': '#969696',
+                }
+                for status_val, color in status_colors.items():
+                    sub_cr = cr_plot[cr_plot['recovery_status'] == status_val]
+                    if sub_cr.empty:
+                        continue
+                    fig_covid.add_trace(go.Scatter(
+                        x=sub_cr['covid_impact_pp'],
+                        y=sub_cr['recovery_pp'],
+                        mode='markers',
+                        name=status_val,
+                        marker=dict(color=color, size=8, opacity=0.8),
+                        text=sub_cr['School Name'],
+                        hovertemplate=(
+                            '<b>%{text}</b><br>'
+                            'COVID impact: %{x:+.1f} pp<br>'
+                            'Recovery: %{y:+.1f} pp<br>'
+                            '<extra></extra>'
+                        ),
+                    ))
+                fig_covid.add_hline(
+                    y=0, line_dash='dash', line_color='grey', line_width=1,
+                )
+                fig_covid.add_vline(
+                    x=0, line_dash='dash', line_color='grey', line_width=1,
+                )
+                fig_covid.update_layout(
+                    title=f'{subject} – COVID Impact (2019→2022) vs Recovery (2022→2024)',
+                    xaxis_title='COVID Impact (pp, negative = decline)',
+                    yaxis_title='Recovery 2022→2024 (pp)',
+                    legend_title='Recovery Status',
+                    height=500,
+                )
+
+    if not fig_covid.data:
+        fig_covid.update_layout(
+            title='No COVID recovery data – run src/covid_recovery_analysis.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
-        fig_scatter, fig_geo, fig_yoy,
+        fig_scatter, fig_geo, fig_yoy, fig_covid,
     )
 
 

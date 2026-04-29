@@ -1,6 +1,8 @@
 # Sprint Plan
 
-## Current Phase: Loop 9 Build complete → Validate next
+## Current Phase: Loop 10 Build complete → Validate next
+
+Loop 10 adds `src/covid_recovery_analysis.py`, a standalone script that quantifies the pandemic's impact on DC school test performance and measures recovery.  Using 2019 as the pre-COVID benchmark and 2022/2024 as post-COVID years, it computes for every school × subject × student subgroup: COVID impact (2019→2022), recovery progress (2022→2024), net change vs. pre-COVID, and a recovery status classification (Exceeded Pre-COVID / Fully Recovered / Partially Recovered / Still Below Pre-COVID).  Key findings: citywide ELA avg COVID impact −3.94 pp, recovery +1.75 pp, net −2.15 pp; Math impact −8.56 pp, recovery +3.17 pp, net −5.43 pp.  The dashboard now renders 12 figures; `summary_report.xlsx` now has 9 sheets (adds "COVID Recovery" sheet).
 
 Loop 9 adds `src/yoy_growth_analysis.py`, a standalone script that computes same-grade year-over-year (YoY) growth for every school, grade, subject, and student subgroup.  This fulfils the backlog README goal: "Compute cohort growth (Grade N → Grade N+1, Year Y → Year Y+1) and same-grade year-over-year growth for every school, subject, and student subgroup."  Key findings: citywide ELA YoY growth averaged +4.82 pp (2016→2017), +0.94 pp (2017→2018), +4.91 pp (2018→2019), +2.02 pp (2022→2023), +0.48 pp (2023→2024).  The dashboard now renders 11 figures; `summary_report.xlsx` now has 8 sheets (adds "YoY Growth" sheet).
 
@@ -26,10 +28,11 @@ Loop 7 adds `src/generate_summary_report.py`, a formatted 6-sheet Excel policy-s
 | 12 | [Loop 7] Formatted Excel policy summary report | Statistician | Tasks 03, 06, rankings, trends | ✅ Built — `generate_summary_report.py` exits 0; produces `output_data/summary_report.xlsx` (6 sheets) |
 | 13 | [Loop 8] Geographic equity analysis | Statistician | school_locations.csv, trends, growth | ✅ Built — `geographic_equity_analysis.py` exits 0; dashboard returns **10 figures**; `summary_report.xlsx` has **7 sheets** |
 | 14 | [Loop 9] Same-grade year-over-year growth analysis | Statistician | Task 02 | ✅ Built — `yoy_growth_analysis.py` exits 0; `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows); dashboard returns **11 figures**; `summary_report.xlsx` has **8 sheets** |
+| 15 | [Loop 10] COVID recovery analysis | Statistician | Task 02 | ✅ Built — `covid_recovery_analysis.py` exits 0; `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows); dashboard returns **12 figures**; `summary_report.xlsx` has **9 sheets** |
 
 ## Notes
 
-- Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python src/equity_gap_analysis.py` → `python src/generate_school_rankings.py` → `python src/proficiency_trend_analysis.py` → `python src/geographic_equity_analysis.py` → `python src/yoy_growth_analysis.py` → `python src/generate_summary_report.py` → `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies` (11 figures)
+- Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python src/equity_gap_analysis.py` → `python src/generate_school_rankings.py` → `python src/proficiency_trend_analysis.py` → `python src/geographic_equity_analysis.py` → `python src/yoy_growth_analysis.py` → `python src/covid_recovery_analysis.py` → `python src/generate_summary_report.py` → `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies` (12 figures)
 - `load_clean_data.py` still requires normalized OSSE files (download from OSSE website) — use `load_wide_format_data.py` for the files already in the repo.
 - `cohort_growth_summary.csv` now has 2,560 rows (Task 03 target was ≥ 1,700 — **target met** in loop 4).
 - No cohort transitions cross the 2019–2022 COVID gap; only within-year-pair transitions (2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024) are produced.
