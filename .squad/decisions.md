@@ -332,3 +332,21 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 8 while explicitly sending the repo back to **Build** next.
 - `.squad/review_report.md` becomes the authoritative closeout record for the loop-8 geographic-equity handoff.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path or finish the blocked browser-console review for the current 10-figure dashboard before another Validate/Closeout cycle.
+
+### D-035 — Build Loop 9: Same-Grade Year-over-Year Growth Analysis
+**Date:** 2026-04-29
+**Decision:** Implement `src/yoy_growth_analysis.py` as a standalone script computing same-grade year-over-year growth for every school, grade, subject, and student subgroup, and extend the dashboard with an 11th figure and `summary_report.xlsx` with an 8th sheet ("YoY Growth").
+**Rationale:**
+- `backlog/README.md` explicitly lists "same-grade year-over-year growth for every school, subject, and student subgroup" as a project goal alongside cohort growth. Loop 9 fulfils this goal.
+- The existing `analyze_growth.py` was written as a prototype but was not standalone (it internally calls `analyze_cohort_growth.py`), so a clean dedicated script avoids duplicated work and confusion in the smoke path.
+- The normalized 4-workbook / 2024-25 data path remains blocked (external files not in repo). The browser-console check is blocked in this environment. Charter vs. DCPS comparison is blocked (no LEA-type column in wide-format files). YoY growth is therefore the highest-value feasible deliverable for loop 9.
+- YoY growth uses the same consecutive-year-pair logic as cohort growth (2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024) and applies the same minimum-N=10 filter.
+**Consequences:**
+- `src/yoy_growth_analysis.py` — new standalone script; run it after `geographic_equity_analysis.py` and before `generate_summary_report.py`.
+- Outputs: `output_data/yoy_growth_detail.csv` (14,391 rows: school × grade × subject × subgroup × transition) and `output_data/yoy_growth_summary.csv` (2,604 rows: school × subject × subgroup).
+- Dashboard (`app/app_simple.py`) extended to load `yoy_growth_detail.csv` and render an 11th figure: a same-grade YoY growth line chart (citywide mode: one line per grade; school mode: one line per school).
+- `src/generate_summary_report.py` extended to write Sheet 8 "YoY Growth" to `summary_report.xlsx` when `yoy_growth_summary.csv` is present; gracefully skips the sheet if the file is absent.
+- Key YoY findings: citywide ELA avg +4.82 pp (2016→2017), +0.94 pp (2017→2018), +4.91 pp (2018→2019), +2.02 pp (2022→2023), +0.48 pp (2023→2024). Math: +2.07, −4.32, +2.42, +3.25, +0.35 pp respectively. The 2017→2018 Math dip (−4.32 pp avg) is analytically interesting and warrants further investigation.
+- All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
+- Smoke path updated: adds `python src/yoy_growth_analysis.py` as step 10 (after `geographic_equity_analysis.py`, before `generate_summary_report.py`).
+- Next step: run Validate/Closeout for loop 9.
