@@ -81,7 +81,7 @@ Validate the latest build output against the current sprint commitments for loop
      - `GET http://127.0.0.1:8050/_dash-layout`
      - `GET http://127.0.0.1:8050/_dash-dependencies`
      - `POST http://127.0.0.1:8050/_dash-update-component`
-      - `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,3600 --screenshot=/tmp/loop10-dashboard.png http://127.0.0.1:8050/` (height increased vs. loop 9 to capture the taller 12-figure page in one screenshot)
+      - `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,3600 --screenshot=/tmp/loop10-dashboard.png http://127.0.0.1:8050/`
    - Result: ✅ Passed
    - Evidence:
       - App startup loaded regenerated CSVs without exceptions and exposed filters for **7 years**, **2 subjects**, **12 subgroups**, and **251 schools**

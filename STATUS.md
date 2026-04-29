@@ -118,9 +118,9 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 - **Loop 8 name-matching note:** 95/115 location schools match directly to growth/trends data. 20 unmatched schools are primarily high schools (no cohort transitions) and schools not represented in the 7 in-repo workbooks.
 - **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
 - **Historical data caveats:** (same as loop 4 — see loop 4 notes in decisions.md D-020)
-- **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
-- **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
-- **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
+- **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
+- **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
+- **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
 - **Next recommended step:** Run **Closeout** for loop 10 — review the updated validation evidence, decide whether the current in-repo handoff is sufficient, and either sign off or return to **Build** for the remaining normalized-data / browser-console scope.
 
 ---
@@ -196,7 +196,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ---
 
-## Historical Notes / Blockers / Follow-up
+## Archived Loop 8 Notes
 
 - The detailed loop-8 blocker list and smoke-path snapshot are retained in `.squad/review_report.md` and `.squad/decisions.md` (see D-034).
 - The authoritative current blockers and next step are the loop-10 items in the top `## Notes / Blockers / Follow-up` section above.
