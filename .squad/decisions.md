@@ -278,3 +278,13 @@
 - Falls back to plain CSV exports if openpyxl is not installed (openpyxl is already in requirements.txt via pandas, so this should not occur in practice).
 - Smoke test path updated: adds `python src/generate_summary_report.py` as step 9 (before dashboard startup).
 - Next step: run Validate/Closeout for loop 7.
+
+
+### D-030 — Validate Passes Loop 7 and Advances to Closeout
+**Date:** 2026-04-29
+**Decision:** Mark Validate as **PASS** for the loop-7 wide-format pipeline and advance the repo to **Closeout**.
+**Rationale:** A fresh-clone validation reran the documented smoke path end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, and `python src/generate_summary_report.py` all exited 0. The run regenerated `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), and `summary_report.xlsx` (6 sheets). `python app/app_simple.py` also started successfully; `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; and a live `POST /_dash-update-component` request returned all nine figures. Direct browser-console inspection remained blocked because the Playwright browser profile was locked.
+**Consequences:**
+- `.squad/validation_report.md` becomes the authoritative validation evidence for loop 7.
+- `STATUS.md` should move the repo to **Validate complete / Closeout next** for loop 7.
+- Closeout should decide whether to sign off the current 7-workbook wide-format + summary-report loop and explicitly carry forward the remaining scope: the missing normalized 4-workbook / 2024-25 path and the blocked browser-console check.

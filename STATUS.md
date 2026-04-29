@@ -2,14 +2,14 @@
 
 ## Current Objective
 
-**Build loop 7 in progress — formatted Excel policy summary report added; Validate/Closeout next.**
+**Validate loop 7 complete — formatted Excel policy summary report and dashboard smoke path passed; Closeout next.**
 
-`src/generate_summary_report.py` has been implemented and exits 0, producing `output_data/summary_report.xlsx` (6 sheets). This fulfills the "Generate formatted Excel/PDF summary reports" item from `backlog/phases.md` Phase 3 Build that remained open after loop 6.
+`src/generate_summary_report.py` has now been validated end to end: the documented loop-7 smoke path exits 0, regenerates the analytical CSV/XLSX outputs, produces `output_data/summary_report.xlsx` with 6 sheets, and preserves the 9-figure dashboard callback path.
 
-Loop 7 build step completed:
-1. Implemented `src/generate_summary_report.py` — reads existing output CSVs and writes a formatted 6-sheet Excel policy workbook.
-2. Confirmed `python src/generate_summary_report.py` exits 0 and produces `output_data/summary_report.xlsx` (36 KB, 6 sheets).
-3. Full smoke path (including new step) passes: `load_wide_format_data` → `analyze_cohort_growth` → `equity_gap_analysis` → `generate_school_rankings` → `proficiency_trend_analysis` → `generate_summary_report` — all exit 0.
+Loop 7 validation completed:
+1. Re-ran the fresh-clone smoke path: `load_wide_format_data` → `analyze_cohort_growth` → `equity_gap_analysis` → `generate_school_rankings` → `proficiency_trend_analysis` → `generate_summary_report` — all exit 0.
+2. Confirmed `output_data/summary_report.xlsx` is regenerated with 6 sheets (`Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`).
+3. Confirmed `python app/app_simple.py` still starts cleanly and a live callback returns all 9 figures.
 
 ---
 
@@ -20,9 +20,9 @@ Loop 7 build step completed:
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | ✅ Complete for loops 2-6 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, and scatter plot; 🔄 Loop 7 in progress — summary report |
-| 4 | Validate | ✅ Complete for loops 1-6; 🔲 Pending for loop 7 |
-| 5 | Closeout | ✅ Complete for loops 2-6; 🔲 Pending for loop 7 |
+| 3 | Build | ✅ Complete through loop 7 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, and summary report |
+| 4 | Validate | ✅ Complete for loops 1-7 |
+| 5 | Closeout | ✅ Complete for loops 2-6; 🔲 Pending for loop 7 signoff |
 
 ---
 
@@ -36,7 +36,7 @@ Loop 7 build step completed:
 | 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **9 figures** (loop 6 adds scatter plot), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Build | Statistician | 🔄 Built — `generate_summary_report.py` exits 0; `summary_report.xlsx` (6 sheets) produced |
+| 07 | Formatted Excel summary report | Validate | Statistician | ✅ Validated — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with 6 sheets |
 
 ---
 
@@ -53,17 +53,17 @@ Loop 7 build step completed:
 | School rankings | `output_data/school_rankings.csv` | ✅ 422 rows |
 | School equity rankings | `output_data/school_equity_rankings.csv` | ✅ 414 rows |
 | **Proficiency trends** | `output_data/proficiency_trends.csv` | ✅ **25,629 rows** — new in loop 5 |
-| **Policy summary report** | `output_data/summary_report.xlsx` | 🔄 **New in loop 7** — 6 formatted sheets for stakeholders |
+| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **Validated in loop 7** — 6 formatted sheets for stakeholders |
 | Processing report | `output_data/processing_report.txt` | ✅ Created |
 | Wide-format loader | `src/load_wide_format_data.py` | ✅ Extended — now handles all 7 in-repo workbooks across 6 naming schemes |
 | Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
 | School rankings script | `src/generate_school_rankings.py` | ✅ New — ranks schools by cohort growth and equity-gap narrowing |
 | **Proficiency trend script** | `src/proficiency_trend_analysis.py` | ✅ **New in loop 5** — grade × year proficiency grid |
-| **Summary report script** | `src/generate_summary_report.py` | 🔄 **New in loop 7** — 6-sheet formatted Excel workbook |
+| **Summary report script** | `src/generate_summary_report.py` | ✅ **Validated in loop 7** — 6-sheet formatted Excel workbook |
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **9 figures**; 9th figure is Baseline Proficiency vs. Cohort Growth scatter plot |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 6 |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 7 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 6 |
 
 ---
@@ -95,11 +95,11 @@ Loop 7 build step completed:
   9. `python src/generate_summary_report.py`
   10. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **9 figures**, including the scatter plot)
 - **Loop 6 closeout evidence (still valid):** all prior scripts exit 0; dashboard callback returns 9 figures; Stuart-Hobson benchmarks remain within ±0.1 pp.
-- **Loop 7 build evidence:** `generate_summary_report.py` exits 0; `output_data/summary_report.xlsx` produced (36 KB, 6 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory).
+- **Loop 7 validation evidence:** smoke path exits 0 through `generate_summary_report.py`; `output_data/summary_report.xlsx` is regenerated with 6 sheets (Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory); dashboard callback still returns 9 figures.
 - **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
 - **Historical data caveats:** (same as loop 4 — see loop 4 notes in decisions.md D-020)
 - **School location coordinates** are approximate; see loop 3 notes.
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
 - **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
 - **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run **Validate** for loop 7 — smoke path including `generate_summary_report.py`, confirm `summary_report.xlsx` is generated with 6 sheets, then run **Closeout**.
+- **Next recommended step:** Run **Closeout** for loop 7 — use this validation evidence to decide signoff vs. return-to-Build.
