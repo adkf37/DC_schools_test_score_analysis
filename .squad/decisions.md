@@ -364,3 +364,15 @@
 - `.squad/validation_report.md` becomes the authoritative validation record for the loop-9 YoY-aware handoff.
 - `STATUS.md` should move the repo to **Validate complete / Closeout next** for loop 9.
 - Closeout must decide whether the current in-repo handoff is sufficient despite the still-blocked browser-console review and missing normalized-data ingestion path.
+
+### D-037 — Closeout Signs Off Loop 9 and Returns the Repo to Build
+**Date:** 2026-04-29
+**Decision:** Closeout approves handoff for the current 7-workbook wide-format + geographic-equity + same-grade YoY + summary-report loop and returns the repo to **Build** for the remaining backlog scope rather than marking the whole project complete.
+**Rationale:**
+- Closeout rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md`, then reran the documented smoke path in a fresh clone: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`, `python src/yoy_growth_analysis.py`, and `python src/generate_summary_report.py`. The rerun regenerated `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows), and `summary_report.xlsx` (8 sheets).
+- `python app/app_simple.py` also started successfully; `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; a live `POST /_dash-update-component` request returned all eleven figures; and a fresh headless Chromium screenshot confirmed the dashboard renders in this environment.
+- The current loop is therefore handoff-ready for the reproducible in-repo path, but the repo still lacks the normalized 4-workbook / 2024-25 path required by Tasks 01–02, and direct browser-console inspection remains blocked in this environment.
+**Consequences:**
+- `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 9 while explicitly sending the repo back to **Build** next.
+- `.squad/review_report.md` becomes the authoritative closeout record for the loop-9 YoY-aware handoff.
+- The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 11-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.

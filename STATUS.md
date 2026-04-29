@@ -2,9 +2,9 @@
 
 ## Current Objective
 
-**Loop 9 Validate complete — same-grade year-over-year growth path passes; ready for Closeout.**
+**Loop 9 Closeout complete — same-grade year-over-year growth path is signed off for the reproducible in-repo handoff; return to Build for remaining backlog scope.**
 
-Loop 9 validation re-ran the documented fresh-clone smoke path and confirmed the same-grade year-over-year (YoY) growth deliverable is reproducible end to end. The repo still fulfills the backlog README goal of computing same-grade YoY growth for every school, subject, and student subgroup. Key findings remain: citywide ELA YoY growth averaged +4.82 pp (2016→2017), +0.94 pp (2017→2018), +4.91 pp (2018→2019), +2.02 pp (2022→2023), +0.48 pp (2023→2024); Math shows a similar pattern with a 2017→2018 dip (avg −4.32 pp) and recovery in 2022→2023 (+3.25 pp). The dashboard now renders **11 figures**; `summary_report.xlsx` now has **8 sheets** (adds "YoY Growth" sheet); direct browser-console inspection remains blocked in this environment.
+Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path plus the dashboard HTTP/callback path. The same-grade year-over-year (YoY) growth deliverable remains reproducible end to end: citywide ELA YoY growth averaged +4.82 pp (2016→2017), +0.94 pp (2017→2018), +4.91 pp (2018→2019), +2.02 pp (2022→2023), +0.48 pp (2023→2024); Math shows a similar pattern with a 2017→2018 dip (avg −4.32 pp) and recovery in 2022→2023 (+3.25 pp). The dashboard renders **11 figures**; `summary_report.xlsx` now has **8 sheets** (adds "YoY Growth" sheet); the current in-repo handoff is approved, but the original normalized-data / 2024-25 path and direct browser-console inspection remain open.
 
 Loop 9 Build completed:
 1. Created `src/yoy_growth_analysis.py` — standalone script reading `combined_all_years.csv`, computing consecutive-year same-grade transitions (2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024; COVID gap excluded), minimum N=10 filter.
@@ -25,7 +25,7 @@ Loop 9 Build completed:
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 9 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth |
 | 4 | Validate | ✅ Complete for loops 1-9 |
-| 5 | Closeout | ✅ Complete for loops 2-8; Loop 9 — Closeout next |
+| 5 | Closeout | ✅ Complete for loops 2-9 |
 
 ---
 
@@ -73,7 +73,7 @@ Loop 9 Build completed:
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **11 figures**; 11th figure is Same-Grade YoY Growth line chart by grade level |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 9 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 8 |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 9 |
 
 ---
 
@@ -114,7 +114,8 @@ Loop 9 Build completed:
 - **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
 - **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
 - **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run **Closeout** for loop 9, using `.squad/validation_report.md` as the authoritative validation evidence.
+- **Loop 9 Closeout evidence:** re-ran the full smoke path from a fresh clone: dependencies, `py_compile`, `load_wide_format_data.py`, `analyze_cohort_growth.py`, `equity_gap_analysis.py`, `generate_school_rankings.py`, `proficiency_trend_analysis.py`, `geographic_equity_analysis.py`, `yoy_growth_analysis.py`, and `generate_summary_report.py` — all exit 0. Reconfirmed regenerated outputs: `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows), and `summary_report.xlsx` (8 sheets). Reconfirmed dashboard server path: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, `POST /_dash-update-component` returns **11 figures**, and a fresh headless screenshot was captured during closeout.
+- **Next recommended step:** Return to **Build** and choose the next backlog slice: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console / manual dashboard checks, or document a backlog reset if the project is intentionally narrowing to the verified in-repo wide-format scope.
 
 Loop 8 closeout rechecked the backlog tasks, sprint plan, decision log, validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path and dashboard callback path. The current handoff is approved for the reproducible in-repo path, but the full backlog is still not complete because `src/load_clean_data.py` still depends on external normalized OSSE files and direct browser-console inspection remains blocked in this environment.
 
