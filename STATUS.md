@@ -2,17 +2,17 @@
 
 ## Current Objective
 
-**Loop 10 Build complete — COVID Recovery Analysis added; return to Validate next.**
+**Loop 10 Validate complete — COVID Recovery Analysis path is reproducible; advance to Closeout next.**
 
-Loop 10 builds `src/covid_recovery_analysis.py`, which quantifies the pandemic's impact on DC school test performance and measures recovery progress. Using 2019 as the pre-COVID benchmark and 2022/2024 as post-COVID years, it computes COVID impact (2019→2022), recovery (2022→2024), net change vs. pre-COVID, and a recovery-status classification (Exceeded Pre-COVID / Fully Recovered / Partially Recovered / Still Below Pre-COVID) for every school × subject × student-subgroup combination.
+Loop 10 Validate rechecked the latest COVID recovery build against the sprint plan and backlog acceptance criteria. The fresh-clone smoke path is reproducible end to end: the 7-workbook ingestion path, cohort/significance/equity/rankings/proficiency-trend/geographic-equity/YoY scripts, the new `src/covid_recovery_analysis.py`, and `src/generate_summary_report.py` all exit 0; the dashboard serves the updated **12-figure** callback; and `summary_report.xlsx` now regenerates with **9 sheets** including `COVID Recovery`.
 
-Loop 10 Build completed:
-1. Created `src/covid_recovery_analysis.py` — standalone script reading `combined_all_years.csv`, computing 2019→2022 COVID impact and 2022→2024 recovery for 100 schools per subject (All Students); minimum N=10 filter applied throughout.
-2. Outputs: `covid_recovery_detail.csv` (1,239 rows: school × subject × subgroup × milestone years) and `covid_recovery_summary.csv` (200 rows: school × subject, All Students only, with recovery status).
-3. Extended `app/app_simple.py` — loads `covid_recovery_summary.csv`; callback now returns **12 figures** (12th is a COVID recovery scatter/grouped-bar chart).
-4. Extended `src/generate_summary_report.py` — adds Sheet 9 "COVID Recovery" to `summary_report.xlsx` when `covid_recovery_summary.csv` is present (graceful skip if absent); workbook now has **9 sheets**.
-5. All four Stuart-Hobson 2022→2023 benchmarks remain within ±0.1 pp.
-6. Fresh-clone smoke path validated through `generate_summary_report.py` — all scripts exit 0.
+Loop 10 Validate confirmed:
+1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
+2. The full smoke path through `python src/generate_summary_report.py` exits 0 and regenerates the documented outputs, including `covid_recovery_detail.csv` (**1,239 rows**), `covid_recovery_summary.csv` (**200 rows**), and `summary_report.xlsx` (**9 sheets**).
+3. Workbook/schema inspection confirms Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, and the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp.
+4. The dashboard HTTP path is live: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200; Dash advertises a **12-output** callback; and a live `POST /_dash-update-component` returns all 12 figures, including the COVID recovery chart.
+5. A headless Chromium screenshot at `/tmp/loop10-dashboard.png` confirms the dashboard renders in this environment.
+6. Direct browser-console inspection remains blocked in this sandbox, and the normalized-data / 2024-25 path remains outside the reproducible in-repo scope.
 
 Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path plus the dashboard HTTP/callback path. The same-grade year-over-year (YoY) growth deliverable remains reproducible end to end: citywide ELA YoY growth averaged +4.82 pp (2016→2017), +0.94 pp (2017→2018), +4.91 pp (2018→2019), +2.02 pp (2022→2023), +0.48 pp (2023→2024); Math shows a similar pattern with a 2017→2018 dip (avg −4.32 pp) and recovery in 2022→2023 (+3.25 pp). The dashboard renders **11 figures**; `summary_report.xlsx` now has **8 sheets** (adds "YoY Growth" sheet); the current in-repo handoff is approved, but the original normalized-data / 2024-25 path and direct browser-console inspection remain open.
 
@@ -26,7 +26,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 10 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis |
-| 4 | Validate | ✅ Complete for loops 1-9; loop 10 pending |
+| 4 | Validate | ✅ Complete for loops 1-10 |
 | 5 | Closeout | ✅ Complete for loops 2-9; loop 10 pending |
 
 ---
@@ -77,7 +77,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **12 figures**; 12th figure is COVID Recovery scatter/grouped-bar chart |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 9 |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 10 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 9 |
 
 ---
@@ -111,19 +111,17 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
   11. `python src/covid_recovery_analysis.py`
   12. `python src/generate_summary_report.py`
   13. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **12 figures**, including the COVID recovery chart)
-- **Loop 10 Build evidence:** ran full smoke path from a fresh clone; all scripts exit 0. Generated `covid_recovery_detail.csv` (1,239 rows) and `covid_recovery_summary.csv` (200 rows); `summary_report.xlsx` now has 9 sheets; dashboard declares 12 figure outputs.
+- **Loop 10 Validate evidence:** reran the full smoke path from a fresh clone; all scripts exit 0. Regenerated `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows), and `summary_report.xlsx` (9 sheets); dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; a live callback returned **12 figures**; screenshot captured at `/tmp/loop10-dashboard.png`.
 - **Loop 10 COVID recovery findings:** citywide ELA avg COVID impact −3.94 pp (2019→2022), recovery +1.75 pp (2022→2024), net vs. pre-COVID −2.15 pp. Math was hit harder: −8.56 pp impact, +3.17 pp recovery, net −5.43 pp. Recovery status: 38% Partially Recovered, 25% Still Below Pre-COVID, 24% Exceeded Pre-COVID, 12% Fully Recovered, 2% No 2024 Data (200 school/subject observations, All Students).
 - **Loop 9 YoY growth findings:** citywide ELA YoY avg was +4.82 pp (2016→2017), +0.94 pp (2017→2018), +4.91 pp (2018→2019), +2.02 pp (2022→2023), +0.48 pp (2023→2024). Math: +2.07 pp (2016→2017), −4.32 pp (2017→2018), +2.42 pp (2018→2019), +3.25 pp (2022→2023), +0.35 pp (2023→2024). COVID gap (2019→2022) is excluded — these reflect only consecutive-year within-period comparisons.
 - **Loop 8 geographic equity findings:** NW avg ELA proficiency 42.7% vs. NE 24.1%, SE 20.1% (−18 pp to −23 pp gap). NW also leads in cohort growth (+4.85 pp ELA). SE schools show the largest gap vs. NW citywide. Math shows a similar pattern (NW 38.4% vs. NE/SE ~15%).
 - **Loop 8 name-matching note:** 95/115 location schools match directly to growth/trends data. 20 unmatched schools are primarily high schools (no cohort transitions) and schools not represented in the 7 in-repo workbooks.
 - **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
 - **Historical data caveats:** (same as loop 4 — see loop 4 notes in decisions.md D-020)
-- **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
-- **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
-- **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run **Validate** for loop 10 — re-run the smoke path, confirm 12 figures and 9 workbook sheets, then advance to **Closeout**.
-4. Confirmed Task 03 regression benchmark still passes: all four Stuart-Hobson 2022→2023 transitions remain within ±0.1 pp.
-5. Recorded closeout signoff in `.squad/review_report.md` and `.squad/decisions.md`, with explicit follow-up to return to **Build**.
+- **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
+- **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
+- **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
+- **Next recommended step:** Run **Closeout** for loop 10 — review the updated validation evidence, decide whether the current in-repo handoff is sufficient, and either sign off or return to **Build** for the remaining normalized-data / browser-console scope.
 
 ---
 
@@ -198,26 +196,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ---
 
-## Notes / Blockers / Follow-up
+## Archived Loop 8 Notes
 
-- **Smoke test commands (loop 8 — updated):**
-  1. `python -m pip install -r requirements.txt`
-  2. `python -m pip install dash plotly`
-  3. `python -m py_compile src/*.py app/*.py inspect_data.py`
-  4. `python src/load_wide_format_data.py`
-  5. `python src/analyze_cohort_growth.py`
-  6. `python src/equity_gap_analysis.py`
-  7. `python src/generate_school_rankings.py`
-  8. `python src/proficiency_trend_analysis.py`
-  9. `python src/geographic_equity_analysis.py`
-  10. `python src/generate_summary_report.py`
-  11. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **10 figures**, including the geographic equity chart)
-- **Loop 8 closeout evidence:** fresh-clone smoke path exits 0 through `generate_summary_report.py`; `output_data/summary_report.xlsx` is regenerated with 7 sheets; dashboard callback returns 10 figures including the geographic-equity chart; `.squad/review_report.md` signs off the current handoff and returns the repo to Build.
-- **Loop 8 geographic equity findings:** NW avg ELA proficiency 42.7% vs. NE 24.1%, SE 20.1% (−18 pp to −23 pp gap). NW also leads in cohort growth (+4.85 pp ELA). SE schools show the largest gap vs. NW citywide. Math shows a similar pattern (NW 38.4% vs. NE/SE ~15%).
-- **Loop 8 name-matching note:** 95/115 location schools match directly to growth/trends data. 20 unmatched schools are primarily high schools (no cohort transitions) and schools not represented in the 7 in-repo workbooks.
-- **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
-- **Historical data caveats:** (same as loop 4 — see loop 4 notes in decisions.md D-020)
-- **Normalized OSSE files** (`load_clean_data.py` targets) are still not available in the repo.
-- **Validation blocker still open:** direct browser-console inspection remains blocked in this environment.
-- **Charter vs. DCPS comparison** remains unimplemented: the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Return to **Build** and choose the next backlog slice: restore the normalized-data / 2024-25 ingestion path or finish the blocked browser-console review for the current 10-figure dashboard.
+- The detailed loop-8 blocker list and smoke-path snapshot are retained in `.squad/review_report.md` and `.squad/decisions.md` (see D-034).
+- The authoritative current blockers and next step are the loop-10 items in the top `## Notes / Blockers / Follow-up` section above.
