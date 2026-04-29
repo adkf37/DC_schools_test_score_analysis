@@ -2,11 +2,11 @@
 
 **Date:** 2026-04-29  
 **Reviewer:** Ralph  
-**Recommendation:** **PASS — advance loop 6 to Closeout**
+**Recommendation:** **PASS — advance loop 7 to Closeout**
 
 ## Scope
 
-Validate the latest build output against the current sprint commitments for loop 6: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend outputs, and the dashboard HTTP/callback path with the new Baseline Proficiency vs. Cohort Growth scatter plot as the 9th figure.
+Validate the latest build output against the current sprint commitments for loop 7: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend outputs, the new formatted Excel policy summary report, and the dashboard HTTP/callback path with the 9-figure experience preserved.
 
 ## Checks Run
 
@@ -22,13 +22,14 @@ Validate the latest build output against the current sprint commitments for loop
    - Command: `python -m py_compile src/*.py app/*.py inspect_data.py`
    - Result: ✅ Passed
 
-4. **Wide-format pipeline smoke test**
+4. **Wide-format pipeline + reporting smoke test**
    - Commands:
      - `python src/load_wide_format_data.py`
      - `python src/analyze_cohort_growth.py`
      - `python src/equity_gap_analysis.py`
      - `python src/generate_school_rankings.py`
      - `python src/proficiency_trend_analysis.py`
+     - `python src/generate_summary_report.py`
    - Result: ✅ Passed
    - Evidence:
      - Loaded **7** in-repo workbooks covering school years **2016, 2017, 2018, 2019, 2022, 2023, 2024**
@@ -41,16 +42,17 @@ Validate the latest build output against the current sprint commitments for loop
      - Wrote `output_data/school_rankings.csv` with **422 rows**
      - Wrote `output_data/school_equity_rankings.csv` with **414 rows**
      - Wrote `output_data/proficiency_trends.csv` with **25,629 rows**
+     - Wrote `output_data/summary_report.xlsx` with **6 sheets**
 
-5. **Schema / benchmark inspection**
+5. **Schema / benchmark / workbook inspection**
    - Command: inspect regenerated outputs with Python/pandas and `openpyxl`
    - Result: ✅ Passed
    - Evidence:
      - `cohort_growth_detail.csv` contains Task 03 required columns plus Task 05 fields `p_value` and `significant`
      - `cohort_growth_summary.csv` contains `pct_significant_transitions`
-     - `proficiency_trends.csv` contains `School Name`, `year`, `Subject`, `grade`, `Student Group Value`, `proficiency_pct`, `n_test_takers`, and `n_proficient`
      - `cohort_growth_pivot.xlsx` contains **6** sheets: `All Students Summary`, `Full Summary`, `All Students Detail`, `ELA Cohort Pivot`, `Math Cohort Pivot`, `Full Detail`
-     - Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp:
+     - `summary_report.xlsx` contains **6** sheets: `Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`
+     - Stuart-Hobson 2022→2023 benchmark rows for `Stuart-Hobson Middle School (Capitol Hill Cluster)` remain within ±0.1 pp:
        - ELA Gr6→Gr7: `33.5484% → 40.5405% (+6.9921 pp)`
        - ELA Gr7→Gr8: `36.2500% → 46.5753% (+10.3253 pp)`
        - Math Gr6→Gr7: `11.0390% → 14.6667% (+3.6277 pp)`
@@ -108,13 +110,14 @@ Validate the latest build output against the current sprint commitments for loop
   - Equity gap outputs regenerate — ✅
   - Rankings outputs regenerate — ✅
   - Proficiency trend output regenerates — ✅
+  - Formatted Excel summary report regenerates with 6 expected sheets — ✅
 
 ## Blocked Checks / Remaining Follow-up
 
 - **Browser-console inspection is still blocked.** Playwright could not open a browser session because the browser profile was already locked (`Browser is already in use for /root/.cache/ms-playwright/mcp-chrome`).
 - **Original normalized-data backlog scope is still open.** The repo validates the reproducible 7-workbook wide-format path, but `src/load_clean_data.py` still depends on external normalized OSSE workbooks, including 2024-25, that are not committed here.
-- **Closeout still needs to decide final project handoff status.** This validate pass proves the current loop-6 wide-format + scatter path is reproducible; Closeout must explicitly sign off or return the repo to Build for remaining backlog scope.
+- **Closeout still needs to decide final project handoff status.** This validate pass proves the current loop-7 wide-format + summary-report + dashboard path is reproducible; Closeout must explicitly sign off or return the repo to Build for remaining backlog scope.
 
 ## Conclusion
 
-Validation passes for the current loop-6 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the analytical outputs regenerate cleanly, and the dashboard now serves all nine figures, including the new Baseline Proficiency vs. Cohort Growth scatter plot. The next phase should be **Closeout**.
+Validation passes for the current loop-7 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the analytical outputs regenerate cleanly, the new `summary_report.xlsx` workbook is produced with all six expected sheets, and the dashboard still serves all nine figures. The next phase should be **Closeout**.
