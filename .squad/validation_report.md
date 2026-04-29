@@ -1,12 +1,12 @@
 # Validation Report
 
-**Date:** 2026-04-28  
+**Date:** 2026-04-29  
 **Reviewer:** Ralph  
-**Recommendation:** **PASS — advance loop 5 to Closeout**
+**Recommendation:** **PASS — advance loop 6 to Closeout**
 
 ## Scope
 
-Validate the latest build output against the current sprint commitments for loop 5: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings outputs, the new proficiency-trend artifact, and the dashboard HTTP/callback path with the new Grade × Year heatmap.
+Validate the latest build output against the current sprint commitments for loop 6: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend outputs, and the dashboard HTTP/callback path with the new Baseline Proficiency vs. Cohort Growth scatter plot as the 9th figure.
 
 ## Checks Run
 
@@ -43,7 +43,7 @@ Validate the latest build output against the current sprint commitments for loop
      - Wrote `output_data/proficiency_trends.csv` with **25,629 rows**
 
 5. **Schema / benchmark inspection**
-   - Command: inspect regenerated outputs with Python/pandas
+   - Command: inspect regenerated outputs with Python/pandas and `openpyxl`
    - Result: ✅ Passed
    - Evidence:
      - `cohort_growth_detail.csv` contains Task 03 required columns plus Task 05 fields `p_value` and `significant`
@@ -67,8 +67,8 @@ Validate the latest build output against the current sprint commitments for loop
    - Evidence:
      - App startup loaded regenerated CSVs without exceptions and exposed filters for **7 years**, **2 subjects**, **12 subgroups**, and **251 schools**
      - `GET /`, `GET /_dash-layout`, and `GET /_dash-dependencies` all returned **200**
-     - `/_dash-dependencies` advertised the expected **8-output** callback
-     - A live callback request returned all eight figures:
+     - `/_dash-dependencies` advertised the expected **9-output** callback
+     - A live callback request returned all nine figures:
        - `timeseries`: `Math - Percent Meeting/Exceeding Over Time`
        - `bars`: `Math - Year 2024: Top Schools`
        - `cohort-bars`: `Math – Avg Cohort Growth (pp)`
@@ -77,6 +77,7 @@ Validate the latest build output against the current sprint commitments for loop
        - `equity-gaps`: `Math – Citywide Avg Proficiency Gap vs All Students`
        - `equity-gap-change`: `Math – Citywide Avg Gap Change (+ = narrowing)`
        - `heatmap`: `Math – Citywide Average: Grade × Year Proficiency (%)`
+       - `scatter`: `Math – Baseline Proficiency vs. Cohort Growth (All Students)`
 
 ## Acceptance-Criteria Status
 
@@ -96,9 +97,10 @@ Validate the latest build output against the current sprint commitments for loop
 
 - **Task 04 — Interactive dashboard**
   - `python app/app_simple.py` starts without errors with regenerated CSV inputs — ✅
-  - Dashboard callback returns at least five figures — ✅ (returns **8**)
+  - Dashboard callback returns at least five figures — ✅ (returns **9**)
   - Subject / subgroup / school / year-range interaction path responds without server-side errors — ✅
-  - Heatmap view is present in the callback output — ✅
+  - Heatmap view remains present in the callback output — ✅
+  - Scatter-plot view is present in the callback output — ✅
   - No unhandled browser-console exceptions during manual interaction — ⚠️ **Blocked in this environment**
 
 - **Task 05 + loop deliverables**
@@ -111,8 +113,8 @@ Validate the latest build output against the current sprint commitments for loop
 
 - **Browser-console inspection is still blocked.** Playwright could not open a browser session because the browser profile was already locked (`Browser is already in use for /root/.cache/ms-playwright/mcp-chrome`).
 - **Original normalized-data backlog scope is still open.** The repo validates the reproducible 7-workbook wide-format path, but `src/load_clean_data.py` still depends on external normalized OSSE workbooks, including 2024-25, that are not committed here.
-- **Closeout still needs to decide final project handoff status.** This validate pass proves the current loop-5 wide-format + heatmap path is reproducible; Closeout must explicitly sign off or return the repo to Build for remaining backlog scope.
+- **Closeout still needs to decide final project handoff status.** This validate pass proves the current loop-6 wide-format + scatter path is reproducible; Closeout must explicitly sign off or return the repo to Build for remaining backlog scope.
 
 ## Conclusion
 
-Validation passes for the current loop-5 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the analytical outputs regenerate cleanly, the new `proficiency_trends.csv` artifact is present, and the dashboard now serves all eight figures including the Grade × Year heatmap. The next phase should be **Closeout**.
+Validation passes for the current loop-6 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the analytical outputs regenerate cleanly, and the dashboard now serves all nine figures, including the new Baseline Proficiency vs. Cohort Growth scatter plot. The next phase should be **Closeout**.
