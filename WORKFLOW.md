@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Closeout Loop 8 Complete — Geographic Equity Added, Repo Returns to Build
+## ✅ Current Status: Closeout Loop 9 Complete — Same-Grade YoY Growth Added, Repo Returns to Build
 
-As of 2026-04-29, loop 8 has passed Validate and Closeout for the reproducible in-repo path. `src/geographic_equity_analysis.py` and the 7-sheet `summary_report.xlsx` are now part of the documented smoke path:
+As of 2026-04-29, loop 9 has passed Validate and Closeout for the reproducible in-repo path. `src/yoy_growth_analysis.py`, the YoY dashboard figure, and the 8-sheet `summary_report.xlsx` are now part of the documented smoke path:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -12,8 +12,9 @@ As of 2026-04-29, loop 8 has passed Validate and Closeout for the reproducible i
 - `python src/equity_gap_analysis.py` ✅
 - `python src/generate_school_rankings.py` ✅
 - `python src/proficiency_trend_analysis.py` ✅
-- `python src/geographic_equity_analysis.py` ✅ ← **new in loop 8**
-- `python src/generate_summary_report.py` ✅ ← updated to 7 sheets in loop 8
+- `python src/geographic_equity_analysis.py` ✅
+- `python src/yoy_growth_analysis.py` ✅ ← **new in loop 9**
+- `python src/generate_summary_report.py` ✅ ← updated to 8 sheets in loop 9
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 **Two data pipeline options:**
@@ -174,19 +175,20 @@ python src/generate_school_rankings.py
 
 ---
 
-### 4. Same-Grade Growth Analysis ✅ READY
-**File**: `src/analyze_growth.py`
+### 4. Same-Grade YoY Growth Analysis ✅ VALIDATED IN LOOP 9
+**File**: `src/yoy_growth_analysis.py`
 
 **What it does:**
-- Computes year-over-year change at the same grade level
-- Also calls `analyze_cohort_growth.py` automatically
+- Computes year-over-year change at the same grade level for every school / grade / subject / subgroup
+- Uses only consecutive year pairs (2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024) and excludes the COVID gap
+- Writes standalone outputs without re-running the cohort pipeline internally
 
 **Outputs:**
-- `school_growth_full.csv` – Detailed same-grade growth metrics
-- `school_growth_by_school_subject.csv` – School-level summary
+- `yoy_growth_detail.csv` – Detailed same-grade YoY metrics
+- `yoy_growth_summary.csv` – School-level summary
 
 ```bash
-python src/analyze_growth.py
+python src/yoy_growth_analysis.py
 ```
 
 ---
@@ -208,10 +210,10 @@ python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 8, example callback filters = Subject: Math; Student Group: All Students):**
+**Validated closeout evidence (Loop 9, example callback filters = Subject: Math; Student Group: All Students):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
-- A live `POST /_dash-update-component` request returns all ten figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, and Geographic Equity chart
+- A live `POST /_dash-update-component` request returns all eleven figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, Geographic Equity chart, and YoY growth chart
 - `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 Math / All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
 
 ---
@@ -234,16 +236,16 @@ python src/proficiency_trend_analysis.py
 
 ---
 
-### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 8
+### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 9
 **File**: `src/generate_summary_report.py`
 
 **What it does:**
-- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`)
-- Produces a formatted 7-sheet Excel workbook for policy stakeholders
+- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`)
+- Produces a formatted 8-sheet Excel workbook for policy stakeholders
 - Applies header formatting, alternating row shading, and colour-coded growth values
 
 **Output:**
-- `summary_report.xlsx` — 7 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity
+- `summary_report.xlsx` — 8 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth
 
 ```bash
 python src/generate_summary_report.py
@@ -293,11 +295,11 @@ python src/proficiency_trend_analysis.py
 # 6. Generate geographic equity outputs
 python src/geographic_equity_analysis.py
 
-# 7. Generate formatted Excel policy summary report
-python src/generate_summary_report.py
+# 7. Generate same-grade YoY outputs
+python src/yoy_growth_analysis.py
 
-# 8. (Optional) Run same-grade year-over-year analysis
-python src/analyze_growth.py
+# 8. Generate formatted Excel policy summary report
+python src/generate_summary_report.py
 
 # 9. (Optional) Launch the interactive dashboard
 python app/app_simple.py
@@ -314,8 +316,8 @@ python app/app_simple.py
 | `src/generate_school_rankings.py` | School rankings by cohort growth and equity-gap change |
 | `src/proficiency_trend_analysis.py` | Grade × year proficiency grid used by the dashboard heatmap |
 | `src/geographic_equity_analysis.py` | Geographic equity outputs and quadrant comparisons |
-| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (7-sheet workbook) |
-| `src/analyze_growth.py` | Same-grade YoY growth |
+| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (8-sheet workbook) |
+| `src/yoy_growth_analysis.py` | Same-grade YoY growth |
 | `app/app_simple.py` | Interactive dashboard |
 | `input_data/school_locations.csv` | Geocoordinates for 115 DC public schools (enables map) |
 | `output_data/cohort_growth_detail.csv` | Every cohort transition |
@@ -328,8 +330,9 @@ python app/app_simple.py
 | `output_data/proficiency_trends.csv` | Grade × year proficiency trends for the heatmap |
 | `output_data/geographic_equity_by_school.csv` | School × subject geographic equity output |
 | `output_data/geographic_equity_by_quadrant.csv` | Quadrant × subject geographic equity summary |
-| `output_data/summary_report.xlsx` | **Policy summary workbook — 7 formatted sheets** |
-| `output_data/school_growth_full.csv` | Same-grade growth detail |
+| `output_data/yoy_growth_detail.csv` | Same-grade YoY growth detail |
+| `output_data/yoy_growth_summary.csv` | Same-grade YoY growth summary |
+| `output_data/summary_report.xlsx` | **Policy summary workbook — 8 formatted sheets** |
 | `output_data/combined_all_years.csv` | Clean combined source data |
 
 ---
@@ -354,10 +357,10 @@ python app/app_simple.py
 
 ### Same-Grade Questions:
 1. **Is Grade 6 ELA citywide improving?**
-   → Filter `school_growth_full.csv` for Grade 6, ELA
+   → Filter `yoy_growth_detail.csv` for `grade == "Grade 6"` and `Subject == "ELA"`
 
 2. **Which schools improved the most from 2022 to 2024 in the in-repo data?**
-   → Sort `school_growth_by_school_subject.csv` by `growth_first_to_last`
+   → Filter `yoy_growth_summary.csv` to the desired subject/subgroup and sort by `avg_pp_growth`
 
 ---
 
@@ -367,7 +370,7 @@ python app/app_simple.py
 
 1. **Choose the next Build target**
       - Restore the full normalized-data / 2024-25 ingestion path, or
-       - Finish the still-blocked browser-console / manual dashboard checks for the current 10-figure dashboard
+       - Finish the still-blocked browser-console / manual dashboard checks for the current 11-figure dashboard
 
 2. **If pursuing the normalized-data path**
    - Update `src/load_clean_data.py` to recognize the repo's actual workbook layout/names, or
