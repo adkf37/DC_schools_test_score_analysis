@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Build Loop 7 In Progress — Formatted Excel Summary Report Added
+## ✅ Current Status: Closeout Loop 7 Complete — Summary Report Added, Repo Returns to Build
 
-As of 2026-04-29, `src/generate_summary_report.py` has been added in Build loop 7. The current smoke path is:
+As of 2026-04-29, loop 7 has passed Validate and Closeout for the reproducible in-repo path. `src/generate_summary_report.py` is now part of the documented smoke path:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -233,7 +233,7 @@ python src/proficiency_trend_analysis.py
 
 ---
 
-### 5c. Policy Summary Report 🔄 NEW IN LOOP 7
+### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 7
 **File**: `src/generate_summary_report.py`
 
 **What it does:**
@@ -335,7 +335,7 @@ python app/app_simple.py
 
 ## 💡 Next Steps
 
-### Required before the next validation / closeout pass:
+### Required before the next Build / Validate cycle:
 
 1. **Choose the next Build target**
       - Restore the full normalized-data / 2024-25 ingestion path, or
