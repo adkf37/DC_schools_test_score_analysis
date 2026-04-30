@@ -2,9 +2,16 @@
 
 ## Current Objective
 
-**Loop 13 Validate complete — grade-level-performance-aware handoff ready for Closeout.**
+**Loop 13 Closeout complete — the grade-level-performance-aware handoff is approved for the reproducible in-repo path; return to Build for remaining backlog scope.**
 
 Loop 13 Build adds `src/grade_level_analysis.py`, a standalone script that computes average proficiency, COVID recovery, and same-grade YoY growth broken down by specific grade of enrollment (Grade 3–Grade 8 and High School) for both ELA and Math. The dashboard now renders **15 figures**; `summary_report.xlsx` now has **12 sheets** (adds "Grade Levels" sheet).
+
+Loop 13 Closeout confirmed:
+1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the loop-13 acceptance criteria.
+2. Re-ran the documented fresh-clone smoke path through `python src/generate_summary_report.py`; every command exited 0 and regenerated the documented loop-13 outputs, including `grade_level_proficiency.csv` (**98 rows**), `grade_level_summary.csv` (**14 rows**), and `summary_report.xlsx` (**12 sheets**).
+3. Re-verified the dashboard path: `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; direct callback invocation returned all **15 figures**, including the grade-level chart; and a fresh headless Chromium screenshot at `/tmp/loop13-closeout-dashboard.png` confirmed the dashboard renders in this environment during closeout.
+4. Updated `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` so the closeout narrative matches the validated loop-13 grade-level-aware state.
+5. Approved the current reproducible in-repo path for handoff, but returned the repo to **Build** because the normalized-data / 2024-25 ingestion path, browser-console inspection, and LEA-type-based charter-vs.-DCPS analysis remain open.
 
 Loop 13 Build completed:
 1. Created `src/grade_level_analysis.py` — exits 0; produces `grade_level_proficiency.csv` (98 rows: avg/median proficiency by grade × subject × year) and `grade_level_summary.csv` (14 rows: grand-average metrics by grade × subject with COVID impact, recovery, and avg YoY growth).
@@ -30,7 +37,7 @@ Loop 13 Validate confirmed:
 6. A headless Chromium screenshot at `/tmp/loop13-dashboard.png` confirms the dashboard renders in this environment.
 7. Direct browser-console inspection remains blocked in this sandbox, and the normalized-data / 2024-25 path remains outside the reproducible in-repo scope.
 
-**Next step: run Closeout for loop 13.**
+**Next step: choose the next Build target (normalized-data / 2024-25 ingestion, browser-console review for the 15-figure dashboard, or formal narrowing of backlog scope).**
 
 Loop 12 Validate confirmed:
 1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
@@ -110,7 +117,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 13 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis |
 | 4 | Validate | ✅ Complete for loops 1-13 |
-| 5 | Closeout | ✅ Complete for loops 2-12 |
+| 5 | Closeout | ✅ Complete for loops 2-13 |
 
 ---
 
@@ -124,7 +131,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **15 figures** (loop 13 adds grade-level trend), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Validate complete — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **12 sheets** (adds Grade Levels in loop 13); Closeout still pending for loop 13 |
+| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Loop 13 closeout complete — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **12 sheets** (adds Grade Levels in loop 13) |
 
 ---
 
@@ -170,7 +177,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **15 figures**; 15th figure is Grade Level proficiency trend |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 13 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 12 |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 13 |
 
 ---
 
@@ -214,4 +221,4 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run **Closeout** for loop 13 and decide whether to sign off the current 15-figure, 12-sheet wide-format handoff or return the repo to **Build** for the remaining normalized-data / browser-console / LEA-type scope.
+- **Next recommended step:** Start the next **Build** loop and choose one explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 15-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
