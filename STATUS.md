@@ -2,9 +2,9 @@
 
 ## Current Objective
 
-**Loop 11 Validate complete — school performance trajectory classification is reproducible; return to Closeout next.**
+**Loop 11 Closeout complete — the school-trajectory-aware handoff is approved for the reproducible in-repo path; return to Build for remaining backlog scope.**
 
-Loop 11 validation reran the full fresh-clone smoke path for the new `src/school_trajectory_analysis.py` deliverable and confirmed the expanded analytical/reporting/dashboard path still works end to end.  The pipeline regenerated `school_trajectory_classification.csv` (**424 rows**), preserved the documented average trend slopes (ELA **+0.065 pp/yr**, Math **−0.656 pp/yr**), and kept Whittier Elementary School as the top improver in both subjects.  The dashboard now renders **13 figures** end to end via a live Dash callback, and `summary_report.xlsx` now has **10 sheets** (adds "School Trajectories" sheet).
+Loop 11 closeout rechecked the backlog tasks, sprint plan, decision log, validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path plus the dashboard HTTP/callback path.  The school trajectory deliverable remains reproducible end to end: `school_trajectory_classification.csv` regenerates with **424 rows**, preserves the documented average trend slopes (ELA **+0.065 pp/yr**, Math **−0.656 pp/yr**), and still shows Whittier Elementary School as the top improver in both subjects.  The dashboard renders **13 figures** end to end via a live Dash callback, and `summary_report.xlsx` now has **10 sheets** (adds "School Trajectories" sheet).  The current in-repo handoff is approved, but the normalized-data / 2024-25 path and direct browser-console inspection remain open.
 
 Loop 11 Build completed:
 1. Created `src/school_trajectory_analysis.py` — exits 0; produces `school_trajectory_classification.csv` (424 rows: 212 schools × 2 subjects, All Students, with OLS slope, R², and trajectory class).
@@ -21,6 +21,14 @@ Loop 11 Validate confirmed:
 5. The dashboard HTTP path is live: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200; Dash advertises a **13-output** callback; and a live `POST /_dash-update-component` returns all 13 figures, including the school trajectory chart.
 6. A headless Chromium screenshot at `/tmp/loop11-dashboard.png` confirms the dashboard renders in this environment.
 7. Direct browser-console inspection remains blocked in this sandbox, and the normalized-data / 2024-25 path remains outside the reproducible in-repo scope.
+
+Loop 11 Closeout confirmed:
+1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, and the full loop-11 smoke path through `python src/generate_summary_report.py` all exit 0 in this clone.
+2. The closeout rerun regenerated the documented loop-11 outputs, including `school_trajectory_classification.csv` (**424 rows**) and `summary_report.xlsx` (**10 sheets**).
+3. `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; Dash advertised a **13-output** callback; and a live `POST /_dash-update-component` returned all **13 figures**, including the school trajectory chart.
+4. A fresh headless Chromium screenshot at `/tmp/loop11-closeout-dashboard.png` confirms the dashboard still renders in this environment during closeout.
+5. `README.md` and `WORKFLOW.md` are refreshed to describe the loop-11 school-trajectory-aware handoff.
+6. The current loop is handoff-ready for the reproducible in-repo path, but the repo still lacks the normalized 4-workbook / 2024-25 path required by Tasks 01–02, and direct browser-console inspection remains blocked in this environment.
 
 Loop 10 Closeout confirmed:
 1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
@@ -43,7 +51,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 11 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification |
 | 4 | Validate | ✅ Complete for loops 1-11 |
-| 5 | Closeout | ✅ Complete for loops 2-10; loop 11 pending |
+| 5 | Closeout | ✅ Complete for loops 2-11; repo returns to Build for remaining backlog scope |
 
 ---
 
@@ -96,7 +104,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **13 figures**; 13th figure is School Trajectory scatter |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 11 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 10 |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 11 |
 
 ---
 
@@ -136,7 +144,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run **Closeout** for loop 11 using the new validation evidence, then decide whether to return to **Build** for remaining backlog scope.
+- **Next recommended step:** Return to **Build** and choose the next explicit backlog slice: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the 13-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before the next Validate/Closeout cycle.
 
 ---
 
