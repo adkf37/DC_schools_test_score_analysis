@@ -2,16 +2,25 @@
 
 ## Current Objective
 
-**Loop 13 Closeout complete — the grade-level-performance-aware handoff is approved for the reproducible in-repo path; return to Build for remaining backlog scope.**
+**Loop 14 Build complete — subgroup proficiency trend analysis adds 16th dashboard figure and 13th workbook sheet; advance to Validate next.**
 
-Loop 13 Build adds `src/grade_level_analysis.py`, a standalone script that computes average proficiency, COVID recovery, and same-grade YoY growth broken down by specific grade of enrollment (Grade 3–Grade 8 and High School) for both ELA and Math. The dashboard now renders **15 figures**; `summary_report.xlsx` now has **12 sheets** (adds "Grade Levels" sheet).
+Loop 14 Build adds `src/subgroup_trend_analysis.py`, a standalone script that computes average proficiency, COVID recovery, and same-grade YoY growth broken down by student demographic subgroup (All Students, Male, Female, Black or African American, Hispanic/Latino of any race, White, Asian, Two or more races, Economically Disadvantaged, EL Active, Students with Disabilities) for both ELA and Math. The dashboard now renders **16 figures**; `summary_report.xlsx` now has **13 sheets** (adds "Subgroups" sheet).
 
-Loop 13 Closeout confirmed:
-1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the loop-13 acceptance criteria.
-2. Re-ran the documented fresh-clone smoke path through `python src/generate_summary_report.py`; every command exited 0 and regenerated the documented loop-13 outputs, including `grade_level_proficiency.csv` (**98 rows**), `grade_level_summary.csv` (**14 rows**), and `summary_report.xlsx` (**12 sheets**).
-3. Re-verified the dashboard path: `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; direct callback invocation returned all **15 figures**, including the grade-level chart; and a fresh headless Chromium screenshot at `/tmp/loop13-closeout-dashboard.png` confirmed the dashboard renders in this environment during closeout.
-4. Updated `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` so the closeout narrative matches the validated loop-13 grade-level-aware state.
-5. Approved the current reproducible in-repo path for handoff, but returned the repo to **Build** because the normalized-data / 2024-25 ingestion path, browser-console inspection, and LEA-type-based charter-vs.-DCPS analysis remain open.
+Loop 14 Build completed:
+1. Created `src/subgroup_trend_analysis.py` — exits 0; produces `subgroup_proficiency.csv` (152 rows: avg/median proficiency by subgroup × subject × year) and `subgroup_summary.csv` (22 rows: grand-average metrics by subgroup × subject with COVID impact, recovery, and avg YoY growth).
+2. Extended `app/app_simple.py` — loads `subgroup_proficiency.csv`; adds 16th figure: in citywide mode, line chart of avg proficiency by student subgroup over time; in school-selection mode, selected school's per-subgroup proficiency overlaid on faint citywide subgroup averages.
+3. Extended `src/generate_summary_report.py` — adds Sheet 13 "Subgroups" when `subgroup_summary.csv` is present; gracefully skips if absent. Workbook now regenerates with **13 sheets**.
+4. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
+5. Direct callback invocation returns all **16 figures**, including the new subgroup proficiency chart.
+
+Key findings from subgroup analysis:
+- ELA proficiency (All Students avg 2016–2024): White highest (83.8%) → Students with Disabilities lowest (7.9%); gap of 75.9 pp
+- Math proficiency (All Students avg 2016–2024): White highest (77.1%) → Students with Disabilities lowest (6.5%); gap of 70.6 pp
+- Largest COVID impact: Hispanic/Latino of any race (ELA −9.70 pp, Math −14.54 pp)
+- Strongest recovery: Asian (ELA +10.31 pp, Math +8.65 pp)
+
+**Next step: run Validate for loop 14 (smoke path + 16 figures + 13 sheets check).**
+
 
 Loop 13 Build completed:
 1. Created `src/grade_level_analysis.py` — exits 0; produces `grade_level_proficiency.csv` (98 rows: avg/median proficiency by grade × subject × year) and `grade_level_summary.csv` (14 rows: grand-average metrics by grade × subject with COVID impact, recovery, and avg YoY growth).

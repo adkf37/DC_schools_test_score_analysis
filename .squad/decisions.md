@@ -555,3 +555,20 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 13 while explicitly sending the repo back to **Build** next.
 - `.squad/review_report.md` becomes the authoritative closeout record for the loop-13 grade-level-aware handoff.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 15-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
+
+### D-050 — Build Loop 14: Subgroup Proficiency Trend Analysis
+**Date:** 2026-04-30
+**Decision:** Implement `src/subgroup_trend_analysis.py` as a standalone script that computes average proficiency, COVID recovery, and same-grade YoY growth broken down by student demographic subgroup (All Students, Male, Female, Black or African American, Hispanic/Latino of any race, White, Asian, Two or more races, Economically Disadvantaged, EL Active, Students with Disabilities) for both ELA and Math. Extend the dashboard with a 16th figure and add Sheet 13 "Subgroups" to `summary_report.xlsx`.
+**Rationale:**
+- The normalized-data / 2024-25 path remains blocked (no OSSE files in repo). Charter-vs.-DCPS analysis remains blocked (no LEA-type column in wide-format files). Browser-console review remains environment-blocked.
+- Subgroup proficiency trend analysis is the next highest-value feasible analysis: it directly addresses the policy question "which student groups are being left behind and how has that changed over time?" using data already in `combined_all_years.csv` (the `Student Group Value` column).
+- Unlike `equity_gap_analysis.py` (which measures how subgroup cohort growth changed *relative to "All Students"* within cohort transitions), this analysis tracks *absolute proficiency levels* over time for each demographic group, enabling trend, COVID impact, and recovery comparison across groups.
+**Consequences:**
+- `src/subgroup_trend_analysis.py` — new standalone script; run after `grade_level_analysis.py` and before `generate_summary_report.py`.
+- Outputs: `subgroup_proficiency.csv` (152 rows: avg/median proficiency by subgroup × subject × year, minimum 3 schools per cell), `subgroup_summary.csv` (22 rows: grand-avg proficiency + COVID recovery + avg YoY growth by subgroup × subject).
+- Key findings: ELA proficiency gap between highest (White, 83.8%) and lowest (Students with Disabilities, 7.9%) subgroup is 75.9 pp; Hispanic/Latino took the largest COVID hit in both subjects (ELA −9.70 pp, Math −14.54 pp); Asian showed the strongest recovery (ELA +10.31 pp, Math +8.65 pp).
+- Dashboard (`app/app_simple.py`) extended to load `subgroup_proficiency.csv` and render a 16th figure: in citywide mode, line chart of avg proficiency by student subgroup over time; in school-selection mode, selected school's per-subgroup proficiency overlaid on faint citywide subgroup averages.
+- `src/generate_summary_report.py` extended to write Sheet 13 "Subgroups" when `subgroup_summary.csv` is present; gracefully skips if absent. Workbook now regenerates with **13 sheets**.
+- Smoke path updated: adds `python src/subgroup_trend_analysis.py` as step 15 (after `grade_level_analysis.py`, before `generate_summary_report.py`).
+- All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
+- Next step: run Validate/Closeout for loop 14.
