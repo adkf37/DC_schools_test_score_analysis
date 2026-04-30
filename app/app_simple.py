@@ -104,6 +104,7 @@ TRAJECTORY_FILE = os.path.join(OUTPUT_DIR, 'school_trajectory_classification.csv
 SCHOOL_TYPE_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'school_type_proficiency.csv')
 SCHOOL_TYPE_BY_SCHOOL_FILE = os.path.join(OUTPUT_DIR, 'school_type_by_school.csv')
 GRADE_LEVEL_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'grade_level_proficiency.csv')
+SUBGROUP_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'subgroup_proficiency.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
@@ -116,6 +117,7 @@ school_trajectories = pd.DataFrame()
 school_type_proficiency = pd.DataFrame()
 school_type_by_school = pd.DataFrame()
 grade_level_proficiency = pd.DataFrame()
+subgroup_proficiency = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -149,6 +151,9 @@ if os.path.isfile(SCHOOL_TYPE_BY_SCHOOL_FILE):
 if os.path.isfile(GRADE_LEVEL_PROFICIENCY_FILE):
     grade_level_proficiency = pd.read_csv(GRADE_LEVEL_PROFICIENCY_FILE)
     print(f"Loaded grade-level proficiency: {len(grade_level_proficiency):,} rows")
+if os.path.isfile(SUBGROUP_PROFICIENCY_FILE):
+    subgroup_proficiency = pd.read_csv(SUBGROUP_PROFICIENCY_FILE)
+    print(f"Loaded subgroup proficiency: {len(subgroup_proficiency):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -424,6 +429,22 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='grade-level')
         ]),
+
+        html.Hr(),
+
+        # ── Subgroup Proficiency Trend section ────────────────────────────
+        html.H4("Proficiency Trends by Student Subgroup", className="mt-3"),
+        html.P(
+            "How do absolute proficiency levels compare across student demographic "
+            "groups (All Students, Male, Female, Black or African American, "
+            "Hispanic/Latino, White, Asian, Economically Disadvantaged, EL Active, "
+            "Students with Disabilities) over time? "
+            "Run python src/subgroup_trend_analysis.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='subgroup-trend')
+        ]),
     ]
 )
 
@@ -465,6 +486,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('trajectory', 'figure'),
     Output('school-type', 'figure'),
     Output('grade-level', 'figure'),
+    Output('subgroup-trend', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -1382,11 +1404,120 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No grade-level data – run src/grade_level_analysis.py'
         )
 
+    # ── Subgroup proficiency trend line chart ─────────────────────────────
+    SUBGROUP_ORDER_DISPLAY = [
+        "All Students", "Male", "Female",
+        "Black or African American", "Hispanic/Latino of any race",
+        "White", "Asian", "Two or more races",
+        # "Econ Dis" and "EL Active" are the OSSE source labels used in the data;
+        # they appear as-is in combined_all_years.csv and subgroup_proficiency.csv.
+        "Econ Dis", "EL Active", "Students with Disabilities",
+    ]
+    fig_subgroup = go.Figure()
+
+    if not subgroup_proficiency.empty:
+        sgp = subgroup_proficiency.copy()
+        if subject:
+            sgp = sgp[sgp['Subject'] == subject]
+        sgp = sgp[sgp['year'].between(year_range[0], year_range[1])]
+
+        if schools and not multi_year.empty:
+            # School-selection mode: show selected school(s) proficiency for the
+            # selected subgroup overlaid on faint citywide subgroup averages
+            sel_df = multi_year[multi_year['School Name'].isin(schools)].copy()
+            if subject:
+                sel_df = sel_df[sel_df['Subject'] == subject]
+            sel_df = sel_df[sel_df['year'].between(year_range[0], year_range[1])]
+            sel_df = sel_df.rename(columns={'subgroup_value_std': 'subgroup'})
+            sel_df = sel_df[sel_df['subgroup'].isin(SUBGROUP_ORDER_DISPLAY)]
+            sel_df = sel_df.dropna(subset=['subgroup', 'percent_value'])
+
+            # Faint citywide subgroup averages
+            for sg in SUBGROUP_ORDER_DISPLAY:
+                sgdata = sgp[sgp['subgroup'] == sg].sort_values('year')
+                if sgdata.empty:
+                    continue
+                fig_subgroup.add_trace(go.Scatter(
+                    x=sgdata['year'],
+                    y=sgdata['avg_proficiency_pct'],
+                    mode='lines',
+                    name=f'{sg} (citywide)',
+                    line=dict(dash='dot', width=1),
+                    opacity=0.35,
+                    showlegend=True,
+                ))
+
+            # Selected school(s) per subgroup
+            school_sg_avg = (
+                sel_df.groupby(['School Name', 'subgroup', 'year'], as_index=False)
+                .agg(avg_pct=('percent_value', 'mean'))
+            )
+            for school_name in school_sg_avg['School Name'].unique():
+                if subgroup and subgroup in SUBGROUP_ORDER_DISPLAY:
+                    sg_list = [subgroup]
+                else:
+                    sg_list = [s for s in SUBGROUP_ORDER_DISPLAY
+                               if s in school_sg_avg['subgroup'].values]
+                for sg in sg_list:
+                    sd = school_sg_avg[
+                        (school_sg_avg['School Name'] == school_name) &
+                        (school_sg_avg['subgroup'] == sg)
+                    ].sort_values('year')
+                    if sd.empty:
+                        continue
+                    fig_subgroup.add_trace(go.Scatter(
+                        x=sd['year'],
+                        y=sd['avg_pct'],
+                        mode='lines+markers',
+                        name=f'{school_name} – {sg}',
+                        marker=dict(size=7),
+                    ))
+            fig_subgroup.update_layout(
+                title=f'{subject} – Selected Schools Proficiency by Student Subgroup',
+                xaxis_title='Year',
+                yaxis_title='Avg Proficiency (%)',
+                legend_title='School / Subgroup',
+                height=500,
+            )
+        else:
+            # Citywide mode: one line per subgroup
+            for sg in SUBGROUP_ORDER_DISPLAY:
+                sgdata = sgp[sgp['subgroup'] == sg].sort_values('year')
+                if sgdata.empty:
+                    continue
+                fig_subgroup.add_trace(go.Scatter(
+                    x=sgdata['year'],
+                    y=sgdata['avg_proficiency_pct'],
+                    mode='lines+markers',
+                    name=sg,
+                    customdata=sgdata[['n_schools', 'median_proficiency_pct']].values,
+                    hovertemplate=(
+                        f'<b>{sg}</b><br>'
+                        'Year: %{x}<br>'
+                        'Avg proficiency: %{y:.1f}%<br>'
+                        'Median: %{customdata[1]:.1f}%<br>'
+                        'Schools: %{customdata[0]}<br>'
+                        '<extra></extra>'
+                    ),
+                ))
+            fig_subgroup.update_layout(
+                title=f'{subject} – Citywide Avg Proficiency by Student Subgroup',
+                xaxis_title='Year',
+                yaxis_title='Avg Proficiency (%)',
+                legend_title='Student Subgroup',
+                height=500,
+            )
+
+    if not fig_subgroup.data:
+        fig_subgroup.update_layout(
+            title='No subgroup data – run src/subgroup_trend_analysis.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
         fig_scatter, fig_geo, fig_yoy, fig_covid, fig_trajectory,
-        fig_school_type, fig_grade_level,
+        fig_school_type, fig_grade_level, fig_subgroup,
     )
 
 
