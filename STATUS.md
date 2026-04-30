@@ -15,7 +15,7 @@ Loop 14 Validate confirmed:
 6. A fresh headless Chromium screenshot at `/tmp/loop14-validate-dashboard.png` confirms the dashboard renders in this environment.
 7. The current loop is ready for Closeout on the reproducible 7-workbook wide-format path, but the normalized-data / 2024-25 path, browser-console inspection, charter-vs.-DCPS analysis, and the undocumented optional consistency view remain outside the verified sprint scope.
 
-**Next step: run Closeout and decide whether to sign off the validated loop-14 handoff or return the repo to Build, explicitly addressing the optional consistency placeholder alongside the existing normalized-data and browser-console blockers.**
+**Next step: run Closeout. First decide whether the validated loop-14 handoff is acceptable as-is. Then either (a) sign off while explicitly carrying forward the optional consistency view, normalized-data / 2024-25 path, and browser-console review as future scope, or (b) return the repo to Build to address one of those items now.**
 
 
 Loop 13 Build completed:

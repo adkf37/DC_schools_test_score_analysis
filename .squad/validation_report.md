@@ -113,8 +113,8 @@ Validate the latest build output against the current sprint commitments for loop
    - Evidence:
       - App startup loaded regenerated CSVs without exceptions and exposed filters for **7 years**, **2 subjects**, **12 subgroups**, and **251 schools**
       - `GET /`, `GET /_dash-layout`, and `GET /_dash-dependencies` all returned **200**
-      - `/_dash-dependencies` includes the committed `subgroup-trend.figure` output and an additional optional `consistency.figure` output
-      - Direct callback invocation returned **17 outputs** total: the **16** loop-14 analytical figures plus one optional consistency placeholder:
+      - `/_dash-dependencies` includes the committed `subgroup-trend.figure` output and an additional conditional `consistency.figure` output that the app renders when the layout is built, even though this sprint does not generate `school_consistency.csv`
+      - Direct callback invocation returned **17 outputs** total: the **16** loop-14 analytical figures plus one data-missing consistency placeholder:
         - `timeseries`: `Math - Percent Meeting/Exceeding Over Time`
         - `bars`: `Math - Year 2024: Top Schools`
         - `cohort-bars`: `Math – Avg Cohort Growth (pp)`
@@ -180,7 +180,7 @@ Validate the latest build output against the current sprint commitments for loop
 ## Blocked Checks / Remaining Follow-up
 
 - **Browser-console inspection is still blocked.** This validation pass confirmed server startup, Dash endpoints, callback/rendering behavior, dependency metadata, and a rendered headless screenshot, but it did not produce direct browser-console evidence from an interactive session in this sandbox.
-- **The app currently exposes an undocumented optional consistency view.** `app/app_simple.py` advertises `consistency.figure`, but `school_consistency.csv` is absent from the sprint smoke path, so the callback currently returns a placeholder figure titled `No consistency data – run src/school_consistency_analysis.py`. Closeout should decide whether this stays as future scope or gets folded into the documented workflow.
+- **The app currently exposes an undocumented data-conditional consistency view.** `app/app_simple.py` always advertises `consistency.figure` in the callback signature, but this sprint does not generate `school_consistency.csv`, so the callback currently returns a placeholder figure titled `No consistency data – run src/school_consistency_analysis.py` instead of a populated chart. Closeout should decide whether this stays as future scope or gets folded into the documented workflow.
 - **Original normalized-data backlog scope is still open.** The repo validates the reproducible 7-workbook wide-format path, but `src/load_clean_data.py` still depends on external normalized OSSE workbooks, including 2024-25, that are not committed here.
 - **Charter-vs.-DCPS analysis remains unimplemented.** The wide-format files still do not include an LEA-type field that would separate DCPS from charter schools.
 - **Closeout still needs to decide final handoff status.** This validate pass proves the current loop-14 subgroup-aware path is reproducible; Closeout must explicitly sign off or return the repo to Build for remaining backlog scope.
