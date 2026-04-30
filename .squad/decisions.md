@@ -439,3 +439,17 @@
 - All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
 - Next step: run Validate/Closeout for loop 11.
 
+### D-042 — Validate Passes Loop 11 and Advances to Closeout
+**Date:** 2026-04-30
+**Decision:** Mark Validate as **PASS** for the loop-11 wide-format pipeline and advance the repo to **Closeout**.
+**Rationale:**
+- Re-ran the documented fresh-clone smoke path end to end: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`, `python src/yoy_growth_analysis.py`, `python src/covid_recovery_analysis.py`, `python src/school_trajectory_analysis.py`, and `python src/generate_summary_report.py`. All commands exited 0.
+- The rerun regenerated `combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows), `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows), `school_trajectory_classification.csv` (424 rows), and `summary_report.xlsx` (10 sheets).
+- Workbook/schema inspection confirmed Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, `summary_report.xlsx` includes the `School Trajectories` sheet, the expected YoY transitions remain present, the COVID recovery status counts still match the documented loop-10 findings, and the Stuart-Hobson 2022→2023 benchmark remains within ±0.1 pp.
+- Loop-11-specific validation also confirmed the new trajectory evidence: `school_trajectory_classification.csv` contains the documented average slope values (ELA `+0.065 pp/yr`, Math `−0.656 pp/yr`), the expected subject-level class distributions, and Whittier Elementary School remains the strongest improver in both ELA and Math.
+- `python app/app_simple.py` started successfully; `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; Dash advertised a 13-output callback; and a live `POST /_dash-update-component` returned all thirteen figures, including the new school trajectory chart. A fresh headless Chromium screenshot at `/tmp/loop11-dashboard.png` confirmed the dashboard renders in this environment.
+- The browser-console inspection remains environment-blocked, and the normalized 4-workbook / 2024-25 path remains outside the reproducible in-repo scope.
+**Consequences:**
+- `.squad/validation_report.md` becomes the authoritative validation record for the loop-11 school-trajectory-aware handoff.
+- `STATUS.md` should move the repo to **Validate complete / Closeout next** for loop 11.
+- Closeout must decide whether the current in-repo handoff is sufficient despite the still-blocked browser-console review and missing normalized-data ingestion path.
