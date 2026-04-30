@@ -4,7 +4,7 @@ This repository is intended to analyze DC OSSE assessment files across the 2021�
 
 ## Current project state
 
-**As of 2026-04-30, loop 14 Closeout is complete: the reproducible 7-workbook wide-format pipeline now includes subgroup-trend outputs, a 16-figure analytical dashboard path, an optional consistency placeholder when `school_consistency.csv` is absent, and a 13-sheet summary workbook, and the repo returns to Build for the remaining backlog scope.**
+**As of 2026-04-30, Loop 15 Build is complete: `school_consistency_analysis.py` is now part of the smoke path; the reproducible pipeline produces a 17-figure analytical dashboard and a 14-sheet summary workbook.**
 
 What was validated from a fresh clone:
 
@@ -23,6 +23,7 @@ What was validated from a fresh clone:
 - `python src/school_type_analysis.py` ✅
 - `python src/grade_level_analysis.py` ✅
 - `python src/subgroup_trend_analysis.py` ✅
+- `python src/school_consistency_analysis.py` ✅
 - `python src/generate_summary_report.py` ✅
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
@@ -52,10 +53,12 @@ What was validated from a fresh clone:
   - `output_data/grade_level_summary.csv` (14 rows)
   - `output_data/subgroup_proficiency.csv` (152 rows)
   - `output_data/subgroup_summary.csv` (22 rows)
-  - `output_data/summary_report.xlsx` (13-sheet Excel policy summary)
+  - `output_data/school_consistency.csv` (424 rows)
+  - `output_data/consistency_class_summary.csv` (10 rows)
+  - `output_data/summary_report.xlsx` (14-sheet Excel policy summary)
 - Stuart-Hobson benchmark transitions staying within ±0.1 pp
 - Task 05 significance fields (`p_value`, `significant`, `pct_significant_transitions`)
-- Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all sixteen analytical figures in the current handoff (with an additional optional consistency placeholder when `school_consistency.csv` is absent)
+- Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all **seventeen** analytical figures in the current handoff
 - Loop 3 policy-analysis outputs on the expanded historical dataset:
   - `output_data/school_rankings.csv` (422 rows)
   - `output_data/school_equity_rankings.csv` (414 rows)
@@ -98,15 +101,15 @@ What was validated from a fresh clone:
   - Grade 7 has the largest ELA COVID impact (−10.78 pp), Grade 4 has the largest Math COVID impact (−11.55 pp), Grade 6 has the strongest ELA recovery (+4.49 pp), and Grade 4 has the strongest Math recovery (+4.70 pp)
   - the dashboard callback now returns a 15th figure: `Math – Citywide Avg Proficiency by Grade Level`
   - `summary_report.xlsx` now includes a `Grade Levels` sheet
-- Loop 14 subgroup-trend outputs and handoff findings:
-  - `subgroup_proficiency.csv` contains 152 subgroup × subject × year rows
-  - `subgroup_summary.csv` contains 22 subgroup × subject summary rows
-  - ELA average proficiency peaks at White (83.82%) and bottoms at Students with Disabilities (7.92%), a 75.90 pp gap
-  - Math average proficiency peaks at White (77.06%) and bottoms at Students with Disabilities (6.46%), a 70.60 pp gap
-  - Hispanic/Latino of any race has the largest COVID hit in both subjects (ELA −9.70 pp; Math −14.54 pp)
-  - Asian has the strongest recovery in both subjects (ELA +10.31 pp; Math +8.65 pp)
-  - the dashboard callback now returns a 16th figure: `Math – Citywide Avg Proficiency by Student Subgroup`
-  - `summary_report.xlsx` now includes a `Subgroups` sheet
+- Loop 15 consistency outputs and handoff findings:
+  - `school_consistency.csv` contains 424 rows (one per school × subject) with avg proficiency, std deviation, CV, min, max, range, and consistency class
+  - `consistency_class_summary.csv` contains 10 rows (per consistency class × subject)
+  - ELA: 38 High-Consistent schools (avg 52.7%, avg CV 10.7%), 37 Low-Volatile schools (avg 13.6%, avg CV 37.5%), 55% Insufficient Data
+  - Math: 39 High-Consistent schools (avg 47.1%, avg CV 13.2%), 38 Low-Volatile schools (avg 9.0%, avg CV 59.0%), 55% Insufficient Data
+  - Top ELA High-Consistent: Ross ES (86.1% avg, CV 3.9%), Janney ES (85.7% avg, CV 3.9%), Key ES (79.6% avg, CV 3.8%)
+  - Most volatile below-median ELA: Savoy ES (7.0% avg, CV 79.4%), Turner ES (8.3% avg, CV 67.8%), Kramer MS (6.3% avg, CV 62.6%)
+  - the dashboard callback now returns a 17th figure: avg-proficiency × CV scatter coloured by consistency class
+  - `summary_report.xlsx` now includes a `Consistency` sheet
 - Cohort transitions for consecutive year pairs only: 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. There is no 2019→2022 transition because OSSE did not release comparable annual school-level assessment files for the COVID-disrupted 2020 and 2021 school years.
 
 ### Remaining gaps
@@ -115,7 +118,6 @@ What was validated from a fresh clone:
 - The 2024-25 source workbook is still missing from the in-repo dataset, so the original full-data backlog target is not met.
 - The original normalized-data success criteria in `backlog/README.md` are still open: four exact OSSE workbooks are not all present in-repo, `load_clean_data.py` is not reproducible here, and the repo therefore does not meet the full ≥395,000-row ingestion target.
 - Direct browser-console inspection during manual interaction remains blocked in this environment.
-- `app/app_simple.py` currently exposes an optional consistency view backed by `src/school_consistency_analysis.py`; because `school_consistency.csv` is not part of the validated smoke path, the current dashboard shows a placeholder message for that panel and `summary_report.xlsx` remains at 13 sheets.
 - Historical school names vary across eras (for example shortened vs. full school names), so cross-era school comparisons should be interpreted carefully even though within-pair cohort transitions are valid.
 
 ## Expected pipeline
@@ -136,17 +138,9 @@ python src/school_trajectory_analysis.py
 python src/school_type_analysis.py
 python src/grade_level_analysis.py
 python src/subgroup_trend_analysis.py
-python src/generate_summary_report.py
-```
-
-Optional future-scope add-on:
-
-```bash
 python src/school_consistency_analysis.py
 python src/generate_summary_report.py
 ```
-
-Run the consistency step before regenerating the summary workbook only if you want the extra dashboard/workbook consistency view; otherwise the current handoff intentionally stays on the validated 13-sheet workbook and placeholder dashboard panel.
 
 If you want to run the dashboard after the analytical outputs are regenerated:
 
@@ -171,6 +165,7 @@ python src/school_trajectory_analysis.py
 python src/school_type_analysis.py
 python src/grade_level_analysis.py
 python src/subgroup_trend_analysis.py
+python src/school_consistency_analysis.py
 python src/generate_summary_report.py
 ```
 
