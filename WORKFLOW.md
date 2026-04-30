@@ -463,16 +463,16 @@ python app/app_simple.py
 ### Required before the next Build / Validate cycle:
 
 1. **Choose the next Build target**
-       - Restore the full normalized-data / 2024-25 ingestion path, or
-        - Finish the still-blocked browser-console / manual dashboard checks for the current 14-figure dashboard
+   - Restore the full normalized-data / 2024-25 ingestion path, or
+   - Finish the still-blocked browser-console / manual dashboard checks for the current 14-figure dashboard
 
 2. **If pursuing the normalized-data path**
    - Update `src/load_clean_data.py` to recognize the repo's actual workbook layout/names, or
    - Place/rename the OSSE files so the documented loader command succeeds
 
 3. **If pursuing the dashboard path**
-        - Run `python app/app_simple.py`
-         - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, heatmap, scatter, YoY, COVID recovery, school trajectory, and school type outputs
+   - Run `python app/app_simple.py`
+   - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, heatmap, scatter, YoY, COVID recovery, school trajectory, and school type outputs
 
 4. **Re-run evidence checks**
    - Verify Stuart-Hobson benchmark values
