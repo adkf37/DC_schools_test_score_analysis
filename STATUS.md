@@ -2,24 +2,20 @@
 
 ## Current Objective
 
-**Loop 14 Build complete — subgroup proficiency trend analysis adds 16th dashboard figure and 13th workbook sheet; advance to Validate next.**
+**Loop 14 Validate complete — subgroup proficiency trend analysis reproduces cleanly, extends the dashboard to 16 figures, and advances to Closeout next.**
 
-Loop 14 Build adds `src/subgroup_trend_analysis.py`, a standalone script that computes average proficiency, COVID recovery, and same-grade YoY growth broken down by student demographic subgroup (All Students, Male, Female, Black or African American, Hispanic/Latino of any race, White, Asian, Two or more races, Economically Disadvantaged, EL Active, Students with Disabilities) for both ELA and Math. The dashboard now renders **16 figures**; `summary_report.xlsx` now has **13 sheets** (adds "Subgroups" sheet).
+Loop 14 Validate confirmed the full 7-workbook wide-format smoke path from a fresh clone, including the new subgroup trend analysis outputs and dashboard/reporting extensions. The repo now has reproducible evidence for the subgroup-aware analytical path: `subgroup_proficiency.csv` regenerates with **152 rows**, `subgroup_summary.csv` regenerates with **22 rows**, the dashboard callback returns **16 figures**, and `summary_report.xlsx` regenerates with **13 sheets** (adds "Subgroups").
 
-Loop 14 Build completed:
-1. Created `src/subgroup_trend_analysis.py` — exits 0; produces `subgroup_proficiency.csv` (152 rows: avg/median proficiency by subgroup × subject × year) and `subgroup_summary.csv` (22 rows: grand-average metrics by subgroup × subject with COVID impact, recovery, and avg YoY growth).
-2. Extended `app/app_simple.py` — loads `subgroup_proficiency.csv`; adds 16th figure: in citywide mode, line chart of avg proficiency by student subgroup over time; in school-selection mode, selected school's per-subgroup proficiency overlaid on faint citywide subgroup averages.
-3. Extended `src/generate_summary_report.py` — adds Sheet 13 "Subgroups" when `subgroup_summary.csv` is present; gracefully skips if absent. Workbook now regenerates with **13 sheets**.
-4. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
-5. Direct callback invocation returns all **16 figures**, including the new subgroup proficiency chart.
+Loop 14 Validate confirmed:
+1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
+2. The full smoke path through `python src/generate_summary_report.py` exits 0 and regenerates the documented outputs, including `subgroup_proficiency.csv` (**152 rows**), `subgroup_summary.csv` (**22 rows**), and `summary_report.xlsx` (**13 sheets**).
+3. Workbook/schema inspection confirms Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp, and the summary workbook now includes the `Subgroups` sheet.
+4. Subgroup inspection confirms the loop-14 claims: ELA avg proficiency peaks at **White (83.82%)** and bottoms at **Students with Disabilities (7.92%)** for a **75.90 pp** gap; Math peaks at **White (77.06%)** and bottoms at **Students with Disabilities (6.46%)** for a **70.60 pp** gap; the largest COVID hit is **Hispanic/Latino of any race** in both subjects (**−9.70 pp ELA**, **−14.54 pp Math**); and the strongest recovery is **Asian** in both subjects (**+10.31 pp ELA**, **+8.65 pp Math**).
+5. The dashboard HTTP path is live: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200; dependency metadata now includes `subgroup-trend.figure`; direct callback invocation returns all **16 figures**, including the new subgroup chart.
+6. A headless Chromium screenshot at `/tmp/loop14-dashboard.png` confirms the dashboard renders in this environment.
+7. Direct browser-console inspection remains blocked in this sandbox, and the normalized-data / 2024-25 path plus charter-vs.-DCPS analysis remain outside the reproducible in-repo scope.
 
-Key findings from subgroup analysis:
-- ELA proficiency (All Students avg 2016–2024): White highest (83.8%) → Students with Disabilities lowest (7.9%); gap of 75.9 pp
-- Math proficiency (All Students avg 2016–2024): White highest (77.1%) → Students with Disabilities lowest (6.5%); gap of 70.6 pp
-- Largest COVID impact: Hispanic/Latino of any race (ELA −9.70 pp, Math −14.54 pp)
-- Strongest recovery: Asian (ELA +10.31 pp, Math +8.65 pp)
-
-**Next step: run Validate for loop 14 (smoke path + 16 figures + 13 sheets check).**
+**Next step: run Closeout for loop 14.**
 
 
 Loop 13 Build completed:
@@ -124,8 +120,8 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | ✅ Complete through loop 13 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis |
-| 4 | Validate | ✅ Complete for loops 1-13 |
+| 3 | Build | ✅ Complete through loop 14 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis, subgroup trend analysis |
+| 4 | Validate | ✅ Complete for loops 1-14 |
 | 5 | Closeout | ✅ Complete for loops 2-13 |
 
 ---
@@ -137,10 +133,10 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 01 | Ingest raw data | Squad Init | Data Engineer | ✅ Wide-format path now covers 7 in-repo files (2016–2024); normalized 4-workbook path still pending external data |
 | 02 | Clean & standardize data | Squad Review | Data Engineer | ✅ `combined_all_years.csv` regenerated (28,069 rows, 7 years, 251 raw schools / 211 cohort-analysis schools) |
 | 03 | Cohort growth analysis | Build | Statistician | ✅ Task 03 target now met — 12,956 detail rows, **2,560 summary rows** (target ≥ 1,700); all 4 Stuart-Hobson benchmarks pass |
-| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **15 figures** (loop 13 adds grade-level trend), school-level and citywide views functional |
+| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **16 figures** (loop 14 adds subgroup trend), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Loop 13 closeout complete — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **12 sheets** (adds Grade Levels in loop 13) |
+| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Validate complete for loop 14 — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **13 sheets** (adds Subgroups in loop 14) |
 
 ---
 
@@ -169,23 +165,26 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | **School type summary** | `output_data/school_type_summary.csv` | ✅ **New in loop 12** — 10 rows (grand-avg proficiency + COVID recovery + cohort growth by type × subject) |
 | **Grade-level proficiency (trend)** | `output_data/grade_level_proficiency.csv` | ✅ **New in loop 13** — 98 rows (avg/median proficiency by grade × subject × year) |
 | **Grade-level summary** | `output_data/grade_level_summary.csv` | ✅ **New in loop 13** — 14 rows (grand-avg proficiency + COVID recovery + avg YoY growth by grade × subject) |
-| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **12 sheets** — adds Grade Levels sheet in loop 13 |
+| **Subgroup proficiency (trend)** | `output_data/subgroup_proficiency.csv` | ✅ **New in loop 14** — 152 rows (avg/median proficiency by subgroup × subject × year) |
+| **Subgroup summary** | `output_data/subgroup_summary.csv` | ✅ **New in loop 14** — 22 rows (grand-avg proficiency + COVID recovery + avg YoY growth by subgroup × subject) |
+| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **13 sheets** — adds Subgroups sheet in loop 14 |
 | Processing report | `output_data/processing_report.txt` | ✅ Created |
 | Wide-format loader | `src/load_wide_format_data.py` | ✅ Extended — now handles all 7 in-repo workbooks across 6 naming schemes |
 | Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
 | School rankings script | `src/generate_school_rankings.py` | ✅ New — ranks schools by cohort growth and equity-gap narrowing |
 | **Proficiency trend script** | `src/proficiency_trend_analysis.py` | ✅ **New in loop 5** — grade × year proficiency grid |
-| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 13** — now produces 12-sheet Excel workbook |
+| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 14** — now produces 13-sheet Excel workbook |
 | **Geographic equity script** | `src/geographic_equity_analysis.py` | ✅ **New in loop 8** — joins school locations with performance data by DC quadrant |
 | **YoY growth script** | `src/yoy_growth_analysis.py` | ✅ **New in loop 9** — same-grade year-over-year growth for every school, grade, subject, subgroup |
 | **COVID recovery script** | `src/covid_recovery_analysis.py` | ✅ **New in loop 10** — 2019→2022 COVID impact and 2022→2024 recovery per school, subject, subgroup |
 | **School trajectory script** | `src/school_trajectory_analysis.py` | ✅ **New in loop 11** — OLS trend slope and class for every school × subject (All Students, 2016–2024) |
 | **School type analysis script** | `src/school_type_analysis.py` | ✅ **New in loop 12** — grade-band classification and performance metrics by school type |
 | **Grade-level analysis script** | `src/grade_level_analysis.py` | ✅ **New in loop 13** — grade-specific proficiency, COVID recovery, and YoY metrics |
+| **Subgroup trend analysis script** | `src/subgroup_trend_analysis.py` | ✅ **New in loop 14** — subgroup-specific proficiency, COVID recovery, and YoY metrics |
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
-| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **15 figures**; 15th figure is Grade Level proficiency trend |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 13 |
+| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **16 figures**; 16th figure is the subgroup proficiency trend |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 14 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 13 |
 
 ---
@@ -205,7 +204,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 13 — validate complete):**
+- **Smoke test commands (loop 14 — validate complete):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -220,14 +219,15 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
   12. `python src/school_trajectory_analysis.py`
   13. `python src/school_type_analysis.py`
   14. `python src/grade_level_analysis.py`
-  15. `python src/generate_summary_report.py`
-  16. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, and `/_dash-dependencies`; verify the dashboard callback path via `app.app_simple.update_figures(...)` (returns **15 figures**, including the grade-level proficiency trend chart)
-- **Loop 13 validation evidence:** reran the full smoke path; all scripts exit 0. `grade_level_proficiency.csv` regenerated (**98 rows**), `grade_level_summary.csv` regenerated (**14 rows**), and `summary_report.xlsx` regenerated (**12 sheets**). Dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; Dash advertised a **15-output** callback; direct callback invocation returned **15 figures**; headless screenshot saved to `/tmp/loop13-dashboard.png`.
-- **Loop 13 grade-level findings:** ELA proficiency (All Students, 2016–2024 avg): Grade 4 **32.74%** > Grade 6 **26.04%**. Math proficiency: Grade 3 **33.76%** > HS **13.17%**. Largest ELA COVID impact: Grade 7 (**−10.78 pp**). Largest Math COVID impact: Grade 4 (**−11.55 pp**). Strongest ELA recovery: Grade 6 (**+4.49 pp**). Strongest Math recovery: Grade 4 (**+4.70 pp**).
+  15. `python src/subgroup_trend_analysis.py`
+  16. `python src/generate_summary_report.py`
+  17. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, and `/_dash-dependencies`; verify the dashboard callback path via `app.app_simple.update_figures(...)` (returns **16 figures**, including the subgroup proficiency trend chart)
+- **Loop 14 validation evidence:** reran the full smoke path; all scripts exit 0. `subgroup_proficiency.csv` regenerated (**152 rows**), `subgroup_summary.csv` regenerated (**22 rows**), and `summary_report.xlsx` regenerated (**13 sheets**). Dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; dependency metadata included `subgroup-trend.figure`; direct callback invocation returned **16 figures**; headless screenshot saved to `/tmp/loop14-dashboard.png`.
+- **Loop 14 subgroup findings:** ELA proficiency (All Students, 2016–2024 avg): White **83.82%** > Students with Disabilities **7.92%** (gap **75.90 pp**). Math proficiency: White **77.06%** > Students with Disabilities **6.46%** (gap **70.60 pp**). Largest COVID impact: Hispanic/Latino of any race (**−9.70 pp ELA**, **−14.54 pp Math**). Strongest recovery: Asian (**+10.31 pp ELA**, **+8.65 pp Math**).
 - **Loop 11 validation evidence:** reran the full smoke path; all scripts exit 0. `school_trajectory_classification.csv` regenerated (424 rows); `summary_report.xlsx` regenerated (10 sheets); dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` returned 200; live callback returned **13 figures**; headless screenshot saved to `/tmp/loop11-dashboard.png`.
 - **Loop 11 trajectory findings:** ELA citywide avg trend slope +0.065 pp/yr — distribution: 55% Insufficient Data (≤2 years of data), 14% Stable, 13% Declining, 9% Improving, 5% Strongly Improving, 4% Strongly Declining. Math avg slope −0.656 pp/yr — more schools are Declining/Strongly Declining than Improving. Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). Top Math improver: Whittier ES (+9.2 pp/yr, 23%→41%). NOTE: 55% of schools are classified "Insufficient Data" because they only appear in the most recent 1-2 years (minimum 3 years required for OLS trend).
 - **Loop 10 COVID recovery findings:** citywide ELA avg COVID impact −3.94 pp (2019→2022), recovery +1.75 pp (2022→2024), net vs. pre-COVID −2.15 pp. Math was hit harder: −8.56 pp impact, +3.17 pp recovery, net −5.43 pp. Recovery status: 38% Partially Recovered, 25% Still Below Pre-COVID, 24% Exceeded Pre-COVID, 12% Fully Recovered, 2% No 2024 Data (200 school/subject observations, All Students).
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Start the next **Build** loop and choose one explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 15-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
+- **Next recommended step:** Run **Closeout** for loop 14, then decide whether to return to **Build** for the normalized-data / 2024-25 ingestion path, the blocked browser-console review, or a deliberate narrowing of the backlog to the verified wide-format scope.
