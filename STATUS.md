@@ -184,4 +184,4 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Start the next **Build** loop and choose one explicit follow-up: restore the normalized-data / 2024-25 ingestion path, complete browser-console review for the 14-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope.
+- **Next recommended step:** Start the next **Build** loop and choose one explicit follow-up: restore the normalized-data / 2024-25 ingestion path, complete browser-console review for the 14-figure dashboard (adds school type trends), or deliberately narrow the backlog to the verified wide-format scope.
