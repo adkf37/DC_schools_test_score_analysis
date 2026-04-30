@@ -465,3 +465,20 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 11 while explicitly sending the repo back to **Build** next.
 - `.squad/review_report.md` becomes the authoritative closeout record for the loop-11 school-trajectory-aware handoff.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 13-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
+
+### D-044 — Build Loop 12: School Type (Grade-Band) Performance Analysis
+**Date:** 2026-04-30
+**Decision:** Implement `src/school_type_analysis.py` as a standalone script that classifies every school into a grade-band category (Elementary, Middle School, High School, Elementary-Middle, or Middle-High) based on which Grade of Enrollment values the school served across all available years, then computes average proficiency trends, COVID recovery metrics, and cohort growth averages by school type. Extend the dashboard with a 14th figure and add Sheet 11 "School Types" to `summary_report.xlsx`.
+**Rationale:**
+- Charter vs. DCPS comparison remains blocked (no LEA-type column). Normalized 4-workbook / 2024-25 path remains blocked. Browser-console review remains environment-blocked. School type (grade-band) analysis is therefore the next highest-value feasible deliverable from the existing in-repo data.
+- Schools serving different grade bands face fundamentally different instructional challenges and student populations. Comparing proficiency, COVID recovery, and cohort growth across school types is analytically meaningful and interpretable for policy audiences without requiring external data or ML dependencies.
+- Classification is derived directly from the `Grade of Enrollment` column already in `combined_all_years.csv`, using a deterministic rule: schools serving only Grades 3-5 → Elementary; only 6-8 → Middle School; only HS → High School; both 3-5 and 6-8 → Elementary-Middle; both 6-8 and HS → Middle-High.
+**Consequences:**
+- `src/school_type_analysis.py` — new standalone script; run after `school_trajectory_analysis.py` and before `generate_summary_report.py`.
+- Outputs: `school_type_by_school.csv` (251 rows: school × type + grades served + years present), `school_type_proficiency.csv` (70 rows: avg/median proficiency by type × subject × year), `school_type_summary.csv` (10 rows: grand-avg proficiency + COVID recovery + cohort growth by type × subject).
+- Key findings: ELA proficiency (All Students avg 2016–2024): Elementary 31.9% > Elementary-Middle 28.9% > High School 27.7% > Middle School 26.1% > Middle-High 18.9%. Math: Elementary 30.9% > Elementary-Middle 21.4% > Middle School 13.9% > High School 12.2% > Middle-High 9.5%. Elementary-Middle ELA cohort growth was highest (+6.6 pp/yr avg). Elementary-Middle schools took the largest COVID hit in ELA (−9.2 pp) but also had strong recovery (+5.3 pp). High School ELA COVID impact was nominally positive (+1.5 pp); likely driven by test-composition changes at the HS level rather than true proficiency gains.
+- Dashboard (`app/app_simple.py`) extended to load `school_type_proficiency.csv` and `school_type_by_school.csv` and render a 14th figure: in citywide mode, line chart of avg proficiency by school type over time; in school-selection mode, individual school lines coloured by type overlaid on faint citywide type averages.
+- `src/generate_summary_report.py` extended to write Sheet 11 "School Types" when `school_type_summary.csv` is present; gracefully skips if absent. Workbook now regenerates with **11 sheets**.
+- Smoke path updated: adds `python src/school_type_analysis.py` as step 13 (after `school_trajectory_analysis.py`, before `generate_summary_report.py`).
+- All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
+- Next step: run Validate/Closeout for loop 12.

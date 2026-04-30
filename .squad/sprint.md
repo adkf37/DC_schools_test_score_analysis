@@ -1,6 +1,8 @@
 # Sprint Plan
 
-## Current Phase: Loop 11 Build complete → Validate next
+## Current Phase: Loop 12 Build complete → Validate next
+
+Loop 12 adds `src/school_type_analysis.py`, a standalone script that classifies every school into a grade-band category (Elementary, Middle School, High School, Elementary-Middle, or Middle-High) based on the grades it served across all available years.  For each school type, the script computes average proficiency by year, COVID recovery metrics, and average cohort growth.  Key findings: Elementary schools have the highest proficiency in both ELA (31.9% avg) and Math (30.9% avg); Middle-High schools have the lowest (ELA 18.9%, Math 9.5%). Elementary-Middle schools had the strongest ELA cohort growth (+6.6 pp/yr avg).  The dashboard now renders **14 figures**; `summary_report.xlsx` now has **11 sheets** (adds "School Types" sheet).
 
 Loop 11 adds `src/school_trajectory_analysis.py`, a standalone script that classifies each school's long-run proficiency trajectory by fitting an OLS linear trend to annual All Students proficiency data across all available years (2016–2024).  The slope (pp/yr) and R² measure how consistently and strongly each school is improving or declining over the multi-year period.  Key findings: ELA citywide avg slope +0.065 pp/yr (mostly Stable); Math avg slope −0.656 pp/yr (more Declining than Improving). Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). The dashboard now renders **13 figures**; `summary_report.xlsx` now has **10 sheets** (adds "School Trajectories" sheet).
 
