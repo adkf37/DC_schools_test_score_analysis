@@ -4,7 +4,7 @@ This repository is intended to analyze DC OSSE assessment files across the 2021�
 
 ## Current project state
 
-**As of 2026-04-30, loop 14 Closeout is complete: the reproducible 7-workbook wide-format pipeline now includes subgroup-trend outputs, a 16-figure dashboard path, and a 13-sheet summary workbook, and the repo returns to Build for the remaining backlog scope.**
+**As of 2026-04-30, loop 14 Closeout is complete: the reproducible 7-workbook wide-format pipeline now includes subgroup-trend outputs, a 16-figure analytical dashboard path, an optional consistency placeholder when `school_consistency.csv` is absent, and a 13-sheet summary workbook, and the repo returns to Build for the remaining backlog scope.**
 
 What was validated from a fresh clone:
 
@@ -55,7 +55,7 @@ What was validated from a fresh clone:
   - `output_data/summary_report.xlsx` (13-sheet Excel policy summary)
 - Stuart-Hobson benchmark transitions staying within ±0.1 pp
 - Task 05 significance fields (`p_value`, `significant`, `pct_significant_transitions`)
-- Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all sixteen figures in the current handoff
+- Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all sixteen analytical figures in the current handoff (with an additional optional consistency placeholder when `school_consistency.csv` is absent)
 - Loop 3 policy-analysis outputs on the expanded historical dataset:
   - `output_data/school_rankings.csv` (422 rows)
   - `output_data/school_equity_rankings.csv` (414 rows)
@@ -115,6 +115,7 @@ What was validated from a fresh clone:
 - The 2024-25 source workbook is still missing from the in-repo dataset, so the original full-data backlog target is not met.
 - The original normalized-data success criteria in `backlog/README.md` are still open: four exact OSSE workbooks are not all present in-repo, `load_clean_data.py` is not reproducible here, and the repo therefore does not meet the full ≥395,000-row ingestion target.
 - Direct browser-console inspection during manual interaction remains blocked in this environment.
+- `app/app_simple.py` currently exposes an optional consistency view backed by `src/school_consistency_analysis.py`; because `school_consistency.csv` is not part of the validated smoke path, the current dashboard shows a placeholder message for that panel and `summary_report.xlsx` remains at 13 sheets.
 - Historical school names vary across eras (for example shortened vs. full school names), so cross-era school comparisons should be interpreted carefully even though within-pair cohort transitions are valid.
 
 ## Expected pipeline
@@ -137,6 +138,15 @@ python src/grade_level_analysis.py
 python src/subgroup_trend_analysis.py
 python src/generate_summary_report.py
 ```
+
+Optional future-scope add-on:
+
+```bash
+python src/school_consistency_analysis.py
+python src/generate_summary_report.py
+```
+
+Run the consistency step before regenerating the summary workbook only if you want the extra dashboard/workbook consistency view; otherwise the current handoff intentionally stays on the validated 13-sheet workbook and placeholder dashboard panel.
 
 If you want to run the dashboard after the analytical outputs are regenerated:
 

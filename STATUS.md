@@ -2,20 +2,20 @@
 
 ## Current Objective
 
-**Loop 14 Validate complete — subgroup proficiency trend analysis remains reproducibly validated in-repo, and the repo should now advance to Closeout.**
+**Loop 14 Closeout complete — the subgroup-aware wide-format handoff is approved for the reproducible in-repo path, and the repo now returns to Build for remaining scope.**
 
-Loop 14 Validate rechecked the backlog tasks, sprint plan, decision log, and prior validation evidence, then re-ran the documented fresh-clone smoke path plus the live dashboard startup/endpoints/callback path. The current in-repo handoff remains reproducible end to end: `subgroup_proficiency.csv` regenerates with **152 rows**, `subgroup_summary.csv` regenerates with **22 rows**, the loop-14 analytical dashboard path still returns the committed **16 figures**, the app currently exposes an additional optional `consistency` placeholder output, and `summary_report.xlsx` regenerates with **13 sheets** (adds "Subgroups").
+Loop 14 Closeout rechecked the backlog tasks, sprint plan, decision log, validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path. The current in-repo handoff remains reproducible end to end: `subgroup_proficiency.csv` regenerates with **152 rows**, `subgroup_summary.csv` regenerates with **22 rows**, the loop-14 analytical dashboard path still returns the committed **16 figures**, the app currently exposes an additional optional `consistency` placeholder output when `school_consistency.csv` is absent, and `summary_report.xlsx` regenerates with **13 sheets** (adds "Subgroups").
 
-Loop 14 Validate confirmed:
+Loop 14 Closeout confirmed:
 1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, and the full smoke path through `python src/generate_summary_report.py` all exit 0 in this clone.
 2. The rerun regenerates the documented analytical outputs, including `combined_all_years.csv` (**28,069 rows**), `cohort_growth_detail.csv` (**12,956 rows**), `cohort_growth_summary.csv` (**2,560 rows**), `subgroup_proficiency.csv` (**152 rows**), `subgroup_summary.csv` (**22 rows**), and `summary_report.xlsx` (**13 sheets**).
 3. Workbook/schema inspection confirms Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp, and the summary workbook includes the `Subgroups` sheet.
 4. Subgroup inspection confirms the loop-14 claims: ELA avg proficiency peaks at **White (83.82%)** and bottoms at **Students with Disabilities (7.92%)** for a **75.90 pp** gap; Math peaks at **White (77.06%)** and bottoms at **Students with Disabilities (6.46%)** for a **70.60 pp** gap; the largest COVID hit is **Hispanic/Latino of any race** in both subjects (**−9.70 pp ELA**, **−14.54 pp Math**); and the strongest recovery is **Asian** in both subjects (**+10.31 pp ELA**, **+8.65 pp Math**).
 5. The dashboard HTTP path is live: `GET /`, `/_dash-layout`, and `/_dash-dependencies` all return 200. Dependency metadata includes both `subgroup-trend.figure` and an optional `consistency.figure`. Direct callback invocation returns the **16** loop-14 analytical figures plus a final placeholder figure titled `No consistency data – run src/school_consistency_analysis.py` because `school_consistency.csv` is not part of the current smoke path.
-6. A fresh headless Chromium screenshot at `/tmp/loop14-validate-dashboard.png` confirms the dashboard renders in this environment.
-7. The current loop is ready for Closeout on the reproducible 7-workbook wide-format path, but the normalized-data / 2024-25 path, browser-console inspection, charter-vs.-DCPS analysis, and the undocumented optional consistency view remain outside the verified sprint scope.
+6. The optional consistency view is explicitly carried forward as future scope rather than a blocker for this signoff. The current closeout approves the verified 16-figure analytical handoff while documenting the placeholder as an undeployed add-on.
+7. The current loop is handoff-ready for the reproducible 7-workbook wide-format path, but the normalized-data / 2024-25 path, browser-console inspection, charter-vs.-DCPS analysis, and the optional consistency workflow remain outside the verified sprint scope.
 
-**Next step: run Closeout. First decide whether the validated loop-14 handoff is acceptable as-is. Then either (a) sign off while explicitly carrying forward the optional consistency view, normalized-data / 2024-25 path, and browser-console review as future scope, or (b) return the repo to Build to address one of those items now.**
+**Next step: return to Build. Choose the next loop's focus: (a) restore the normalized-data / 2024-25 path, (b) finish browser-console / manual dashboard review, or (c) explicitly fold the optional consistency workflow into the documented smoke path or backlog scope.**
 
 
 Loop 13 Build completed:
@@ -122,7 +122,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 14 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis, subgroup trend analysis |
 | 4 | Validate | ✅ Complete for loops 1-14 |
-| 5 | Closeout | ✅ Complete for loops 2-13; loop 14 pending signoff |
+| 5 | Closeout | ✅ Complete for loops 2-14; repo returns to Build next |
 
 ---
 
@@ -136,7 +136,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **16 figures** (loop 14 adds subgroup trend), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Validate complete for loop 14 — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **13 sheets** (adds Subgroups in loop 14) |
+| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Closeout complete for loop 14 — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **13 sheets** (adds Subgroups in loop 14) |
 
 ---
 
@@ -183,9 +183,9 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | **Subgroup trend analysis script** | `src/subgroup_trend_analysis.py` | ✅ **New in loop 14** — subgroup-specific proficiency, COVID recovery, and YoY metrics |
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
-| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **16 figures**; 16th figure is the subgroup proficiency trend |
+| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **16 analytical figures**; app also exposes an optional consistency placeholder when `school_consistency.csv` is absent |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 14 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 13 |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 14 |
 
 ---
 
@@ -204,7 +204,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 14 — validate complete):**
+- **Smoke test commands (loop 14 — closeout complete):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -222,7 +222,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
   15. `python src/subgroup_trend_analysis.py`
   16. `python src/generate_summary_report.py`
   17. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, and `/_dash-dependencies`; verify the dashboard callback path via `app.app_simple.update_figures(...)` (returns **16 figures**, including the subgroup proficiency trend chart)
-- **Loop 14 validation evidence:** reran the full smoke path; all scripts exit 0. `subgroup_proficiency.csv` regenerated (**152 rows**), `subgroup_summary.csv` regenerated (**22 rows**), and `summary_report.xlsx` regenerated (**13 sheets**). Dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; dependency metadata included `subgroup-trend.figure`; direct callback invocation returned **16 figures**; headless screenshot saved to `/tmp/loop14-dashboard.png`.
+- **Loop 14 closeout evidence:** reran the full smoke path; all scripts exit 0. `subgroup_proficiency.csv` regenerated (**152 rows**), `subgroup_summary.csv` regenerated (**22 rows**), and `summary_report.xlsx` regenerated (**13 sheets**). Dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; dependency metadata included both `subgroup-trend.figure` and `consistency.figure`; direct callback invocation returned the **16 analytical figures** plus a placeholder consistency chart; the optional consistency workflow is documented as future scope.
 - **Loop 14 subgroup findings:** ELA proficiency (All Students, 2016–2024 avg): White **83.82%** > Students with Disabilities **7.92%** (gap **75.90 pp**). Math proficiency: White **77.06%** > Students with Disabilities **6.46%** (gap **70.60 pp**). Largest COVID impact: Hispanic/Latino of any race (**−9.70 pp ELA**, **−14.54 pp Math**). Strongest recovery: Asian (**+10.31 pp ELA**, **+8.65 pp Math**).
 - **Loop 11 validation evidence:** reran the full smoke path; all scripts exit 0. `school_trajectory_classification.csv` regenerated (424 rows); `summary_report.xlsx` regenerated (10 sheets); dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` returned 200; live callback returned **13 figures**; headless screenshot saved to `/tmp/loop11-dashboard.png`.
 - **Loop 11 trajectory findings:** ELA citywide avg trend slope +0.065 pp/yr — distribution: 55% Insufficient Data (≤2 years of data), 14% Stable, 13% Declining, 9% Improving, 5% Strongly Improving, 4% Strongly Declining. Math avg slope −0.656 pp/yr — more schools are Declining/Strongly Declining than Improving. Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). Top Math improver: Whittier ES (+9.2 pp/yr, 23%→41%). NOTE: 55% of schools are classified "Insufficient Data" because they only appear in the most recent 1-2 years (minimum 3 years required for OLS trend).
@@ -230,4 +230,4 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run **Closeout** for loop 14, then decide whether to return to **Build** for the normalized-data / 2024-25 ingestion path, the blocked browser-console review, or a deliberate narrowing of the backlog to the verified wide-format scope.
+- **Next recommended step:** Return to **Build** for one explicit follow-up: the normalized-data / 2024-25 ingestion path, the blocked browser-console review, or documented disposition of the optional consistency workflow / backlog scope.
