@@ -648,7 +648,7 @@ def _build_school_type_sheet(school_type: pd.DataFrame) -> pd.DataFrame:
         'net_vs_precovid_pp': 'Net vs Pre-COVID (pp)',
         'avg_cohort_growth_pp': 'Avg Cohort Growth (pp)',
     }
-    out = school_type.rename(columns={k: v for k, v in rename.items() if k in school_type.columns})
+    out = school_type.rename(columns=rename)
 
     # Round numeric columns
     for col in ('Avg Proficiency (%)', 'COVID Impact 2019→2022 (pp)',

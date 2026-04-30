@@ -207,7 +207,7 @@ def run() -> None:
     # Collect all grades each school has ever served
     school_grades_all = (
         df.groupby("School Name")[grade_col]
-        .apply(set)
+        .agg(set)
     )
 
     school_type_map = school_grades_all.apply(_classify_school_type)
