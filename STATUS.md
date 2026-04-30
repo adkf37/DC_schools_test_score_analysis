@@ -2,7 +2,25 @@
 
 ## Current Objective
 
-**Loop 11 Closeout complete — the school-trajectory-aware handoff is approved for the reproducible in-repo path; return to Build for remaining backlog scope.**
+**Loop 12 Build complete — school-type-aware pipeline; return to Validate.**
+
+Loop 12 Build adds `src/school_type_analysis.py`, a standalone script that classifies every school by its grade-band configuration (Elementary, Middle School, High School, Elementary-Middle, or Middle-High) and then computes average proficiency, COVID recovery, and cohort growth metrics by school type. The dashboard now renders **14 figures**; `summary_report.xlsx` now has **11 sheets** (adds "School Types" sheet).
+
+Loop 12 Build completed:
+1. Created `src/school_type_analysis.py` — exits 0; produces `school_type_by_school.csv` (251 rows: school-level type classification), `school_type_proficiency.csv` (70 rows: avg/median proficiency by school type × subject × year), and `school_type_summary.csv` (10 rows: grand-average metrics by school type × subject with COVID recovery and cohort growth).
+2. Extended `app/app_simple.py` — loads `school_type_proficiency.csv` and `school_type_by_school.csv`; adds 14th figure: in citywide mode, line chart of avg proficiency by school type over time; in school-selection mode, selected schools plotted individually (coloured by type) overlaid on faint type-average lines for context.
+3. Extended `src/generate_summary_report.py` — adds Sheet 11 "School Types" when `school_type_summary.csv` is present; gracefully skips if absent. Workbook now regenerates with **11 sheets**.
+4. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
+5. Dashboard `/_dash-dependencies` advertises a **14-output** callback; `GET /`, `/_dash-layout` return 200.
+
+Key findings from school type analysis:
+- ELA proficiency (All Students, 2016–2024 avg): Elementary 31.9% > Elementary-Middle 28.9% > High School 27.7% > Middle School 26.1% > Middle-High 18.9%
+- Math proficiency (All Students, 2016–2024 avg): Elementary 30.9% > Elementary-Middle 21.4% > Middle School 13.9% > High School 12.2% > Middle-High 9.5%
+- Elementary schools had the largest ELA COVID impact (−4.2 pp) and Elementary-Middle the largest Math COVID impact (−8.4 pp)
+- High School ELA COVID impact was +1.5 pp (counter-intuitive; likely driven by test composition changes at the high school level)
+- Middle School ELA recovery was strongest (+3.4 pp); Elementary Math recovery was strongest (+4.1 pp)
+
+Loop 11 Closeout complete — the school-trajectory-aware handoff is approved for the reproducible in-repo path; return to Build for remaining backlog scope.
 
 Loop 11 closeout rechecked the backlog tasks, sprint plan, decision log, validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path plus the dashboard HTTP/callback path.  The school trajectory deliverable remains reproducible end to end: `school_trajectory_classification.csv` regenerates with **424 rows**, preserves the documented average trend slopes (ELA **+0.065 pp/yr**, Math **−0.656 pp/yr**), and still shows Whittier Elementary School as the top improver in both subjects.  The dashboard renders **13 figures** end to end via a live Dash callback, and `summary_report.xlsx` now has **10 sheets** (adds "School Trajectories" sheet).  The current in-repo handoff is approved, but the normalized-data / 2024-25 path and direct browser-console inspection remain open.
 
@@ -49,9 +67,9 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | ✅ Complete through loop 11 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification |
-| 4 | Validate | ✅ Complete for loops 1-11 |
-| 5 | Closeout | ✅ Complete for loops 2-11; repo returns to Build for remaining backlog scope |
+| 3 | Build | ✅ Complete through loop 12 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis |
+| 4 | Validate | ✅ Complete for loops 1-11; loop 12 pending |
+| 5 | Closeout | ✅ Complete for loops 2-11; loop 12 pending |
 
 ---
 
@@ -89,20 +107,24 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | **COVID recovery detail** | `output_data/covid_recovery_detail.csv` | ✅ **New in loop 10** — 1,239 rows (school × subject × subgroup × milestone years) |
 | **COVID recovery summary** | `output_data/covid_recovery_summary.csv` | ✅ **New in loop 10** — 200 rows (school × subject, All Students, with recovery status) |
 | **School trajectory classification** | `output_data/school_trajectory_classification.csv` | ✅ **New in loop 11** — 424 rows (212 schools × 2 subjects, All Students, with OLS slope, R², trajectory class) |
-| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **10 sheets** — adds School Trajectories sheet in loop 11 |
+| **School type classification (by school)** | `output_data/school_type_by_school.csv` | ✅ **New in loop 12** — 251 rows (school-level type: Elementary / Middle / High / Elem-Mid / Mid-High) |
+| **School type proficiency (trend)** | `output_data/school_type_proficiency.csv` | ✅ **New in loop 12** — 70 rows (avg/median proficiency by school type × subject × year) |
+| **School type summary** | `output_data/school_type_summary.csv` | ✅ **New in loop 12** — 10 rows (grand-avg proficiency + COVID recovery + cohort growth by type × subject) |
+| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **11 sheets** — adds School Types sheet in loop 12 |
 | Processing report | `output_data/processing_report.txt` | ✅ Created |
 | Wide-format loader | `src/load_wide_format_data.py` | ✅ Extended — now handles all 7 in-repo workbooks across 6 naming schemes |
 | Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
 | School rankings script | `src/generate_school_rankings.py` | ✅ New — ranks schools by cohort growth and equity-gap narrowing |
 | **Proficiency trend script** | `src/proficiency_trend_analysis.py` | ✅ **New in loop 5** — grade × year proficiency grid |
-| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 11** — now produces 10-sheet Excel workbook |
+| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 12** — now produces 11-sheet Excel workbook |
 | **Geographic equity script** | `src/geographic_equity_analysis.py` | ✅ **New in loop 8** — joins school locations with performance data by DC quadrant |
 | **YoY growth script** | `src/yoy_growth_analysis.py` | ✅ **New in loop 9** — same-grade year-over-year growth for every school, grade, subject, subgroup |
 | **COVID recovery script** | `src/covid_recovery_analysis.py` | ✅ **New in loop 10** — 2019→2022 COVID impact and 2022→2024 recovery per school, subject, subgroup |
 | **School trajectory script** | `src/school_trajectory_analysis.py` | ✅ **New in loop 11** — OLS trend slope and class for every school × subject (All Students, 2016–2024) |
+| **School type analysis script** | `src/school_type_analysis.py` | ✅ **New in loop 12** — grade-band classification and performance metrics by school type |
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
-| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **13 figures**; 13th figure is School Trajectory scatter |
+| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **14 figures**; 14th figure is School Type proficiency trend |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 11 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 11 |
 
@@ -123,7 +145,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 11 — validated):**
+- **Smoke test commands (loop 12 — build complete, validate pending):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -136,15 +158,18 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
   10. `python src/yoy_growth_analysis.py`
   11. `python src/covid_recovery_analysis.py`
   12. `python src/school_trajectory_analysis.py`
-  13. `python src/generate_summary_report.py`
-  14. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **13 figures**, including the school trajectory scatter)
+  13. `python src/school_type_analysis.py`
+  14. `python src/generate_summary_report.py`
+  15. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **14 figures**, including the school type proficiency trend chart)
+- **Loop 12 build evidence (pre-validate):** all scripts exit 0. `school_type_by_school.csv` (251 rows), `school_type_proficiency.csv` (70 rows), `school_type_summary.csv` (10 rows) generated. `summary_report.xlsx` regenerated (11 sheets). Dashboard `/_dash-dependencies` advertises 14 outputs.
+- **Loop 12 school type findings:** ELA proficiency (All Students, 2016–2024 avg): Elementary 31.9% > Elementary-Middle 28.9% > High School 27.7% > Middle School 26.1% > Middle-High 18.9%. Math proficiency: Elementary 30.9% > Elementary-Middle 21.4% > Middle School 13.9% > High School 12.2% > Middle-High 9.5%. Elementary-Middle schools had the strongest ELA cohort growth (+6.6 pp/yr) and Middle School ELA recovery was strongest (+3.4 pp).
 - **Loop 11 validation evidence:** reran the full smoke path; all scripts exit 0. `school_trajectory_classification.csv` regenerated (424 rows); `summary_report.xlsx` regenerated (10 sheets); dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` returned 200; live callback returned **13 figures**; headless screenshot saved to `/tmp/loop11-dashboard.png`.
 - **Loop 11 trajectory findings:** ELA citywide avg trend slope +0.065 pp/yr — distribution: 55% Insufficient Data (≤2 years of data), 14% Stable, 13% Declining, 9% Improving, 5% Strongly Improving, 4% Strongly Declining. Math avg slope −0.656 pp/yr — more schools are Declining/Strongly Declining than Improving. Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). Top Math improver: Whittier ES (+9.2 pp/yr, 23%→41%). NOTE: 55% of schools are classified "Insufficient Data" because they only appear in the most recent 1-2 years (minimum 3 years required for OLS trend).
 - **Loop 10 COVID recovery findings:** citywide ELA avg COVID impact −3.94 pp (2019→2022), recovery +1.75 pp (2022→2024), net vs. pre-COVID −2.15 pp. Math was hit harder: −8.56 pp impact, +3.17 pp recovery, net −5.43 pp. Recovery status: 38% Partially Recovered, 25% Still Below Pre-COVID, 24% Exceeded Pre-COVID, 12% Fully Recovered, 2% No 2024 Data (200 school/subject observations, All Students).
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Return to **Build** and choose the next explicit backlog slice: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the 13-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before the next Validate/Closeout cycle.
+- **Next recommended step:** Run **Validate** for loop 12 (smoke path through `school_type_analysis.py`, confirm 14 figures, 11 sheets, Stuart-Hobson benchmarks still pass), then Closeout loop 12.
 
 ---
 
