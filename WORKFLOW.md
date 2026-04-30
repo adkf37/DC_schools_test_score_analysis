@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Closeout Loop 11 Complete — School Trajectories Added, Repo Returns to Build
+## ✅ Current Status: Closeout Loop 12 Complete — School Types Added, Repo Returns to Build
 
-As of 2026-04-30, loop 11 has passed Validate and Closeout for the reproducible in-repo path. `src/school_trajectory_analysis.py`, the school trajectory dashboard figure, and the 10-sheet `summary_report.xlsx` are now part of the documented smoke path:
+As of 2026-04-30, loop 12 has passed Validate and Closeout for the reproducible in-repo path. `src/school_type_analysis.py`, the school type dashboard figure, and the 11-sheet `summary_report.xlsx` are now part of the documented smoke path:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -16,7 +16,8 @@ As of 2026-04-30, loop 11 has passed Validate and Closeout for the reproducible 
 - `python src/yoy_growth_analysis.py` ✅
 - `python src/covid_recovery_analysis.py` ✅ ← **new in loop 10**
 - `python src/school_trajectory_analysis.py` ✅ ← **new in loop 11**
-- `python src/generate_summary_report.py` ✅ ← updated to 10 sheets in loop 11
+- `python src/school_type_analysis.py` ✅ ← **new in loop 12**
+- `python src/generate_summary_report.py` ✅ ← updated to 11 sheets in loop 12
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 **Two data pipeline options:**
@@ -236,6 +237,28 @@ python src/school_trajectory_analysis.py
 
 ---
 
+### 4d. School Type Analysis ✅ VALIDATED IN LOOP 12
+**File**: `src/school_type_analysis.py`
+
+**What it does:**
+- Classifies each school into a grade-band type using the grades it serves across the available wide-format years
+- Computes average proficiency-by-year trends for each school type by subject
+- Summarizes school-type COVID impact, recovery, and average cohort growth for both dashboard and workbook handoff
+
+**Outputs:**
+- `school_type_by_school.csv` – 251 school × type rows
+- `school_type_proficiency.csv` – 70 school-type × subject × year proficiency rows
+- `school_type_summary.csv` – 10 school-type × subject summary rows
+
+```bash
+python src/school_type_analysis.py
+```
+
+**Current handoff finding:**
+- Elementary schools lead average proficiency in both ELA (31.85%) and Math (30.91%); Elementary-Middle schools have the strongest ELA cohort growth (+6.56 pp/yr).
+
+---
+
 ### 5. Interactive Dashboard ✅ VALIDATED FOR THE CURRENT LOOP
 **File**: `app/app_simple.py`
 
@@ -247,6 +270,7 @@ python src/school_trajectory_analysis.py
 - **Baseline Proficiency vs. Cohort Growth scatter** – school-level baseline-vs-growth view with significance/transition context
 - **COVID recovery chart** – citywide impact-vs-recovery scatter or selected-school milestone bar chart
 - **School trajectory chart** – school-level slope-vs-average-proficiency scatter coloured by trajectory class
+- **School type chart** – school-type proficiency trends citywide or selected-school overlays coloured by type
 - Filter by subject, student group, schools, year range
 - Map view (requires `input_data/school_locations.csv` — included in Loop 3 and still validated in Loop 5)
 
@@ -255,10 +279,10 @@ python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 11, example callback filters = Subject: Math; Student Group: All Students):**
+**Validated closeout evidence (Loop 12, example callback filters = Subject: Math; Student Group: All Students):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
-- A live `POST /_dash-update-component` request returns all thirteen figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, Geographic Equity chart, YoY growth chart, COVID recovery chart, and school trajectory chart
+- A live `POST /_dash-update-component` request returns all fourteen figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, Geographic Equity chart, YoY growth chart, COVID recovery chart, school trajectory chart, and school type chart
 - `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 Math / All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
 
 ---
@@ -281,16 +305,16 @@ python src/proficiency_trend_analysis.py
 
 ---
 
-### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 11
+### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 12
 **File**: `src/generate_summary_report.py`
 
 **What it does:**
-- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`, `covid_recovery_summary.csv`, `school_trajectory_classification.csv`)
-- Produces a formatted 10-sheet Excel workbook for policy stakeholders
+- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`, `covid_recovery_summary.csv`, `school_trajectory_classification.csv`, `school_type_summary.csv`)
+- Produces a formatted 11-sheet Excel workbook for policy stakeholders
 - Applies header formatting, alternating row shading, and colour-coded growth values
 
 **Output:**
-- `summary_report.xlsx` — 10 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories
+- `summary_report.xlsx` — 11 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types
 
 ```bash
 python src/generate_summary_report.py
@@ -349,10 +373,13 @@ python src/covid_recovery_analysis.py
 # 9. Generate school trajectory outputs
 python src/school_trajectory_analysis.py
 
-# 10. Generate formatted Excel policy summary report
+# 10. Generate school type outputs
+python src/school_type_analysis.py
+
+# 11. Generate formatted Excel policy summary report
 python src/generate_summary_report.py
 
-# 11. (Optional) Launch the interactive dashboard
+# 12. (Optional) Launch the interactive dashboard
 python app/app_simple.py
 ```
 
@@ -368,7 +395,8 @@ python app/app_simple.py
 | `src/proficiency_trend_analysis.py` | Grade × year proficiency grid used by the dashboard heatmap |
 | `src/geographic_equity_analysis.py` | Geographic equity outputs and quadrant comparisons |
 | `src/school_trajectory_analysis.py` | Multi-year OLS trend slopes and trajectory classes |
-| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (10-sheet workbook) |
+| `src/school_type_analysis.py` | Grade-band school type analysis and type-level performance summaries |
+| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (11-sheet workbook) |
 | `src/yoy_growth_analysis.py` | Same-grade YoY growth |
 | `src/covid_recovery_analysis.py` | COVID impact and recovery analysis |
 | `app/app_simple.py` | Interactive dashboard |
@@ -388,7 +416,10 @@ python app/app_simple.py
 | `output_data/covid_recovery_detail.csv` | COVID impact and recovery detail |
 | `output_data/covid_recovery_summary.csv` | COVID recovery status summary |
 | `output_data/school_trajectory_classification.csv` | School-level trend slopes and trajectory classes |
-| `output_data/summary_report.xlsx` | **Policy summary workbook — 10 formatted sheets** |
+| `output_data/school_type_by_school.csv` | School-level type assignments |
+| `output_data/school_type_proficiency.csv` | School-type proficiency trends |
+| `output_data/school_type_summary.csv` | School-type summary metrics |
+| `output_data/summary_report.xlsx` | **Policy summary workbook — 11 formatted sheets** |
 | `output_data/combined_all_years.csv` | Clean combined source data |
 
 ---
@@ -432,16 +463,16 @@ python app/app_simple.py
 ### Required before the next Build / Validate cycle:
 
 1. **Choose the next Build target**
-      - Restore the full normalized-data / 2024-25 ingestion path, or
-        - Finish the still-blocked browser-console / manual dashboard checks for the current 13-figure dashboard
+       - Restore the full normalized-data / 2024-25 ingestion path, or
+        - Finish the still-blocked browser-console / manual dashboard checks for the current 14-figure dashboard
 
 2. **If pursuing the normalized-data path**
    - Update `src/load_clean_data.py` to recognize the repo's actual workbook layout/names, or
    - Place/rename the OSSE files so the documented loader command succeeds
 
 3. **If pursuing the dashboard path**
-       - Run `python app/app_simple.py`
-        - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, heatmap, scatter, YoY, COVID recovery, and school trajectory outputs
+        - Run `python app/app_simple.py`
+         - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, heatmap, scatter, YoY, COVID recovery, school trajectory, and school type outputs
 
 4. **Re-run evidence checks**
    - Verify Stuart-Hobson benchmark values
