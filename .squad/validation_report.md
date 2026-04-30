@@ -6,7 +6,7 @@
 
 ## Scope
 
-Validate the latest build output against the current sprint commitments for loop 14: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend/geographic-equity/YoY/COVID/trajectory/school-type/grade-level outputs, the new subgroup trend analysis outputs, the 13-sheet policy summary workbook, and the dashboard startup/rendering path with the new 16-figure experience.
+Validate the latest build output against the current sprint commitments for loop 14: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend/geographic-equity/YoY/COVID/trajectory/school-type/grade-level outputs, the new subgroup trend analysis outputs, the 13-sheet policy summary workbook, and the dashboard startup/rendering path with the committed 16 analytical figures. Also record the newly observed optional `consistency` placeholder output that is present in the app but not backed by this sprint's smoke path.
 
 ## Checks Run
 
@@ -108,13 +108,13 @@ Validate the latest build output against the current sprint commitments for loop
       - `GET http://127.0.0.1:8050/_dash-layout`
       - `GET http://127.0.0.1:8050/_dash-dependencies`
       - `python -c "import app.app_simple as m; m.update_figures('Math', 'All Students', None, [2022, 2024])"`
-      - `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,5600 --screenshot=/tmp/loop14-dashboard.png http://127.0.0.1:8050/`
+      - `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,5600 --screenshot=/tmp/loop14-validate-dashboard.png http://127.0.0.1:8050/`
    - Result: ✅ Passed
    - Evidence:
       - App startup loaded regenerated CSVs without exceptions and exposed filters for **7 years**, **2 subjects**, **12 subgroups**, and **251 schools**
       - `GET /`, `GET /_dash-layout`, and `GET /_dash-dependencies` all returned **200**
-      - `/_dash-dependencies` includes the new `subgroup-trend.figure` output alongside the existing dashboard outputs
-      - Direct callback invocation returned all sixteen figures:
+      - `/_dash-dependencies` includes the committed `subgroup-trend.figure` output and an additional conditional `consistency.figure` output that the app renders when the layout is built, even though this sprint does not generate `school_consistency.csv`
+      - Direct callback invocation returned **17 outputs** total: the **16** loop-14 analytical figures plus one data-missing consistency placeholder:
         - `timeseries`: `Math - Percent Meeting/Exceeding Over Time`
         - `bars`: `Math - Year 2024: Top Schools`
         - `cohort-bars`: `Math – Avg Cohort Growth (pp)`
@@ -131,7 +131,8 @@ Validate the latest build output against the current sprint commitments for loop
         - `school-type`: `Math – Citywide Avg Proficiency by School Type`
         - `grade-level`: `Math – Citywide Avg Proficiency by Grade Level`
         - `subgroup-trend`: `Math – Citywide Avg Proficiency by Student Subgroup`
-      - Captured a headless dashboard screenshot at `/tmp/loop14-dashboard.png` to confirm the 16-figure page renders in this environment
+        - `consistency`: `No consistency data – run src/school_consistency_analysis.py`
+      - Captured a headless dashboard screenshot at `/tmp/loop14-validate-dashboard.png` to confirm the dashboard page renders in this environment
 
 ## Acceptance-Criteria Status
 
@@ -151,7 +152,7 @@ Validate the latest build output against the current sprint commitments for loop
 
 - **Task 04 — Interactive dashboard**
   - `python app/app_simple.py` starts without errors with regenerated CSV inputs — ✅
-  - Dashboard callback returns at least five figures — ✅ (returns **16**)
+  - Dashboard callback returns at least five figures — ✅ (returns the committed **16** analytical figures, plus **1** optional consistency placeholder output)
   - Subject / subgroup / school / year-range interaction path responds without server-side errors — ✅
   - Map view loads without errors when `input_data/school_locations.csv` is present — ✅
   - YoY growth chart is present in the callback output — ✅
@@ -179,10 +180,11 @@ Validate the latest build output against the current sprint commitments for loop
 ## Blocked Checks / Remaining Follow-up
 
 - **Browser-console inspection is still blocked.** This validation pass confirmed server startup, Dash endpoints, callback/rendering behavior, dependency metadata, and a rendered headless screenshot, but it did not produce direct browser-console evidence from an interactive session in this sandbox.
+- **The app currently exposes an undocumented data-conditional consistency view.** `app/app_simple.py` always advertises `consistency.figure` in the callback signature, but this sprint does not generate `school_consistency.csv`, so the callback currently returns a placeholder figure titled `No consistency data – run src/school_consistency_analysis.py` instead of a populated chart. Closeout should decide whether this stays as future scope or gets folded into the documented workflow.
 - **Original normalized-data backlog scope is still open.** The repo validates the reproducible 7-workbook wide-format path, but `src/load_clean_data.py` still depends on external normalized OSSE workbooks, including 2024-25, that are not committed here.
 - **Charter-vs.-DCPS analysis remains unimplemented.** The wide-format files still do not include an LEA-type field that would separate DCPS from charter schools.
 - **Closeout still needs to decide final handoff status.** This validate pass proves the current loop-14 subgroup-aware path is reproducible; Closeout must explicitly sign off or return the repo to Build for remaining backlog scope.
 
 ## Conclusion
 
-Validation passes for the current loop-14 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the analytical outputs regenerate cleanly, the new subgroup CSVs and dashboard figure are present, and `summary_report.xlsx` is produced with all thirteen expected sheets. The next phase should be **Closeout**.
+Validation passes for the current loop-14 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the analytical outputs regenerate cleanly, the new subgroup CSVs and dashboard figure are present, and `summary_report.xlsx` is produced with all thirteen expected sheets. The dashboard also exposes an optional unbacked consistency placeholder that Closeout should explicitly disposition. The next phase should be **Closeout**.
