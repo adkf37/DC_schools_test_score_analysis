@@ -2,20 +2,20 @@
 
 ## Current Objective
 
-**Loop 14 Validate complete — subgroup proficiency trend analysis reproduces cleanly, extends the dashboard to 16 figures, and advances to Closeout next.**
+**Loop 14 Closeout complete — subgroup proficiency trend analysis is approved for the reproducible in-repo handoff, and the repo returns to Build for the remaining backlog scope.**
 
-Loop 14 Validate confirmed the full 7-workbook wide-format smoke path from a fresh clone, including the new subgroup trend analysis outputs and dashboard/reporting extensions. The repo now has reproducible evidence for the subgroup-aware analytical path: `subgroup_proficiency.csv` regenerates with **152 rows**, `subgroup_summary.csv` regenerates with **22 rows**, the dashboard callback returns **16 figures**, and `summary_report.xlsx` regenerates with **13 sheets** (adds "Subgroups").
+Loop 14 Closeout rechecked the backlog tasks, sprint plan, decision log, prior validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path plus the live dashboard startup/endpoints/callback path. The current in-repo handoff remains reproducible end to end: `subgroup_proficiency.csv` regenerates with **152 rows**, `subgroup_summary.csv` regenerates with **22 rows**, the dashboard callback returns **16 figures**, and `summary_report.xlsx` regenerates with **13 sheets** (adds "Subgroups").
 
-Loop 14 Validate confirmed:
-1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
-2. The full smoke path through `python src/generate_summary_report.py` exits 0 and regenerates the documented outputs, including `subgroup_proficiency.csv` (**152 rows**), `subgroup_summary.csv` (**22 rows**), and `summary_report.xlsx` (**13 sheets**).
-3. Workbook/schema inspection confirms Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp, and the summary workbook now includes the `Subgroups` sheet.
+Loop 14 Closeout confirmed:
+1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, and the full smoke path through `python src/generate_summary_report.py` all exit 0 in this clone.
+2. The rerun regenerates the documented analytical outputs, including `combined_all_years.csv` (**28,069 rows**), `cohort_growth_detail.csv` (**12,956 rows**), `cohort_growth_summary.csv` (**2,560 rows**), `subgroup_proficiency.csv` (**152 rows**), `subgroup_summary.csv` (**22 rows**), and `summary_report.xlsx` (**13 sheets**).
+3. Workbook/schema inspection confirms Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp, and the summary workbook includes the `Subgroups` sheet.
 4. Subgroup inspection confirms the loop-14 claims: ELA avg proficiency peaks at **White (83.82%)** and bottoms at **Students with Disabilities (7.92%)** for a **75.90 pp** gap; Math peaks at **White (77.06%)** and bottoms at **Students with Disabilities (6.46%)** for a **70.60 pp** gap; the largest COVID hit is **Hispanic/Latino of any race** in both subjects (**−9.70 pp ELA**, **−14.54 pp Math**); and the strongest recovery is **Asian** in both subjects (**+10.31 pp ELA**, **+8.65 pp Math**).
-5. The dashboard HTTP path is live: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200; dependency metadata now includes `subgroup-trend.figure`; direct callback invocation returns all **16 figures**, including the new subgroup chart.
-6. A headless Chromium screenshot at `/tmp/loop14-dashboard.png` confirms the dashboard renders in this environment.
-7. Direct browser-console inspection remains blocked in this sandbox, and the normalized-data / 2024-25 path plus charter-vs.-DCPS analysis remain outside the reproducible in-repo scope.
+5. The dashboard HTTP path is live: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200; dependency metadata includes `subgroup-trend.figure`; direct callback invocation returns all **16 figures**, including the subgroup chart.
+6. A fresh headless Chromium screenshot at `/tmp/loop14-closeout-dashboard.png` confirms the dashboard renders in this environment.
+7. The current loop is approved for handoff on the reproducible 7-workbook wide-format path, but the normalized-data / 2024-25 path, browser-console inspection, and charter-vs.-DCPS analysis remain outside the verified in-repo scope.
 
-**Next step: run Closeout for loop 14.**
+**Next step: choose the next Build target — restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the 16-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope.**
 
 
 Loop 13 Build completed:
