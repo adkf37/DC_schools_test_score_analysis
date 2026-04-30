@@ -103,6 +103,7 @@ COVID_RECOVERY_FILE = os.path.join(OUTPUT_DIR, 'covid_recovery_summary.csv')
 TRAJECTORY_FILE = os.path.join(OUTPUT_DIR, 'school_trajectory_classification.csv')
 SCHOOL_TYPE_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'school_type_proficiency.csv')
 SCHOOL_TYPE_BY_SCHOOL_FILE = os.path.join(OUTPUT_DIR, 'school_type_by_school.csv')
+GRADE_LEVEL_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'grade_level_proficiency.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
@@ -114,6 +115,7 @@ covid_recovery = pd.DataFrame()
 school_trajectories = pd.DataFrame()
 school_type_proficiency = pd.DataFrame()
 school_type_by_school = pd.DataFrame()
+grade_level_proficiency = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -144,6 +146,9 @@ if os.path.isfile(SCHOOL_TYPE_PROFICIENCY_FILE):
 if os.path.isfile(SCHOOL_TYPE_BY_SCHOOL_FILE):
     school_type_by_school = pd.read_csv(SCHOOL_TYPE_BY_SCHOOL_FILE)
     print(f"Loaded school type classifications: {len(school_type_by_school):,} rows")
+if os.path.isfile(GRADE_LEVEL_PROFICIENCY_FILE):
+    grade_level_proficiency = pd.read_csv(GRADE_LEVEL_PROFICIENCY_FILE)
+    print(f"Loaded grade-level proficiency: {len(grade_level_proficiency):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -403,6 +408,22 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='school-type')
         ]),
+
+        html.Hr(),
+
+        # ── Grade-Level Proficiency section ──────────────────────────────
+        html.H4("Proficiency by Grade Level", className="mt-3"),
+        html.P(
+            "How does proficiency compare across grade levels (Grade 3–8 and High School)? "
+            "Each line shows the average proficiency for all DC schools at that grade, "
+            "by year and subject. In school-selection mode, shows the selected school's "
+            "per-grade proficiency over time. "
+            "Run python src/grade_level_analysis.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='grade-level')
+        ]),
     ]
 )
 
@@ -443,6 +464,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('covid-recovery', 'figure'),
     Output('trajectory', 'figure'),
     Output('school-type', 'figure'),
+    Output('grade-level', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -1258,11 +1280,113 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No school type data – run src/school_type_analysis.py'
         )
 
+    # ── Grade-level proficiency line chart ────────────────────────────────
+    GRADE_ORDER_DISPLAY = [
+        "Grade 3", "Grade 4", "Grade 5",
+        "Grade 6", "Grade 7", "Grade 8", "HS",
+    ]
+    fig_grade_level = go.Figure()
+
+    if not grade_level_proficiency.empty:
+        glp = grade_level_proficiency.copy()
+        if subject:
+            glp = glp[glp['Subject'] == subject]
+        glp = glp[glp['year'].between(year_range[0], year_range[1])]
+
+        if schools and not multi_year.empty:
+            # School-selection mode: show selected school's per-grade proficiency
+            sel_df = multi_year[multi_year['School Name'].isin(schools)].copy()
+            if subject:
+                sel_df = sel_df[sel_df['Subject'] == subject]
+            sel_df = sel_df[sel_df['year'].between(year_range[0], year_range[1])]
+            # Keep All Students rows for comparability
+            sel_df = sel_df[sel_df['subgroup_value_std'].isin(
+                {'All Students', 'All', 'Total'}
+            )]
+            sel_df = sel_df.dropna(subset=['Grade of Enrollment', 'percent_value'])
+            sel_df['grade'] = sel_df['Grade of Enrollment'].str.strip()
+
+            # Citywide grade averages as faint reference lines
+            for grade in GRADE_ORDER_DISPLAY:
+                gdata = glp[glp['grade'] == grade].sort_values('year')
+                if gdata.empty:
+                    continue
+                fig_grade_level.add_trace(go.Scatter(
+                    x=gdata['year'],
+                    y=gdata['avg_proficiency_pct'],
+                    mode='lines',
+                    name=f'{grade} (citywide avg)',
+                    line=dict(dash='dot', width=1),
+                    opacity=0.4,
+                    showlegend=True,
+                ))
+
+            # Selected school(s) lines per grade
+            school_grade_avg = (
+                sel_df.groupby(['School Name', 'grade', 'year'], as_index=False)
+                .agg(avg_pct=('percent_value', 'mean'))
+            )
+            for school_name in school_grade_avg['School Name'].unique():
+                for grade in GRADE_ORDER_DISPLAY:
+                    sd = school_grade_avg[
+                        (school_grade_avg['School Name'] == school_name) &
+                        (school_grade_avg['grade'] == grade)
+                    ].sort_values('year')
+                    if sd.empty:
+                        continue
+                    fig_grade_level.add_trace(go.Scatter(
+                        x=sd['year'],
+                        y=sd['avg_pct'],
+                        mode='lines+markers',
+                        name=f'{school_name} – {grade}',
+                        marker=dict(size=7),
+                    ))
+            fig_grade_level.update_layout(
+                title=f'{subject} – Selected Schools Proficiency by Grade Level',
+                xaxis_title='Year',
+                yaxis_title='Avg Proficiency (%)',
+                legend_title='School / Grade',
+                height=500,
+            )
+        else:
+            # Citywide mode: one line per grade level
+            for grade in GRADE_ORDER_DISPLAY:
+                gdata = glp[glp['grade'] == grade].sort_values('year')
+                if gdata.empty:
+                    continue
+                fig_grade_level.add_trace(go.Scatter(
+                    x=gdata['year'],
+                    y=gdata['avg_proficiency_pct'],
+                    mode='lines+markers',
+                    name=grade,
+                    customdata=gdata[['n_schools', 'median_proficiency_pct']].values,
+                    hovertemplate=(
+                        f'<b>{grade}</b><br>'
+                        'Year: %{x}<br>'
+                        'Avg proficiency: %{y:.1f}%<br>'
+                        'Median: %{customdata[1]:.1f}%<br>'
+                        'Schools: %{customdata[0]}<br>'
+                        '<extra></extra>'
+                    ),
+                ))
+            fig_grade_level.update_layout(
+                title=f'{subject} – Citywide Avg Proficiency by Grade Level',
+                xaxis_title='Year',
+                yaxis_title='Avg Proficiency (%)',
+                legend_title='Grade',
+                height=450,
+            )
+
+    if not fig_grade_level.data:
+        fig_grade_level.update_layout(
+            title='No grade-level data – run src/grade_level_analysis.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
         fig_scatter, fig_geo, fig_yoy, fig_covid, fig_trajectory,
-        fig_school_type,
+        fig_school_type, fig_grade_level,
     )
 
 
