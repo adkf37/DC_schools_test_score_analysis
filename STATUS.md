@@ -2,9 +2,9 @@
 
 ## Current Objective
 
-**Loop 11 Build complete — school performance trajectory classification added; return to Validate next.**
+**Loop 11 Validate complete — school performance trajectory classification is reproducible; return to Closeout next.**
 
-Loop 11 adds `src/school_trajectory_analysis.py`, a standalone script that classifies each school's long-run proficiency trajectory by fitting an OLS linear trend to annual All Students proficiency data across all available years (2016–2024).  The slope (pp/yr) and R² measure how consistently and strongly each school is improving or declining.  Key findings: ELA citywide avg slope +0.065 pp/yr (mostly Stable); Math avg slope −0.656 pp/yr (leaning Declining).  Top ELA improver: Whittier ES (+8.2 pp/yr, 22→39%). The dashboard now renders **13 figures**; `summary_report.xlsx` now has **10 sheets** (adds "School Trajectories" sheet).
+Loop 11 validation reran the full fresh-clone smoke path for the new `src/school_trajectory_analysis.py` deliverable and confirmed the expanded analytical/reporting/dashboard path still works end to end.  The pipeline regenerated `school_trajectory_classification.csv` (**424 rows**), preserved the documented average trend slopes (ELA **+0.065 pp/yr**, Math **−0.656 pp/yr**), and kept Whittier Elementary School as the top improver in both subjects.  The dashboard now renders **13 figures** end to end via a live Dash callback, and `summary_report.xlsx` now has **10 sheets** (adds "School Trajectories" sheet).
 
 Loop 11 Build completed:
 1. Created `src/school_trajectory_analysis.py` — exits 0; produces `school_trajectory_classification.csv` (424 rows: 212 schools × 2 subjects, All Students, with OLS slope, R², and trajectory class).
@@ -12,6 +12,15 @@ Loop 11 Build completed:
 3. Extended `src/generate_summary_report.py` — adds Sheet 10 "School Trajectories" when `school_trajectory_classification.csv` is present; gracefully skips if absent. Workbook now regenerates with **10 sheets**.
 4. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
 5. Dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` return 200; `POST /_dash-update-component` returns all **13 figures**.
+
+Loop 11 Validate confirmed:
+1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
+2. The full smoke path through `python src/generate_summary_report.py` exits 0 and regenerates the documented outputs, including `school_trajectory_classification.csv` (**424 rows**) and `summary_report.xlsx` (**10 sheets**).
+3. Workbook/schema inspection confirms Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, and the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp.
+4. Trajectory inspection confirms the loop-11 claims: average slope by subject is **+0.065 pp/yr (ELA)** and **−0.656 pp/yr (Math)**; ELA class mix is 117 Insufficient Data / 30 Stable / 27 Declining / 19 Improving / 11 Strongly Improving / 8 Strongly Declining; Math class mix is 117 Insufficient Data / 38 Declining / 21 Stable / 18 Strongly Declining / 11 Improving / 7 Strongly Improving.
+5. The dashboard HTTP path is live: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200; Dash advertises a **13-output** callback; and a live `POST /_dash-update-component` returns all 13 figures, including the school trajectory chart.
+6. A headless Chromium screenshot at `/tmp/loop11-dashboard.png` confirms the dashboard renders in this environment.
+7. Direct browser-console inspection remains blocked in this sandbox, and the normalized-data / 2024-25 path remains outside the reproducible in-repo scope.
 
 Loop 10 Closeout confirmed:
 1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
@@ -33,7 +42,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 11 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification |
-| 4 | Validate | ✅ Complete for loops 1-10; loop 11 pending |
+| 4 | Validate | ✅ Complete for loops 1-11 |
 | 5 | Closeout | ✅ Complete for loops 2-10; loop 11 pending |
 
 ---
@@ -86,7 +95,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **13 figures**; 13th figure is School Trajectory scatter |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 10 |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 11 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 10 |
 
 ---
@@ -106,7 +115,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 11 — updated):**
+- **Smoke test commands (loop 11 — validated):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -121,13 +130,13 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
   12. `python src/school_trajectory_analysis.py`
   13. `python src/generate_summary_report.py`
   14. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **13 figures**, including the school trajectory scatter)
-- **Loop 11 Build evidence:** ran full smoke path; all scripts exit 0. `school_trajectory_classification.csv` regenerated (424 rows); `summary_report.xlsx` regenerated (10 sheets); dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` returned 200; live callback returned **13 figures**.
+- **Loop 11 validation evidence:** reran the full smoke path; all scripts exit 0. `school_trajectory_classification.csv` regenerated (424 rows); `summary_report.xlsx` regenerated (10 sheets); dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` returned 200; live callback returned **13 figures**; headless screenshot saved to `/tmp/loop11-dashboard.png`.
 - **Loop 11 trajectory findings:** ELA citywide avg trend slope +0.065 pp/yr — distribution: 55% Insufficient Data (≤2 years of data), 14% Stable, 13% Declining, 9% Improving, 5% Strongly Improving, 4% Strongly Declining. Math avg slope −0.656 pp/yr — more schools are Declining/Strongly Declining than Improving. Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). Top Math improver: Whittier ES (+9.2 pp/yr, 23%→41%). NOTE: 55% of schools are classified "Insufficient Data" because they only appear in the most recent 1-2 years (minimum 3 years required for OLS trend).
 - **Loop 10 COVID recovery findings:** citywide ELA avg COVID impact −3.94 pp (2019→2022), recovery +1.75 pp (2022→2024), net vs. pre-COVID −2.15 pp. Math was hit harder: −8.56 pp impact, +3.17 pp recovery, net −5.43 pp. Recovery status: 38% Partially Recovered, 25% Still Below Pre-COVID, 24% Exceeded Pre-COVID, 12% Fully Recovered, 2% No 2024 Data (200 school/subject observations, All Students).
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run **Validate** for loop 11 (smoke path + 13-figure dashboard confirmation + schema checks), then **Closeout** loop 11.
+- **Next recommended step:** Run **Closeout** for loop 11 using the new validation evidence, then decide whether to return to **Build** for remaining backlog scope.
 
 ---
 
