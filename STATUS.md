@@ -2,9 +2,16 @@
 
 ## Current Objective
 
-**Loop 10 Closeout complete — sign off the current 7-workbook wide-format + COVID-recovery-aware handoff; return to Build for the remaining backlog scope.**
+**Loop 11 Build complete — school performance trajectory classification added; return to Validate next.**
 
-Loop 10 Closeout rechecked the backlog tasks, sprint Definition of Done, decision log, validation report, and human-facing docs, then re-ran the documented fresh-clone smoke path plus the dashboard HTTP/callback path. The current in-repo handoff is approved for the reproducible 7-workbook path: `src/covid_recovery_analysis.py` exits 0, the dashboard now serves **12 figures**, and `summary_report.xlsx` regenerates with **9 sheets** including `COVID Recovery`. The repo is handoff-ready for this loop, but the original normalized-data / 2024-25 path and direct browser-console inspection remain open and send the project back to **Build** next.
+Loop 11 adds `src/school_trajectory_analysis.py`, a standalone script that classifies each school's long-run proficiency trajectory by fitting an OLS linear trend to annual All Students proficiency data across all available years (2016–2024).  The slope (pp/yr) and R² measure how consistently and strongly each school is improving or declining.  Key findings: ELA citywide avg slope +0.065 pp/yr (mostly Stable); Math avg slope −0.656 pp/yr (leaning Declining).  Top ELA improver: Whittier ES (+8.2 pp/yr, 22→39%). The dashboard now renders **13 figures**; `summary_report.xlsx` now has **10 sheets** (adds "School Trajectories" sheet).
+
+Loop 11 Build completed:
+1. Created `src/school_trajectory_analysis.py` — exits 0; produces `school_trajectory_classification.csv` (424 rows: 212 schools × 2 subjects, All Students, with OLS slope, R², and trajectory class).
+2. Extended `app/app_simple.py` — loads `school_trajectory_classification.csv`; adds 13th figure: in citywide mode, scatter of trend slope vs. avg proficiency (colour-coded by trajectory class); in school-selection mode, same scatter filtered to selected schools.
+3. Extended `src/generate_summary_report.py` — adds Sheet 10 "School Trajectories" when `school_trajectory_classification.csv` is present; gracefully skips if absent. Workbook now regenerates with **10 sheets**.
+4. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
+5. Dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` return 200; `POST /_dash-update-component` returns all **13 figures**.
 
 Loop 10 Closeout confirmed:
 1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
@@ -25,9 +32,9 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | ✅ Complete through loop 10 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis |
-| 4 | Validate | ✅ Complete for loops 1-10 |
-| 5 | Closeout | ✅ Complete for loops 2-10 |
+| 3 | Build | ✅ Complete through loop 11 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification |
+| 4 | Validate | ✅ Complete for loops 1-10; loop 11 pending |
+| 5 | Closeout | ✅ Complete for loops 2-10; loop 11 pending |
 
 ---
 
@@ -38,10 +45,10 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 01 | Ingest raw data | Squad Init | Data Engineer | ✅ Wide-format path now covers 7 in-repo files (2016–2024); normalized 4-workbook path still pending external data |
 | 02 | Clean & standardize data | Squad Review | Data Engineer | ✅ `combined_all_years.csv` regenerated (28,069 rows, 7 years, 251 raw schools / 211 cohort-analysis schools) |
 | 03 | Cohort growth analysis | Build | Statistician | ✅ Task 03 target now met — 12,956 detail rows, **2,560 summary rows** (target ≥ 1,700); all 4 Stuart-Hobson benchmarks pass |
-| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **12 figures** (loop 10 adds COVID recovery chart), school-level and citywide views functional |
+| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **13 figures** (loop 11 adds school trajectory scatter), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Closed out — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **9 sheets** (adds COVID Recovery in loop 10) |
+| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Closed out — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **10 sheets** (adds School Trajectories in loop 11) |
 
 ---
 
@@ -64,19 +71,21 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | **YoY growth summary** | `output_data/yoy_growth_summary.csv` | ✅ **New in loop 9** — 2,604 rows (school × subject × subgroup) |
 | **COVID recovery detail** | `output_data/covid_recovery_detail.csv` | ✅ **New in loop 10** — 1,239 rows (school × subject × subgroup × milestone years) |
 | **COVID recovery summary** | `output_data/covid_recovery_summary.csv` | ✅ **New in loop 10** — 200 rows (school × subject, All Students, with recovery status) |
-| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **9 sheets** — adds COVID Recovery sheet in loop 10 |
+| **School trajectory classification** | `output_data/school_trajectory_classification.csv` | ✅ **New in loop 11** — 424 rows (212 schools × 2 subjects, All Students, with OLS slope, R², trajectory class) |
+| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **10 sheets** — adds School Trajectories sheet in loop 11 |
 | Processing report | `output_data/processing_report.txt` | ✅ Created |
 | Wide-format loader | `src/load_wide_format_data.py` | ✅ Extended — now handles all 7 in-repo workbooks across 6 naming schemes |
 | Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
 | School rankings script | `src/generate_school_rankings.py` | ✅ New — ranks schools by cohort growth and equity-gap narrowing |
 | **Proficiency trend script** | `src/proficiency_trend_analysis.py` | ✅ **New in loop 5** — grade × year proficiency grid |
-| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 10** — now produces 9-sheet Excel workbook |
+| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 11** — now produces 10-sheet Excel workbook |
 | **Geographic equity script** | `src/geographic_equity_analysis.py` | ✅ **New in loop 8** — joins school locations with performance data by DC quadrant |
 | **YoY growth script** | `src/yoy_growth_analysis.py` | ✅ **New in loop 9** — same-grade year-over-year growth for every school, grade, subject, subgroup |
 | **COVID recovery script** | `src/covid_recovery_analysis.py` | ✅ **New in loop 10** — 2019→2022 COVID impact and 2022→2024 recovery per school, subject, subgroup |
+| **School trajectory script** | `src/school_trajectory_analysis.py` | ✅ **New in loop 11** — OLS trend slope and class for every school × subject (All Students, 2016–2024) |
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
-| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **12 figures**; 12th figure is COVID Recovery scatter/grouped-bar chart |
+| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **13 figures**; 13th figure is School Trajectory scatter |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 10 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 10 |
 
@@ -97,7 +106,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 10 — updated):**
+- **Smoke test commands (loop 11 — updated):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -109,19 +118,16 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
   9. `python src/geographic_equity_analysis.py`
   10. `python src/yoy_growth_analysis.py`
   11. `python src/covid_recovery_analysis.py`
-  12. `python src/generate_summary_report.py`
-  13. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **12 figures**, including the COVID recovery chart)
-- **Loop 10 Closeout evidence:** re-ran the full smoke path from a fresh clone; all scripts exit 0. Regenerated `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows), and `summary_report.xlsx` (9 sheets); dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; a live callback returned **12 figures**; closeout screenshot captured at `/tmp/loop10-closeout-dashboard.png`.
+  12. `python src/school_trajectory_analysis.py`
+  13. `python src/generate_summary_report.py`
+  14. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, `/_dash-dependencies`, and `POST /_dash-update-component` (callback returns **13 figures**, including the school trajectory scatter)
+- **Loop 11 Build evidence:** ran full smoke path; all scripts exit 0. `school_trajectory_classification.csv` regenerated (424 rows); `summary_report.xlsx` regenerated (10 sheets); dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` returned 200; live callback returned **13 figures**.
+- **Loop 11 trajectory findings:** ELA citywide avg trend slope +0.065 pp/yr — distribution: 55% Insufficient Data (≤2 years of data), 14% Stable, 13% Declining, 9% Improving, 5% Strongly Improving, 4% Strongly Declining. Math avg slope −0.656 pp/yr — more schools are Declining/Strongly Declining than Improving. Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). Top Math improver: Whittier ES (+9.2 pp/yr, 23%→41%). NOTE: 55% of schools are classified "Insufficient Data" because they only appear in the most recent 1-2 years (minimum 3 years required for OLS trend).
 - **Loop 10 COVID recovery findings:** citywide ELA avg COVID impact −3.94 pp (2019→2022), recovery +1.75 pp (2022→2024), net vs. pre-COVID −2.15 pp. Math was hit harder: −8.56 pp impact, +3.17 pp recovery, net −5.43 pp. Recovery status: 38% Partially Recovered, 25% Still Below Pre-COVID, 24% Exceeded Pre-COVID, 12% Fully Recovered, 2% No 2024 Data (200 school/subject observations, All Students).
-- **Loop 9 YoY growth findings:** citywide ELA YoY avg was +4.82 pp (2016→2017), +0.94 pp (2017→2018), +4.91 pp (2018→2019), +2.02 pp (2022→2023), +0.48 pp (2023→2024). Math: +2.07 pp (2016→2017), −4.32 pp (2017→2018), +2.42 pp (2018→2019), +3.25 pp (2022→2023), +0.35 pp (2023→2024). COVID gap (2019→2022) is excluded — these reflect only consecutive-year within-period comparisons.
-- **Loop 8 geographic equity findings:** NW avg ELA proficiency 42.7% vs. NE 24.1%, SE 20.1% (−18 pp to −23 pp gap). NW also leads in cohort growth (+4.85 pp ELA). SE schools show the largest gap vs. NW citywide. Math shows a similar pattern (NW 38.4% vs. NE/SE ~15%).
-- **Loop 8 name-matching note:** 95/115 location schools match directly to growth/trends data. 20 unmatched schools are primarily high schools (no cohort transitions) and schools not represented in the 7 in-repo workbooks.
-- **Cohort-transition years available:** 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. No transitions cross the 2019–2022 COVID gap.
-- **Historical data caveats:** (same as loop 4 — see loop 4 notes in decisions.md D-020)
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Return to **Build** and choose the next backlog slice: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the 12-figure dashboard, or explicitly narrow the project scope to the verified in-repo wide-format path.
+- **Next recommended step:** Run **Validate** for loop 11 (smoke path + 13-figure dashboard confirmation + schema checks), then **Closeout** loop 11.
 
 ---
 

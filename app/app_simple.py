@@ -100,6 +100,7 @@ PROFICIENCY_TRENDS_FILE = os.path.join(OUTPUT_DIR, 'proficiency_trends.csv')
 GEO_EQUITY_FILE = os.path.join(OUTPUT_DIR, 'geographic_equity_by_quadrant.csv')
 YOY_DETAIL_FILE = os.path.join(OUTPUT_DIR, 'yoy_growth_detail.csv')
 COVID_RECOVERY_FILE = os.path.join(OUTPUT_DIR, 'covid_recovery_summary.csv')
+TRAJECTORY_FILE = os.path.join(OUTPUT_DIR, 'school_trajectory_classification.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
@@ -108,6 +109,7 @@ proficiency_trends = pd.DataFrame()
 geo_equity = pd.DataFrame()
 yoy_detail = pd.DataFrame()
 covid_recovery = pd.DataFrame()
+school_trajectories = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -129,6 +131,9 @@ if os.path.isfile(YOY_DETAIL_FILE):
 if os.path.isfile(COVID_RECOVERY_FILE):
     covid_recovery = pd.read_csv(COVID_RECOVERY_FILE)
     print(f"Loaded COVID recovery summary: {len(covid_recovery):,} rows")
+if os.path.isfile(TRAJECTORY_FILE):
+    school_trajectories = pd.read_csv(TRAJECTORY_FILE)
+    print(f"Loaded school trajectory classification: {len(school_trajectories):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -355,6 +360,23 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='covid-recovery')
         ]),
+
+        html.Hr(),
+
+        # ── School Performance Trajectory section ─────────────────────────
+        html.H4("School Performance Trajectory (2016–2024)", className="mt-3"),
+        html.P(
+            "Long-run proficiency trend for each school, estimated from a linear "
+            "regression across all available years (2016–2024). "
+            "Slope (pp/yr) classifies schools as: "
+            "Strongly Improving (>2 pp/yr), Improving (0.5–2), Stable (±0.5), "
+            "Declining (−0.5 to −2), or Strongly Declining (<−2). "
+            "Run python src/school_trajectory_analysis.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='trajectory')
+        ]),
     ]
 )
 
@@ -393,6 +415,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('geo-equity', 'figure'),
     Output('yoy-growth', 'figure'),
     Output('covid-recovery', 'figure'),
+    Output('trajectory', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -1048,10 +1071,74 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No COVID recovery data – run src/covid_recovery_analysis.py'
         )
 
+    # ── School performance trajectory scatter ─────────────────────────────
+    fig_trajectory = go.Figure()
+
+    if not school_trajectories.empty:
+        tr = school_trajectories.copy()
+        if subject:
+            tr = tr[tr['Subject'] == subject]
+        if schools:
+            tr = tr[tr['School Name'].isin(schools)]
+
+        # Exclude Insufficient Data rows when both axes are NaN
+        tr_plot = tr.dropna(subset=['trend_slope_pp_yr', 'avg_proficiency_pct'])
+
+        if not tr_plot.empty:
+            trajectory_colors = {
+                'Strongly Improving': '#1a9641',
+                'Improving': '#a6d96a',
+                'Stable': '#ffffbf',
+                'Declining': '#fdae61',
+                'Strongly Declining': '#d7191c',
+                'Insufficient Data': '#bdbdbd',
+            }
+            for tclass, color in trajectory_colors.items():
+                sub_tr = tr_plot[tr_plot['trajectory_class'] == tclass]
+                if sub_tr.empty:
+                    continue
+                fig_trajectory.add_trace(go.Scatter(
+                    x=sub_tr['trend_slope_pp_yr'],
+                    y=sub_tr['avg_proficiency_pct'],
+                    mode='markers',
+                    name=tclass,
+                    marker=dict(color=color, size=9, opacity=0.85,
+                                line=dict(width=0.5, color='#555')),
+                    text=sub_tr['School Name'],
+                    customdata=sub_tr[['first_proficiency_pct', 'last_proficiency_pct',
+                                       'n_years_with_data']].values,
+                    hovertemplate=(
+                        '<b>%{text}</b><br>'
+                        'Slope: %{x:+.3f} pp/yr<br>'
+                        'Avg proficiency: %{y:.1f}%<br>'
+                        'First → Last: %{customdata[0]:.1f}% → %{customdata[1]:.1f}%<br>'
+                        'Years with data: %{customdata[2]}<br>'
+                        '<extra></extra>'
+                    ),
+                ))
+            fig_trajectory.add_vline(
+                x=0, line_dash='dash', line_color='grey', line_width=1,
+            )
+            fig_trajectory.update_layout(
+                title=(
+                    f'{subject} – School Proficiency Trajectory (2016–2024)'
+                    if subject else 'School Proficiency Trajectory (2016–2024)'
+                ),
+                xaxis_title='Trend Slope (pp/yr, positive = improving)',
+                yaxis_title='Avg Proficiency, All Students (%)',
+                legend_title='Trajectory',
+                height=500,
+            )
+
+    if not fig_trajectory.data:
+        fig_trajectory.update_layout(
+            title='No trajectory data – run src/school_trajectory_analysis.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
-        fig_scatter, fig_geo, fig_yoy, fig_covid,
+        fig_scatter, fig_geo, fig_yoy, fig_covid, fig_trajectory,
     )
 
 
