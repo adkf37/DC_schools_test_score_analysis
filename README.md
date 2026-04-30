@@ -4,7 +4,7 @@ This repository is intended to analyze DC OSSE assessment files across the 2021�
 
 ## Current project state
 
-**As of 2026-04-30, loop 11 Closeout is complete: the reproducible 7-workbook wide-format pipeline now includes school trajectory outputs, a 13-figure dashboard path, and a 10-sheet summary workbook, and the repo returns to Build for the remaining backlog scope.**
+**As of 2026-04-30, loop 12 Closeout is complete: the reproducible 7-workbook wide-format pipeline now includes school type outputs, a 14-figure dashboard path, and an 11-sheet summary workbook, and the repo returns to Build for the remaining backlog scope.**
 
 What was validated from a fresh clone:
 
@@ -20,6 +20,7 @@ What was validated from a fresh clone:
 - `python src/yoy_growth_analysis.py` ✅
 - `python src/covid_recovery_analysis.py` ✅
 - `python src/school_trajectory_analysis.py` ✅
+- `python src/school_type_analysis.py` ✅
 - `python src/generate_summary_report.py` ✅
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
@@ -42,10 +43,13 @@ What was validated from a fresh clone:
   - `output_data/covid_recovery_detail.csv` (1,239 rows)
   - `output_data/covid_recovery_summary.csv` (200 rows)
   - `output_data/school_trajectory_classification.csv` (424 rows)
-  - `output_data/summary_report.xlsx` (10-sheet Excel policy summary)
+  - `output_data/school_type_by_school.csv` (251 rows)
+  - `output_data/school_type_proficiency.csv` (70 rows)
+  - `output_data/school_type_summary.csv` (10 rows)
+  - `output_data/summary_report.xlsx` (11-sheet Excel policy summary)
 - Stuart-Hobson benchmark transitions staying within ±0.1 pp
 - Task 05 significance fields (`p_value`, `significant`, `pct_significant_transitions`)
-- Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all thirteen figures
+- Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all fourteen figures
 - Loop 3 policy-analysis outputs on the expanded historical dataset:
   - `output_data/school_rankings.csv` (422 rows)
   - `output_data/school_equity_rankings.csv` (414 rows)
@@ -74,6 +78,12 @@ What was validated from a fresh clone:
   - Whittier Elementary School is the top improver in both subjects
   - the dashboard callback now returns a 13th figure: `Math – School Proficiency Trajectory (2016–2024)`
   - `summary_report.xlsx` now includes a `School Trajectories` sheet
+- Loop 12 school type outputs and handoff findings:
+  - `school_type_by_school.csv` contains 251 school-level type assignments: 147 Elementary, 39 High School, 31 Elementary-Middle, 28 Middle School, and 6 Middle-High
+  - `school_type_summary.csv` shows Elementary schools leading average proficiency in both ELA (31.85%) and Math (30.91%)
+  - Elementary-Middle schools have the strongest ELA cohort growth (+6.56 pp/yr), Middle School has the strongest ELA recovery (+3.37 pp), and Elementary has the strongest Math recovery (+4.06 pp)
+  - the dashboard callback now returns a 14th figure: `Math – Citywide Avg Proficiency by School Type`
+  - `summary_report.xlsx` now includes a `School Types` sheet
 - Cohort transitions for consecutive year pairs only: 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. There is no 2019→2022 transition because OSSE did not release comparable annual school-level assessment files for the COVID-disrupted 2020 and 2021 school years.
 
 ### Remaining gaps
@@ -99,6 +109,7 @@ python src/geographic_equity_analysis.py
 python src/yoy_growth_analysis.py
 python src/covid_recovery_analysis.py
 python src/school_trajectory_analysis.py
+python src/school_type_analysis.py
 python src/generate_summary_report.py
 ```
 
@@ -122,6 +133,7 @@ python src/geographic_equity_analysis.py
 python src/yoy_growth_analysis.py
 python src/covid_recovery_analysis.py
 python src/school_trajectory_analysis.py
+python src/school_type_analysis.py
 ```
 
 ## Required source files
@@ -154,6 +166,9 @@ If the loader and cohort analysis run successfully, the project should produce:
 - `output_data/covid_recovery_detail.csv`
 - `output_data/covid_recovery_summary.csv`
 - `output_data/school_trajectory_classification.csv`
+- `output_data/school_type_by_school.csv`
+- `output_data/school_type_proficiency.csv`
+- `output_data/school_type_summary.csv`
 - `output_data/summary_report.xlsx`
 
 The current closeout review regenerated these files from a fresh clone via the wide-format loader path listed above.
@@ -167,9 +182,9 @@ The current closeout review regenerated these files from a fresh clone via the w
 
 ## Next steps
 
-**Loop 11 (closed out):** the geographic-equity + same-grade YoY + COVID recovery + school trajectory outputs, the 13-figure dashboard path, and the 10-sheet summary workbook are validated and handoff-ready for the reproducible in-repo path.
+**Loop 12 (closed out):** the geographic-equity + same-grade YoY + COVID recovery + school trajectory + school type outputs, the 14-figure dashboard path, and the 11-sheet summary workbook are validated and handoff-ready for the reproducible in-repo path.
 
 **Future Build loops:**
 1. Restore the full normalized-data / 2024-25 ingestion path (requires downloading OSSE workbooks).
-2. Confirm browser-console cleanliness during manual interaction with the 13-figure dashboard.
+2. Confirm browser-console cleanliness during manual interaction with the 14-figure dashboard.
 3. Re-run Validate + Closeout after the next Build loop changes the evidence or scope.

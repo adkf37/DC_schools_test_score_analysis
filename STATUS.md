@@ -2,7 +2,7 @@
 
 ## Current Objective
 
-**Loop 12 Validate complete — school-type-aware pipeline; advance to Closeout.**
+**Loop 12 Closeout complete — school-type-aware handoff approved for the reproducible in-repo path; return to Build for remaining backlog scope.**
 
 Loop 12 Build adds `src/school_type_analysis.py`, a standalone script that classifies every school by its grade-band configuration (Elementary, Middle School, High School, Elementary-Middle, or Middle-High) and then computes average proficiency, COVID recovery, and cohort growth metrics by school type. The dashboard now renders **14 figures**; `summary_report.xlsx` now has **11 sheets** (adds "School Types" sheet).
 
@@ -28,6 +28,12 @@ Key findings from school type analysis:
 - Elementary schools had the largest ELA COVID impact (−4.2 pp) and Elementary-Middle the largest Math COVID impact (−8.4 pp)
 - High School ELA COVID impact was +1.5 pp (counter-intuitive; likely driven by test composition changes at the high school level)
 - Middle School ELA recovery was strongest (+3.4 pp); Elementary Math recovery was strongest (+4.1 pp)
+
+Loop 12 Closeout confirmed:
+1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the loop-12 acceptance criteria.
+2. Accepted the fresh-clone smoke-path evidence for the current in-repo handoff: `school_type_by_school.csv` (**251 rows**), `school_type_proficiency.csv` (**70 rows**), `school_type_summary.csv` (**10 rows**), `summary_report.xlsx` (**11 sheets**), and a live dashboard callback returning **14 figures**.
+3. Updated `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` so the closeout narrative matches the validated school-type-aware state.
+4. Approved the current reproducible in-repo path for handoff, but returned the repo to **Build** because the normalized-data / 2024-25 ingestion path, browser-console inspection, and LEA-type-based charter-vs.-DCPS analysis remain open.
 
 Loop 11 Closeout complete — the school-trajectory-aware handoff is approved for the reproducible in-repo path; return to Build for remaining backlog scope.
 
@@ -78,7 +84,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 12 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis |
 | 4 | Validate | ✅ Complete for loops 1-12 |
-| 5 | Closeout | ✅ Complete for loops 2-11; loop 12 pending |
+| 5 | Closeout | ✅ Complete for loops 2-12 |
 
 ---
 
@@ -92,7 +98,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **14 figures** (loop 12 adds school type trend), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Validate complete — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **11 sheets** (adds School Types in loop 12) |
+| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Closeout complete — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **11 sheets** (adds School Types in loop 12) |
 
 ---
 
@@ -135,7 +141,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **14 figures**; 14th figure is School Type proficiency trend |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 12 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 11 |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 12 |
 
 ---
 
@@ -154,7 +160,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 12 — validate complete):**
+- **Smoke test commands (loop 12 — closeout complete):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -178,82 +184,4 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Run **Closeout** for loop 12 (review the fresh validation evidence, decide whether the school-type-aware handoff is sufficient for the reproducible in-repo path, and carry forward the normalized-data / browser-console / LEA-type gaps explicitly).
-
----
-
-## Phase Tracker
-
-| Phase | Name | Status |
-|-------|------|--------|
-| 0 | Planner | ✅ Complete |
-| 1 | Squad Init | ✅ Complete |
-| 2 | Squad Review | ✅ Complete |
-| 3 | Build | ✅ Complete through loop 8 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, and geographic equity |
-| 4 | Validate | ✅ Complete for loops 1-8 |
-| 5 | Closeout | ✅ Complete for loops 2-8 |
-
----
-
-## Task Status
-
-| ID | Task | Phase | Owner | Status |
-|----|------|-------|-------|--------|
-| 01 | Ingest raw data | Squad Init | Data Engineer | ✅ Wide-format path now covers 7 in-repo files (2016–2024); normalized 4-workbook path still pending external data |
-| 02 | Clean & standardize data | Squad Review | Data Engineer | ✅ `combined_all_years.csv` regenerated (28,069 rows, 7 years, 251 raw schools / 211 cohort-analysis schools) |
-| 03 | Cohort growth analysis | Build | Statistician | ✅ Task 03 target now met — 12,956 detail rows, **2,560 summary rows** (target ≥ 1,700); all 4 Stuart-Hobson benchmarks pass |
-| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **10 figures** (loop 8 adds geographic equity chart), school-level and citywide views functional |
-| 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
-| 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Closed out — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **7 sheets** (adds Geographic Equity in loop 8) |
-
----
-
-## Key Outputs
-
-| Output | Location | Status |
-|--------|----------|--------|
-| Combined dataset (all years) | `output_data/combined_all_years.csv` | ✅ 28,069 rows (7 years: 2016–2024) |
-| Cohort growth detail | `output_data/cohort_growth_detail.csv` | ✅ 12,956 rows |
-| Cohort growth summary | `output_data/cohort_growth_summary.csv` | ✅ **2,560 rows** (Task 03 target met) |
-| Cohort growth Excel workbook | `output_data/cohort_growth_pivot.xlsx` | ✅ 6 sheets |
-| Equity gap detail | `output_data/equity_gap_detail.csv` | ✅ 13,008 rows |
-| Equity gap summary | `output_data/equity_gap_summary.csv` | ✅ 2,138 rows |
-| School rankings | `output_data/school_rankings.csv` | ✅ 422 rows |
-| School equity rankings | `output_data/school_equity_rankings.csv` | ✅ 414 rows |
-| **Proficiency trends** | `output_data/proficiency_trends.csv` | ✅ **25,629 rows** — new in loop 5 |
-| **Geographic equity (school)** | `output_data/geographic_equity_by_school.csv` | ✅ **New in loop 8** — 210 rows (school × subject, with Quadrant/Neighborhood) |
-| **Geographic equity (quadrant)** | `output_data/geographic_equity_by_quadrant.csv` | ✅ **New in loop 8** — 8 rows (4 quadrants × 2 subjects) |
-| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **7 sheets** — adds Geographic Equity sheet in loop 8 |
-| Processing report | `output_data/processing_report.txt` | ✅ Created |
-| Wide-format loader | `src/load_wide_format_data.py` | ✅ Extended — now handles all 7 in-repo workbooks across 6 naming schemes |
-| Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
-| School rankings script | `src/generate_school_rankings.py` | ✅ New — ranks schools by cohort growth and equity-gap narrowing |
-| **Proficiency trend script** | `src/proficiency_trend_analysis.py` | ✅ **New in loop 5** — grade × year proficiency grid |
-| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 8** — now produces 7-sheet Excel workbook |
-| **Geographic equity script** | `src/geographic_equity_analysis.py` | ✅ **New in loop 8** — joins school locations with performance data by DC quadrant |
-| School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
-| Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
-| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **10 figures**; 10th figure is Geographic Equity bar+line chart by DC quadrant |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 8 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 8 |
-
----
-
-## Squad
-
-| Member | Role | Charter |
-|--------|------|---------|
-| Lead | Project Lead & Architect | `.squad/agents/lead/charter.md` |
-| Data Engineer | Data Ingestion & Pipeline | `.squad/agents/data-engineer/charter.md` |
-| Statistician | Analysis & Statistical Tests | `.squad/agents/statistician/charter.md` |
-| Tester | Quality Assurance & Validation | `.squad/agents/tester/charter.md` |
-| Scribe | Documentation & History | `.squad/agents/scribe/charter.md` |
-| Ralph | Risk, Assumptions & Review | `.squad/agents/ralph/charter.md` |
-
----
-
-## Archived Loop 8 Notes
-
-- The detailed loop-8 blocker list and smoke-path snapshot are retained in `.squad/review_report.md` and `.squad/decisions.md` (see D-034).
-- The authoritative current blockers and next step are the loop-10 items in the top `## Notes / Blockers / Follow-up` section above.
+- **Next recommended step:** Start the next **Build** loop and choose one explicit follow-up: restore the normalized-data / 2024-25 ingestion path, complete browser-console review for the 14-figure dashboard (adds school type trends), or deliberately narrow the backlog to the verified wide-format scope.
