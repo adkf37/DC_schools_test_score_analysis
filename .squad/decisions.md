@@ -510,3 +510,20 @@
 - `STATUS.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 12 while explicitly sending the repo back to **Build** next.
 - `.squad/review_report.md` becomes the authoritative closeout record for the loop-12 school-type-aware handoff.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 14-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
+
+### D-047 — Build Loop 13: Grade-Level Performance Analysis
+**Date:** 2026-04-30
+**Decision:** Implement `src/grade_level_analysis.py` as a standalone script that computes average proficiency, COVID recovery, and same-grade YoY growth broken down by specific grade of enrollment (Grade 3–Grade 8 and High School) for both ELA and Math. Extend the dashboard with a 15th figure and add Sheet 12 "Grade Levels" to `summary_report.xlsx`.
+**Rationale:**
+- The normalized-data / 2024-25 path remains blocked (no OSSE files in repo). Charter-vs.-DCPS analysis remains blocked (no LEA-type column in wide-format files). Browser-console review remains environment-blocked.
+- Grade-level breakdown is the next highest-value feasible analysis: it directly addresses the policy question of "where in the K-12 pipeline are students struggling most?" and uses data already in `combined_all_years.csv` (the `Grade of Enrollment` column).
+- Unlike the school-type analysis (which aggregates by grade-band into five coarse buckets) and the YoY analysis (which measures change at a single school), this analysis gives a citywide picture of how average proficiency compares across the seven individual grade levels, enabling grade-by-grade COVID impact and recovery comparisons.
+**Consequences:**
+- `src/grade_level_analysis.py` — new standalone script; run after `school_type_analysis.py` and before `generate_summary_report.py`.
+- Outputs: `grade_level_proficiency.csv` (98 rows: avg/median proficiency by grade × subject × year, minimum 3 schools per cell), `grade_level_summary.csv` (14 rows: grand-avg proficiency + COVID recovery + avg YoY growth by grade × subject).
+- Key findings: Grade 4 highest ELA avg proficiency (32.7%); Grade 3 highest Math avg proficiency (33.8%); HS lowest Math (13.2%); Grade 7 largest ELA COVID impact (−10.78 pp); Grade 4 largest Math COVID impact (−11.55 pp); Grade 6 strongest ELA recovery (+4.49 pp); Grade 4 strongest Math recovery (+4.70 pp).
+- Dashboard (`app/app_simple.py`) extended to load `grade_level_proficiency.csv` and render a 15th figure: in citywide mode, line chart of avg proficiency by grade over time; in school-selection mode, selected school's per-grade proficiency over time overlaid on faint citywide grade averages.
+- `src/generate_summary_report.py` extended to write Sheet 12 "Grade Levels" when `grade_level_summary.csv` is present; gracefully skips if absent. Workbook now regenerates with **12 sheets**.
+- Smoke path updated: adds `python src/grade_level_analysis.py` as step 14 (after `school_type_analysis.py`, before `generate_summary_report.py`).
+- All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
+- Next step: run Validate/Closeout for loop 13.

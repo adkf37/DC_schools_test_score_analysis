@@ -2,9 +2,26 @@
 
 ## Current Objective
 
-**Loop 12 Closeout complete — school-type-aware handoff approved for the reproducible in-repo path; return to Build for remaining backlog scope.**
+**Loop 13 Build complete — grade-level-performance-aware handoff ready for Validate.**
 
-Loop 12 Build adds `src/school_type_analysis.py`, a standalone script that classifies every school by its grade-band configuration (Elementary, Middle School, High School, Elementary-Middle, or Middle-High) and then computes average proficiency, COVID recovery, and cohort growth metrics by school type. The dashboard now renders **14 figures**; `summary_report.xlsx` now has **11 sheets** (adds "School Types" sheet).
+Loop 13 Build adds `src/grade_level_analysis.py`, a standalone script that computes average proficiency, COVID recovery, and same-grade YoY growth broken down by specific grade of enrollment (Grade 3–Grade 8 and High School) for both ELA and Math. The dashboard now renders **15 figures**; `summary_report.xlsx` now has **12 sheets** (adds "Grade Levels" sheet).
+
+Loop 13 Build completed:
+1. Created `src/grade_level_analysis.py` — exits 0; produces `grade_level_proficiency.csv` (98 rows: avg/median proficiency by grade × subject × year) and `grade_level_summary.csv` (14 rows: grand-average metrics by grade × subject with COVID impact, recovery, and avg YoY growth).
+2. Extended `app/app_simple.py` — loads `grade_level_proficiency.csv`; adds 15th figure: in citywide mode, line chart of avg proficiency by grade over time; in school-selection mode, selected school's per-grade proficiency overlaid on faint citywide grade averages.
+3. Extended `src/generate_summary_report.py` — adds Sheet 12 "Grade Levels" when `grade_level_summary.csv` is present; gracefully skips if absent. Workbook now regenerates with **12 sheets**.
+4. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
+5. Dashboard `/_dash-dependencies` advertises a **15-output** callback; all 15 figure component IDs are returned in a live `POST /_dash-update-component` response.
+
+Key findings from grade-level analysis:
+- ELA proficiency (All Students, 2016–2024 avg): Grade 4 highest (32.7%) → Grade 6 lowest (26.0%)
+- Math proficiency (All Students, 2016–2024 avg): Grade 3 highest (33.8%) → HS lowest (13.2%)
+- Largest ELA COVID impact: Grade 7 (−10.78 pp 2019→2022)
+- Largest Math COVID impact: Grade 4 (−11.55 pp 2019→2022)
+- Strongest ELA recovery: Grade 6 (+4.49 pp 2022→2024)
+- Strongest Math recovery: Grade 4 (+4.70 pp 2022→2024)
+
+**Next step: run Validate/Closeout for loop 13.**
 
 Loop 12 Validate confirmed:
 1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
