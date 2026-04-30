@@ -2,7 +2,7 @@
 
 ## ✅ Current Status: Closeout Loop 14 Complete — Subgroup Trends Added, Repo Returns to Build
 
-As of 2026-04-30, loop 14 has passed Validate and Closeout for the reproducible in-repo path. `src/subgroup_trend_analysis.py`, the subgroup dashboard figure, and the 13-sheet `summary_report.xlsx` are now part of the documented smoke path:
+As of 2026-04-30, loop 14 has passed Validate and Closeout for the reproducible in-repo path. `src/subgroup_trend_analysis.py`, the subgroup dashboard figure, and the 13-sheet `summary_report.xlsx` are now part of the documented smoke path. The dashboard also advertises an optional consistency panel; when `school_consistency.csv` is absent, that panel remains a documented placeholder rather than part of the validated smoke path:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -21,6 +21,8 @@ As of 2026-04-30, loop 14 has passed Validate and Closeout for the reproducible 
 - `python src/subgroup_trend_analysis.py` ✅ ← **new in loop 14**
 - `python src/generate_summary_report.py` ✅ ← updated to 13 sheets in loop 14
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
+
+> Optional future-scope add-on: run `python src/school_consistency_analysis.py` before `python src/generate_summary_report.py` if you want the extra consistency chart/sheet. Without that file, the dashboard shows `No consistency data – run src/school_consistency_analysis.py`, and the validated handoff remains the 13-sheet workbook path above.
 
 **Two data pipeline options:**
 
