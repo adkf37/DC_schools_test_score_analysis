@@ -1,6 +1,8 @@
 # Sprint Plan
 
-## Current Phase: Loop 10 Build complete → Validate next
+## Current Phase: Loop 11 Build complete → Validate next
+
+Loop 11 adds `src/school_trajectory_analysis.py`, a standalone script that classifies each school's long-run proficiency trajectory by fitting an OLS linear trend to annual All Students proficiency data across all available years (2016–2024).  The slope (pp/yr) and R² measure how consistently and strongly each school is improving or declining over the multi-year period.  Key findings: ELA citywide avg slope +0.065 pp/yr (mostly Stable); Math avg slope −0.656 pp/yr (more Declining than Improving). Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). The dashboard now renders **13 figures**; `summary_report.xlsx` now has **10 sheets** (adds "School Trajectories" sheet).
 
 Loop 10 adds `src/covid_recovery_analysis.py`, a standalone script that quantifies the pandemic's impact on DC school test performance and measures recovery.  Using 2019 as the pre-COVID benchmark and 2022/2024 as post-COVID years, it computes for every school × subject × student subgroup: COVID impact (2019→2022), recovery progress (2022→2024), net change vs. pre-COVID, and a recovery status classification (Exceeded Pre-COVID / Fully Recovered / Partially Recovered / Still Below Pre-COVID).  Key findings: citywide ELA avg COVID impact −3.94 pp, recovery +1.75 pp, net −2.15 pp; Math impact −8.56 pp, recovery +3.17 pp, net −5.43 pp.  The dashboard now renders 12 figures; `summary_report.xlsx` now has 9 sheets (adds "COVID Recovery" sheet).
 
@@ -29,15 +31,15 @@ Loop 7 adds `src/generate_summary_report.py`, a formatted 6-sheet Excel policy-s
 | 13 | [Loop 8] Geographic equity analysis | Statistician | school_locations.csv, trends, growth | ✅ Built — `geographic_equity_analysis.py` exits 0; dashboard returns **10 figures**; `summary_report.xlsx` has **7 sheets** |
 | 14 | [Loop 9] Same-grade year-over-year growth analysis | Statistician | Task 02 | ✅ Built — `yoy_growth_analysis.py` exits 0; `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows); dashboard returns **11 figures**; `summary_report.xlsx` has **8 sheets** |
 | 15 | [Loop 10] COVID recovery analysis | Statistician | Task 02 | ✅ Built — `covid_recovery_analysis.py` exits 0; `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows); dashboard returns **12 figures**; `summary_report.xlsx` has **9 sheets** |
+| 16 | [Loop 11] School performance trajectory classification | Statistician | proficiency_trends.csv | ✅ Built — `school_trajectory_analysis.py` exits 0; `school_trajectory_classification.csv` (424 rows); dashboard returns **13 figures**; `summary_report.xlsx` has **10 sheets** |
 
 ## Notes
 
-- Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python src/equity_gap_analysis.py` → `python src/generate_school_rankings.py` → `python src/proficiency_trend_analysis.py` → `python src/geographic_equity_analysis.py` → `python src/yoy_growth_analysis.py` → `python src/covid_recovery_analysis.py` → `python src/generate_summary_report.py` → `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies` (12 figures)
+- Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python src/equity_gap_analysis.py` → `python src/generate_school_rankings.py` → `python src/proficiency_trend_analysis.py` → `python src/geographic_equity_analysis.py` → `python src/yoy_growth_analysis.py` → `python src/covid_recovery_analysis.py` → `python src/school_trajectory_analysis.py` → `python src/generate_summary_report.py` → `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies` (**13 figures**)
 - `load_clean_data.py` still requires normalized OSSE files (download from OSSE website) — use `load_wide_format_data.py` for the files already in the repo.
 - `cohort_growth_summary.csv` now has 2,560 rows (Task 03 target was ≥ 1,700 — **target met** in loop 4).
 - No cohort transitions cross the 2019–2022 COVID gap; only within-year-pair transitions (2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024) are produced.
 - `proficiency_trends.csv` has 25,629 rows covering school × year × subject × grade × subgroup proficiency.
-- Citywide avg proficiency (All Students): ELA rose from 22.7% (2016) to 35.2% (2019), dropped to 29.4% (2022), and recovered to 32.1% (2024); Math followed a similar pattern.
-- `summary_report.xlsx` has 8 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, **YoY Growth**.
-- YoY growth key finding: citywide ELA avg +4.82 pp (2016→2017), +0.94 pp (2017→2018), +4.91 pp (2018→2019), +2.02 pp (2022→2023), +0.48 pp (2023→2024). Math: +2.07, −4.32, +2.42, +3.25, +0.35 pp for the same periods.
-- Next action: validate loop 9 outputs (run smoke path, confirm 11 figures, 8 sheets), then Closeout loop 9.
+- `summary_report.xlsx` has **10 sheets**: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, **School Trajectories**.
+- Trajectory key finding: ELA avg slope +0.065 pp/yr (Stable overall); Math avg slope −0.656 pp/yr (Declining overall). ~55% of schools have Insufficient Data (fewer than 3 years with All Students proficiency). Top improver in both ELA and Math: Whittier Elementary School.
+- Next action: validate loop 11 outputs (run smoke path, confirm 13 figures, 10 sheets), then Closeout loop 11.

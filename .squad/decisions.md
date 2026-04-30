@@ -421,3 +421,21 @@
 - `.squad/review_report.md` becomes the authoritative closeout record for the loop-10 COVID-recovery-aware handoff.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 12-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
 
+### D-041 — Build Loop 11: School Performance Trajectory Classification
+**Date:** 2026-04-30
+**Decision:** Implement `src/school_trajectory_analysis.py` as a standalone script fitting an OLS linear trend to each school's multi-year All Students proficiency data (2016–2024) and classifying schools into five trajectory categories; extend the dashboard with a 13th figure; and add Sheet 10 "School Trajectories" to `summary_report.xlsx`.
+**Rationale:**
+- The repo contains proficiency data for 7 years (2016–2024) that allows a long-run trend analysis. Stakeholders need to know whether each school has been consistently improving, stable, or declining across the full available period — not just in response to COVID or year-over-year.
+- Normalized 4-workbook / 2024-25 path remains blocked. Charter vs. DCPS comparison is blocked (no LEA-type column). Browser-console review remains environment-blocked. School trajectory is therefore the next highest-value feasible deliverable.
+- OLS linear regression on (year, proficiency_pct) is the standard, interpretable approach for trend classification; slope (pp/yr) and R² are sufficient to screen and communicate trajectory patterns to policy audiences without requiring ML dependencies.
+- Minimum 3 years of valid All Students data required before a slope is estimated; schools with fewer years are labeled "Insufficient Data" (note: ~55% of schools fall in this category because many only appear in the most recent 1-3 wide-format workbooks).
+**Consequences:**
+- `src/school_trajectory_analysis.py` — new standalone script; run it after `covid_recovery_analysis.py` and before `generate_summary_report.py`.
+- Outputs: `output_data/school_trajectory_classification.csv` (424 rows: 212 schools × 2 subjects, All Students, with n_years_with_data, first/last year, avg/first/last proficiency, total_change_pp, trend_slope_pp_yr, r_squared, trajectory_class).
+- Key findings: ELA citywide avg slope +0.065 pp/yr (majority Stable or Insufficient Data); Math avg slope −0.656 pp/yr (more Declining than Improving). Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). Top Math improver: Whittier ES (+9.2 pp/yr, 23%→41%).
+- Dashboard (`app/app_simple.py`) extended to load `school_trajectory_classification.csv` and render a 13th figure: scatter of trend slope (x) vs. avg proficiency (y), colour-coded by trajectory class; school-selection mode shows same scatter filtered to selected schools.
+- `src/generate_summary_report.py` extended to write Sheet 10 "School Trajectories" to `summary_report.xlsx` when `school_trajectory_classification.csv` is present; gracefully skips if absent.
+- Smoke path updated: adds `python src/school_trajectory_analysis.py` as step 12 (after `covid_recovery_analysis.py`, before `generate_summary_report.py`).
+- All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied).
+- Next step: run Validate/Closeout for loop 11.
+
