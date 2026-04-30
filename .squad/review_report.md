@@ -2,11 +2,11 @@
 
 **Date:** 2026-04-30
 **Reviewer:** Ralph
-**Final Decision:** **CLOSEOUT SIGNOFF FOR THE CURRENT 7-WORKBOOK WIDE-FORMAT + GRADE-LEVEL-AWARE HANDOFF — return to Build for remaining scope**
+**Final Decision:** **CLOSEOUT SIGNOFF FOR THE CURRENT 7-WORKBOOK WIDE-FORMAT + SUBGROUP-AWARE HANDOFF — return to Build for remaining scope**
 
 ## Scope
 
-Closeout review for loop 13 against the backlog tasks, sprint Definition of Done, current documentation, and the repository's reproducibility requirements from a fresh clone.
+Closeout review for loop 14 against the backlog tasks, sprint Definition of Done, current documentation, and the repository's reproducibility requirements from a fresh clone.
 
 ## Evidence Checked
 
@@ -45,29 +45,30 @@ Closeout review for loop 13 against the backlog tasks, sprint Definition of Done
 12. `python src/school_trajectory_analysis.py` — ✅ passed
 13. `python src/school_type_analysis.py` — ✅ passed
 14. `python src/grade_level_analysis.py` — ✅ passed
-15. `python src/generate_summary_report.py` — ✅ passed
-16. `python app/app_simple.py` plus `GET /`, `/_dash-layout`, and `/_dash-dependencies` — ✅ passed
-17. `python -c "import app.app_simple as m; m.update_figures('Math', 'All Students', None, [2022, 2024])"` — ✅ passed (15 figures returned)
-18. `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,5200 --screenshot=/tmp/loop13-closeout-dashboard.png http://127.0.0.1:8050/` — ✅ passed
+15. `python src/subgroup_trend_analysis.py` — ✅ passed
+16. `python src/generate_summary_report.py` — ✅ passed
+17. `python app/app_simple.py` plus `GET /`, `/_dash-layout`, and `/_dash-dependencies` — ✅ passed
+18. `python -c "import app.app_simple as m; m.update_figures('Math', 'All Students', None, [2022, 2024])"` — ✅ passed (16 figures returned)
+19. `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,5600 --screenshot=/tmp/loop14-closeout-dashboard.png http://127.0.0.1:8050/` — ✅ passed
 
 ## Acceptance Criteria Review
 
 - **Closeout outcome recorded in `STATUS.md`** — ✅ updated in this loop
 - **`.squad/review_report.md` exists and includes an explicit final decision** — ✅
 - **Final closeout notes written to `.squad/decisions.md`** — ✅
-- **Human-facing docs current enough for handoff** — ✅ refreshed to match the validated loop-13 wide-format + equity + rankings + trends + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + summary-report state
+- **Human-facing docs current enough for handoff** — ✅ refreshed to match the validated loop-14 wide-format + equity + rankings + trends + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + subgroup-trend + summary-report state
 - **Remaining blockers or follow-up work are explicit** — ✅
 
 ## Findings
 
-1. **Fresh-clone reproducibility succeeds for the repo's documented loop-13 7-workbook wide-format path.**
+1. **Fresh-clone reproducibility succeeds for the repo's documented loop-14 7-workbook wide-format path.**
    Closeout re-ran the documented smoke path from dependency install through `src/generate_summary_report.py`, and every command exited 0. The wide-format loader again discovered the seven committed workbooks under `input_data/School and Demographic Group Aggregation/`, covering 2016, 2017, 2018, 2019, 2022, 2023, and 2024.
 
-2. **Task 03 and Task 05 remain met for the reproducible in-repo path, and the loop-13 analytical artifact set reproduces cleanly.**
-   The closeout rerun regenerated `output_data/combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `cohort_growth_pivot.xlsx` (6 sheets), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows), `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows), `school_trajectory_classification.csv` (424 rows), `school_type_by_school.csv` (251 rows), `school_type_proficiency.csv` (70 rows), `school_type_summary.csv` (10 rows), `grade_level_proficiency.csv` (98 rows), `grade_level_summary.csv` (14 rows), and `summary_report.xlsx` (12 sheets). The Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp of the manual targets, and the significance fields remain present.
+2. **Task 03 and Task 05 remain met for the reproducible in-repo path, and the loop-14 analytical artifact set reproduces cleanly.**
+   The closeout rerun regenerated `output_data/combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `cohort_growth_pivot.xlsx` (6 sheets), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows), `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows), `school_trajectory_classification.csv` (424 rows), `school_type_by_school.csv` (251 rows), `school_type_proficiency.csv` (70 rows), `school_type_summary.csv` (10 rows), `grade_level_proficiency.csv` (98 rows), `grade_level_summary.csv` (14 rows), `subgroup_proficiency.csv` (152 rows), `subgroup_summary.csv` (22 rows), and `summary_report.xlsx` (13 sheets). The Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp of the manual targets, and the significance fields remain present.
 
-3. **The grade-level outputs, workbook, and dashboard path are handoff-ready for this loop.**
-   `python src/grade_level_analysis.py` reproduces the documented grade-level findings: ELA average proficiency peaks at Grade 4 (32.74%) and bottoms at Grade 6 (26.04%); Math peaks at Grade 3 (33.76%) and bottoms at High School (13.17%); Grade 7 has the largest ELA COVID impact (−10.78 pp); Grade 4 has the largest Math COVID impact (−11.55 pp); Grade 6 has the strongest ELA recovery (+4.49 pp); and Grade 4 has the strongest Math recovery (+4.70 pp). `summary_report.xlsx` regenerates with all twelve expected sheets, including `Grade Levels`. `python app/app_simple.py` starts successfully against the regenerated CSVs, `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, direct callback invocation returns all fifteen figures, including the new grade-level chart, and a fresh headless screenshot confirms the dashboard renders in this environment.
+3. **The subgroup outputs, workbook, and dashboard path are handoff-ready for this loop.**
+   `python src/subgroup_trend_analysis.py` reproduces the documented subgroup findings: ELA average proficiency peaks at White (83.82%) and bottoms at Students with Disabilities (7.92%) for a 75.90 pp gap; Math peaks at White (77.06%) and bottoms at Students with Disabilities (6.46%) for a 70.60 pp gap; Hispanic/Latino of any race has the largest COVID hit in both subjects (ELA −9.70 pp; Math −14.54 pp); and Asian has the strongest recovery in both subjects (ELA +10.31 pp; Math +8.65 pp). `summary_report.xlsx` regenerates with all thirteen expected sheets, including `Subgroups`. `python app/app_simple.py` starts successfully against the regenerated CSVs, `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, direct callback invocation returns all sixteen figures, including the new subgroup chart, and a fresh headless screenshot confirms the dashboard renders in this environment.
 
 4. **Closeout should sign off the current loop, but not declare the full backlog complete.**  
    The handoff artifacts now match the verified state of the historical-data wide-format pipeline, but backlog Tasks 01 and 02 are still open against their original normalized-data acceptance criteria. The original 2024-25 ingestion path is not reproducible from the repo alone, direct browser-console inspection during manual interaction remains unfinished in this sandbox, and charter-vs.-DCPS analysis still cannot be performed from the current wide-format files.
@@ -82,16 +83,16 @@ Closeout review for loop 13 against the backlog tasks, sprint Definition of Done
 
 ## Recommendation
 
-**Sign off the current 7-workbook wide-format + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + summary-report loop for handoff, then return the repository to Build for the remaining backlog scope.**
+**Sign off the current 7-workbook wide-format + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + subgroup-trend + summary-report loop for handoff, then return the repository to Build for the remaining backlog scope.**
 
 Required follow-up:
 
-1. Choose the next Build target: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console / manual dashboard checks for the current 15-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope.
+1. Choose the next Build target: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console / manual dashboard checks for the current 16-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope.
 2. If the normalized-data path is chosen, align `src/load_clean_data.py` with the actual input contract or add/document the required OSSE files.
-3. If dashboard work is chosen, validate the browser console during manual interaction against the 15-figure dashboard and decide whether to tighten any remaining map-data coverage mismatches.
+3. If dashboard work is chosen, validate the browser console during manual interaction against the 16-figure dashboard and decide whether to tighten any remaining map-data coverage mismatches.
 4. Re-run Validate/Closeout after the next Build loop changes the evidence or scope.
 
 ## Signoff
 
-**Approved for closeout of the current 7-workbook wide-format + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + summary-report loop. Not approved as full project completion.**
-The repository is handoff-ready for a human who needs the verified in-repo historical-data path, regenerated analytical outputs, the geographic-equity, YoY, COVID recovery, school trajectory, school type, and grade-level findings, the formatted 12-sheet summary workbook, the 15-figure dashboard evidence, and explicit remaining limitations, and it should now return to **Build** for the next backlog slice.
+**Approved for closeout of the current 7-workbook wide-format + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + subgroup-trend + summary-report loop. Not approved as full project completion.**
+The repository is handoff-ready for a human who needs the verified in-repo historical-data path, regenerated analytical outputs, the geographic-equity, YoY, COVID recovery, school trajectory, school type, grade-level, and subgroup-trend findings, the formatted 13-sheet summary workbook, the 16-figure dashboard evidence, and explicit remaining limitations, and it should now return to **Build** for the next backlog slice.

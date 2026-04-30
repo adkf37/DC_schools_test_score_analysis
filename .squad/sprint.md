@@ -1,6 +1,6 @@
 # Sprint Plan
 
-## Current Phase: Loop 14 Build complete → Validate next
+## Current Phase: Loop 14 Closeout complete → Build next
 
 Loop 14 adds `src/subgroup_trend_analysis.py`, a standalone script that computes average proficiency, COVID recovery, and same-grade YoY growth broken down by student demographic subgroup (All Students, Male, Female, Black or African American, Hispanic/Latino of any race, White, Asian, Two or more races, Economically Disadvantaged, EL Active, Students with Disabilities) for both ELA and Math across all DC schools. Unlike `equity_gap_analysis.py` (which focuses on cohort growth gaps relative to "All Students"), this analysis tracks absolute proficiency levels over time for each demographic group. Key findings: ELA proficiency gap between highest (White, 83.8%) and lowest (Students with Disabilities, 7.9%) subgroup is 75.9 pp; Hispanic/Latino took the largest COVID hit in both subjects (ELA −9.70 pp, Math −14.54 pp); Asian showed the strongest recovery (ELA +10.31 pp, Math +8.65 pp). The dashboard now renders **16 figures**; `summary_report.xlsx` now has **13 sheets** (adds "Subgroups" sheet).
 
@@ -49,4 +49,4 @@ Loop 7 adds `src/generate_summary_report.py`, a formatted 6-sheet Excel policy-s
 - Trajectory key finding: ELA avg slope +0.065 pp/yr (Stable overall); Math avg slope −0.656 pp/yr (Declining overall). ~55% of schools have Insufficient Data (fewer than 3 years with All Students proficiency). Top improver in both ELA and Math: Whittier Elementary School.
 - Grade-level key finding: Grade 4 highest ELA avg proficiency (32.7%); Grade 3 highest Math avg proficiency (33.8%); HS lowest Math (13.2%); Grade 7 largest ELA COVID impact (−10.78 pp); Grade 4 largest Math COVID impact (−11.55 pp).
 - Subgroup key finding: White highest ELA avg proficiency (83.8%), Students with Disabilities lowest (7.9%), gap 75.9 pp; Hispanic/Latino took the largest COVID hit (ELA −9.70 pp, Math −14.54 pp); Asian showed the strongest recovery (ELA +10.31 pp, Math +8.65 pp).
-- Next action: validate loop 14 outputs (run smoke path, confirm 16 figures, 13 sheets), then Closeout loop 14.
+- Next action: choose the next Build target (normalized-data / 2024-25 ingestion, blocked browser-console review for the 16-figure dashboard, or deliberate backlog narrowing), then re-run Validate/Closeout once the scope changes.
