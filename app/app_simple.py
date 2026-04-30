@@ -105,6 +105,7 @@ SCHOOL_TYPE_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'school_type_proficiency
 SCHOOL_TYPE_BY_SCHOOL_FILE = os.path.join(OUTPUT_DIR, 'school_type_by_school.csv')
 GRADE_LEVEL_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'grade_level_proficiency.csv')
 SUBGROUP_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'subgroup_proficiency.csv')
+SCHOOL_CONSISTENCY_FILE = os.path.join(OUTPUT_DIR, 'school_consistency.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
@@ -118,6 +119,7 @@ school_type_proficiency = pd.DataFrame()
 school_type_by_school = pd.DataFrame()
 grade_level_proficiency = pd.DataFrame()
 subgroup_proficiency = pd.DataFrame()
+school_consistency = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -154,6 +156,9 @@ if os.path.isfile(GRADE_LEVEL_PROFICIENCY_FILE):
 if os.path.isfile(SUBGROUP_PROFICIENCY_FILE):
     subgroup_proficiency = pd.read_csv(SUBGROUP_PROFICIENCY_FILE)
     print(f"Loaded subgroup proficiency: {len(subgroup_proficiency):,} rows")
+if os.path.isfile(SCHOOL_CONSISTENCY_FILE):
+    school_consistency = pd.read_csv(SCHOOL_CONSISTENCY_FILE)
+    print(f"Loaded school consistency: {len(school_consistency):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -445,6 +450,25 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='subgroup-trend')
         ]),
+
+        html.Hr(),
+
+        # ── Performance Consistency section ───────────────────────────────
+        html.H4("School Performance Consistency", className="mt-3"),
+        html.P(
+            "How stable is each school's proficiency from year to year? "
+            "Each point is a school (All Students, selected subject). "
+            "X-axis: average proficiency. Y-axis: Coefficient of Variation (CV = std/avg × 100%) — "
+            "higher CV means more year-to-year fluctuation. "
+            "Schools are classified into four quadrants: "
+            "High-Consistent (steady high performers), High-Volatile (high but fluctuating), "
+            "Low-Consistent (steady but low), and Low-Volatile (low and fluctuating). "
+            "Run python src/school_consistency_analysis.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='consistency')
+        ]),
     ]
 )
 
@@ -487,6 +511,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('school-type', 'figure'),
     Output('grade-level', 'figure'),
     Output('subgroup-trend', 'figure'),
+    Output('consistency', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -1513,11 +1538,105 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No subgroup data – run src/subgroup_trend_analysis.py'
         )
 
+    # ── School performance consistency scatter ────────────────────────────
+    CONSISTENCY_COLORS = {
+        'High-Consistent': '#1a9641',
+        'High-Volatile': '#a6d96a',
+        'Low-Consistent': '#fdae61',
+        'Low-Volatile': '#d7191c',
+        'Insufficient Data': '#bdbdbd',
+    }
+    fig_consistency = go.Figure()
+
+    if not school_consistency.empty:
+        sc_df = school_consistency.copy()
+        if subject:
+            sc_df = sc_df[sc_df['Subject'] == subject]
+        if schools:
+            sc_df = sc_df[sc_df['School Name'].isin(schools)]
+
+        sc_plot = sc_df.dropna(subset=['avg_proficiency_pct', 'cv_proficiency_pct'])
+
+        if not sc_plot.empty:
+            for cls, color in CONSISTENCY_COLORS.items():
+                sub_cls = sc_plot[sc_plot['consistency_class'] == cls]
+                if sub_cls.empty:
+                    continue
+                fig_consistency.add_trace(go.Scatter(
+                    x=sub_cls['avg_proficiency_pct'],
+                    y=sub_cls['cv_proficiency_pct'],
+                    mode='markers',
+                    name=cls,
+                    marker=dict(
+                        color=color, size=9, opacity=0.85,
+                        line=dict(width=0.5, color='#555'),
+                    ),
+                    text=sub_cls['School Name'],
+                    customdata=sub_cls[['n_years_with_data', 'std_proficiency_pct',
+                                        'range_proficiency_pp']].values,
+                    hovertemplate=(
+                        '<b>%{text}</b><br>'
+                        'Avg proficiency: %{x:.1f}%<br>'
+                        'CV: %{y:.1f}%<br>'
+                        'Std dev: %{customdata[1]:.1f} pp<br>'
+                        'Range (max−min): %{customdata[2]:.1f} pp<br>'
+                        'Years with data: %{customdata[0]}<br>'
+                        '<extra></extra>'
+                    ),
+                ))
+
+            # Median cut-point reference lines
+            classifiable = sc_plot[sc_plot['consistency_class'] != 'Insufficient Data']
+            if not classifiable.empty:
+                med_avg = classifiable['avg_proficiency_pct'].median()
+                med_cv = classifiable['cv_proficiency_pct'].median()
+                fig_consistency.add_vline(
+                    x=med_avg, line_dash='dash', line_color='grey', line_width=1,
+                )
+                fig_consistency.add_hline(
+                    y=med_cv, line_dash='dash', line_color='grey', line_width=1,
+                )
+                x_rng = sc_plot['avg_proficiency_pct']
+                y_rng = sc_plot['cv_proficiency_pct']
+                x_pad = (x_rng.max() - x_rng.min()) * 0.05 or 1.0
+                y_pad = (y_rng.max() - y_rng.min()) * 0.05 or 1.0
+                for annotation in [
+                    dict(x=x_rng.max() + x_pad, y=y_rng.min() - y_pad,
+                         text='High-Consistent', showarrow=False,
+                         font=dict(size=9, color='#1a9641'), xanchor='right'),
+                    dict(x=x_rng.max() + x_pad, y=y_rng.max() + y_pad,
+                         text='High-Volatile', showarrow=False,
+                         font=dict(size=9, color='#7a9e3b'), xanchor='right'),
+                    dict(x=x_rng.min() - x_pad, y=y_rng.min() - y_pad,
+                         text='Low-Consistent', showarrow=False,
+                         font=dict(size=9, color='#e09020'), xanchor='left'),
+                    dict(x=x_rng.min() - x_pad, y=y_rng.max() + y_pad,
+                         text='Low-Volatile', showarrow=False,
+                         font=dict(size=9, color='#d7191c'), xanchor='left'),
+                ]:
+                    fig_consistency.add_annotation(**annotation)
+
+            fig_consistency.update_layout(
+                title=(
+                    f'{subject} – School Performance Consistency'
+                    if subject else 'School Performance Consistency'
+                ),
+                xaxis_title='Avg Proficiency, All Students (%)',
+                yaxis_title='CV (Coefficient of Variation, %)',
+                legend_title='Consistency Class',
+                height=520,
+            )
+
+    if not fig_consistency.data:
+        fig_consistency.update_layout(
+            title='No consistency data – run src/school_consistency_analysis.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
         fig_scatter, fig_geo, fig_yoy, fig_covid, fig_trajectory,
-        fig_school_type, fig_grade_level, fig_subgroup,
+        fig_school_type, fig_grade_level, fig_subgroup, fig_consistency,
     )
 
 
