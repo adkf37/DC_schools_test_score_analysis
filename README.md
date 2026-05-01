@@ -4,7 +4,7 @@ This repository is intended to analyze DC OSSE assessment files across the 2021â
 
 ## Current project state
 
-**As of 2026-04-30, Loop 15 Build is complete: `school_consistency_analysis.py` is now part of the smoke path; the reproducible pipeline produces a 17-figure analytical dashboard and a 14-sheet summary workbook.**
+**As of 2026-05-01, Loop 15 Closeout is complete: `school_consistency_analysis.py` is part of the approved smoke path; the reproducible in-repo pipeline produces a 17-figure analytical dashboard and a 14-sheet summary workbook, and the repo now returns to Build for remaining backlog scope.**
 
 What was validated from a fresh clone:
 
@@ -206,6 +206,8 @@ If the loader and cohort analysis run successfully, the project should produce:
 - `output_data/grade_level_summary.csv`
 - `output_data/subgroup_proficiency.csv`
 - `output_data/subgroup_summary.csv`
+- `output_data/school_consistency.csv`
+- `output_data/consistency_class_summary.csv`
 - `output_data/summary_report.xlsx`
 
 The current closeout review regenerated these files from a fresh clone via the wide-format loader path listed above.
@@ -219,9 +221,9 @@ The current closeout review regenerated these files from a fresh clone via the w
 
 ## Next steps
 
-**Loop 14 (closed out):** the geographic-equity + same-grade YoY + COVID recovery + school trajectory + school type + grade-level + subgroup-trend outputs, the 16-figure dashboard path, and the 13-sheet summary workbook are validated and handoff-ready for the reproducible in-repo path.
+**Loop 15 (closed out):** the geographic-equity + same-grade YoY + COVID recovery + school trajectory + school type + grade-level + subgroup-trend + consistency outputs, the 17-figure dashboard path, and the 14-sheet summary workbook are validated and handoff-ready for the reproducible in-repo path.
 
 **Future Build loops:**
 1. Restore the full normalized-data / 2024-25 ingestion path (requires downloading OSSE workbooks).
-2. Confirm browser-console cleanliness during manual interaction with the 16-figure dashboard.
+2. Confirm browser-console cleanliness during manual interaction with the 17-figure dashboard.
 3. Re-run Validate + Closeout after the next Build loop changes the evidence or scope.
