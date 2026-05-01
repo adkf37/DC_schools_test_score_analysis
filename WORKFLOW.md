@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Loop 15 Build Complete — School Consistency Analysis Added to Smoke Path
+## ✅ Current Status: Loop 15 Closeout Complete — Consistency-Aware Handoff Signed Off
 
-As of 2026-04-30, Loop 15 Build is complete. `src/school_consistency_analysis.py`, the consistency dashboard figure, and the 14-sheet `summary_report.xlsx` are now part of the documented smoke path:
+As of 2026-05-01, Loop 15 Closeout is complete. `src/school_consistency_analysis.py`, the consistency dashboard figure, and the 14-sheet `summary_report.xlsx` are part of the approved documented smoke path, and the repo now returns to Build for the remaining backlog scope:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -326,10 +326,10 @@ python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 14, example callback filters = Subject: Math; Student Group: All Students):**
+**Validated closeout evidence (Loop 15, example callback filters = Subject: Math; Student Group: All Students):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
-- A live `POST /_dash-update-component` request returns all sixteen figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, Geographic Equity chart, YoY growth chart, COVID recovery chart, school trajectory chart, school type chart, grade-level chart, and subgroup trend chart
+- A live callback request returns all seventeen figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, Geographic Equity chart, YoY growth chart, COVID recovery chart, school trajectory chart, school type chart, grade-level chart, subgroup trend chart, and populated consistency chart
 - `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 Math / All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
 
 ---
@@ -352,7 +352,7 @@ python src/proficiency_trend_analysis.py
 
 ---
 
-### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 14
+### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 15
 **File**: `src/generate_summary_report.py`
 
 **What it does:**
@@ -527,7 +527,7 @@ python app/app_simple.py
 
 1. **Choose the next Build target**
     - Restore the full normalized-data / 2024-25 ingestion path, or
-    - Finish the still-blocked browser-console / manual dashboard checks for the current 16-figure dashboard, or
+    - Finish the still-blocked browser-console / manual dashboard checks for the current 17-figure dashboard, or
     - Deliberately narrow the backlog to the verified wide-format scope
 
 2. **If pursuing the normalized-data path**
@@ -536,7 +536,7 @@ python app/app_simple.py
 
 3. **If pursuing the dashboard path**
      - Run `python app/app_simple.py`
-     - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, heatmap, scatter, YoY, COVID recovery, school trajectory, school type, grade-level, and subgroup-trend outputs
+      - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, heatmap, scatter, YoY, COVID recovery, school trajectory, school type, grade-level, subgroup-trend, and consistency outputs
 
 4. **Re-run evidence checks**
    - Verify Stuart-Hobson benchmark values

@@ -2,18 +2,19 @@
 
 ## Current Objective
 
-**Loop 15 Validate complete — the consistency-aware smoke path reproduces end to end; dashboard returns 17 figures and summary_report.xlsx has 14 sheets.**
+**Loop 15 Closeout complete — the consistency-aware 7-workbook wide-format handoff is signed off for the reproducible in-repo path; return to Build for remaining backlog scope.**
 
-Loop 15 Validate re-ran the documented smoke path from dependency install through dashboard startup/rendering. The consistency workflow is now part of the validated baseline rather than an optional placeholder: `python src/school_consistency_analysis.py` regenerates `school_consistency.csv` (**424 rows**, one per school × subject) and `consistency_class_summary.csv` (**10 rows**, per consistency class × subject), the dashboard callback returns **17** analytical figures including the populated consistency scatter, and `summary_report.xlsx` regenerates with **14 sheets** (adds "Consistency").
+Loop 15 Closeout rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md`, then re-ran the documented smoke path and live dashboard checks from a fresh clone. The consistency workflow is now part of the approved baseline: `python src/school_consistency_analysis.py` regenerates `school_consistency.csv` (**424 rows**) and `consistency_class_summary.csv` (**10 rows**), the dashboard callback returns **17** analytical figures including the populated consistency scatter, and `summary_report.xlsx` regenerates with **14 sheets**.
 
-Loop 15 Validate confirmed:
+Loop 15 Closeout confirmed:
 1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, and the full smoke path through `python src/generate_summary_report.py` all exit 0.
 2. The rerun regenerates the documented analytical outputs, including `school_consistency.csv` (**424 rows**), `consistency_class_summary.csv` (**10 rows**), and `summary_report.xlsx` (**14 sheets**).
 3. Task 03 and Task 05 benchmarks still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, and the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp.
 4. Consistency inspection confirms the loop-15 findings: **38 High-Consistent / 10 High-Volatile / 10 Low-Consistent / 37 Low-Volatile / 117 Insufficient Data** schools in ELA and **39 / 9 / 9 / 38 / 117** in Math; top ELA High-Consistent schools remain Ross ES (86.13%, CV 3.85%), Janney ES (85.67%, CV 3.93%), and Key ES (79.58%, CV 3.76%); and the most volatile below-median ELA schools remain Savoy ES (7.04%, CV 79.37%), Turner ES at Green (8.34%, CV 67.82%), and Kramer MS (6.31%, CV 62.60%).
-5. Dashboard `/_dash-dependencies` advertises **17** figure outputs including `consistency.figure`; `GET /`, `/_dash-layout`, and `/_dash-dependencies` all return 200; direct callback invocation returns all **17** analytical figures; and a fresh headless screenshot at `/tmp/loop15-validate-dashboard.png` confirms the UI renders in this environment.
+5. Dashboard `/_dash-dependencies` advertises **17** figure outputs including `consistency.figure`; `GET /`, `/_dash-layout`, and `/_dash-dependencies` all return 200; direct callback invocation returns all **17** analytical figures; and a fresh headless screenshot at `/tmp/loop15-closeout-dashboard.png` confirms the UI renders in this environment.
+6. The current in-repo path is approved for handoff, but the normalized-data / 2024-25 ingestion path, direct browser-console inspection during manual interaction, and charter-vs.-DCPS analysis remain explicit follow-up work.
 
-**Next step: Closeout Loop 15 — review the validation evidence, decide whether the current handoff is sufficient for the reproducible in-repo path, and either sign off or return the repo to Build for remaining backlog scope.**
+**Next step: Return the repo to Build and choose the next backlog slice — restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console/manual dashboard checks, or deliberately narrow the backlog to the verified wide-format scope.**
 
 
 Loop 13 Build completed:
@@ -120,7 +121,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 2 | Squad Review | ✅ Complete |
 | 3 | Build | ✅ Complete through loop 15 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis, subgroup trend analysis, school consistency analysis |
 | 4 | Validate | ✅ Complete for loops 1-15 |
-| 5 | Closeout | ✅ Complete for loops 2-14; loop 15 closeout next |
+| 5 | Closeout | ✅ Complete for loops 2-15 |
 
 ---
 
@@ -186,7 +187,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | **School consistency analysis script** | `src/school_consistency_analysis.py` | ✅ **New in loop 15 smoke path** — school-level volatility / consistency classification |
 | Interactive dashboard | `app/app_simple.py` | ✅ Extended to **17 analytical figures** including the populated consistency chart |
 | Validation report | `.squad/validation_report.md` | ✅ Updated for loop 15 |
-| Review report | `.squad/review_report.md` | ✅ Updated for loop 14 |
+| Review report | `.squad/review_report.md` | ✅ Updated for loop 15 |
 
 ---
 
@@ -232,4 +233,4 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Move to **Closeout** for loop 15 using the current validation evidence, then decide whether to sign off the reproducible in-repo path or return to **Build** for the remaining normalized-data / browser-console / charter-vs.-DCPS scope.
+- **Next recommended step:** Return to **Build** and choose the next follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console/manual dashboard checks for the 17-figure app, or deliberately narrow the backlog to the verified wide-format scope.
