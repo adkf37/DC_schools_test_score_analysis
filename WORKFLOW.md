@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Closeout Loop 14 Complete — Subgroup Trends Added, Repo Returns to Build
+## ✅ Current Status: Loop 15 Build Complete — School Consistency Analysis Added to Smoke Path
 
-As of 2026-04-30, loop 14 has passed Validate and Closeout for the reproducible in-repo path. `src/subgroup_trend_analysis.py`, the subgroup dashboard figure, and the 13-sheet `summary_report.xlsx` are now part of the documented smoke path. The dashboard also advertises an optional consistency panel; when `school_consistency.csv` is absent, that panel remains a documented placeholder rather than part of the validated smoke path:
+As of 2026-04-30, Loop 15 Build is complete. `src/school_consistency_analysis.py`, the consistency dashboard figure, and the 14-sheet `summary_report.xlsx` are now part of the documented smoke path:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -19,10 +19,9 @@ As of 2026-04-30, loop 14 has passed Validate and Closeout for the reproducible 
 - `python src/school_type_analysis.py` ✅ ← **new in loop 12**
 - `python src/grade_level_analysis.py` ✅ ← **new in loop 13**
 - `python src/subgroup_trend_analysis.py` ✅ ← **new in loop 14**
-- `python src/generate_summary_report.py` ✅ ← updated to 13 sheets in loop 14
+- `python src/school_consistency_analysis.py` ✅ ← **new in loop 15**
+- `python src/generate_summary_report.py` ✅ ← updated to 14 sheets in loop 15
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
-
-> Optional future-scope add-on: run `python src/school_consistency_analysis.py` before `python src/generate_summary_report.py` if you want the extra consistency chart/sheet. Without that file, the dashboard shows `No consistency data – run src/school_consistency_analysis.py`, and the validated handoff remains the 13-sheet workbook path above.
 
 **Two data pipeline options:**
 
@@ -357,12 +356,12 @@ python src/proficiency_trend_analysis.py
 **File**: `src/generate_summary_report.py`
 
 **What it does:**
-- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`, `covid_recovery_summary.csv`, `school_trajectory_classification.csv`, `school_type_summary.csv`, `grade_level_summary.csv`, `subgroup_summary.csv`)
-- Produces a formatted 13-sheet Excel workbook for policy stakeholders
+- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`, `covid_recovery_summary.csv`, `school_trajectory_classification.csv`, `school_type_summary.csv`, `grade_level_summary.csv`, `subgroup_summary.csv`, `school_consistency.csv`)
+- Produces a formatted 14-sheet Excel workbook for policy stakeholders
 - Applies header formatting, alternating row shading, and colour-coded growth values
 
 **Output:**
-- `summary_report.xlsx` — 13 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types, Grade Levels, Subgroups
+- `summary_report.xlsx` — 14 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types, Grade Levels, Subgroups, Consistency
 
 ```bash
 python src/generate_summary_report.py
@@ -430,10 +429,13 @@ python src/grade_level_analysis.py
 # 12. Generate subgroup-trend outputs
 python src/subgroup_trend_analysis.py
 
-# 13. Generate formatted Excel policy summary report
+# 13. Generate school performance consistency outputs
+python src/school_consistency_analysis.py
+
+# 14. Generate formatted Excel policy summary report
 python src/generate_summary_report.py
 
-# 14. (Optional) Launch the interactive dashboard
+# 15. (Optional) Launch the interactive dashboard
 python app/app_simple.py
 ```
 
@@ -452,7 +454,8 @@ python app/app_simple.py
 | `src/school_type_analysis.py` | Grade-band school type analysis and type-level performance summaries |
 | `src/grade_level_analysis.py` | Grade-level proficiency, COVID impact, recovery, and YoY summaries |
 | `src/subgroup_trend_analysis.py` | Student subgroup proficiency, COVID impact, recovery, and YoY summaries |
-| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (13-sheet workbook) |
+| `src/school_consistency_analysis.py` | School performance consistency: std deviation, CV, and consistency class per school × subject |
+| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (14-sheet workbook) |
 | `src/yoy_growth_analysis.py` | Same-grade YoY growth |
 | `src/covid_recovery_analysis.py` | COVID impact and recovery analysis |
 | `app/app_simple.py` | Interactive dashboard |

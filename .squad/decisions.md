@@ -627,3 +627,22 @@
 - `.squad/review_report.md` remains the authoritative closeout record for the loop-14 subgroup-aware handoff and should mention the accepted consistency placeholder.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 16-figure dashboard, or deliberately operationalize / document `src/school_consistency_analysis.py` before another Validate/Closeout cycle.
 
+
+### D-055 — Build Loop 15: School Performance Consistency Analysis Integrated into Smoke Path
+**Date:** 2026-04-30
+**Decision:** Integrate `src/school_consistency_analysis.py` into the documented smoke path as Loop 15. The script was already written and the dashboard/workbook already had conditional code for it; this loop makes consistency a first-class part of the analytical pipeline rather than an optional future add-on.
+**Rationale:**
+- D-054 explicitly flagged integrating the consistency workflow as the primary candidate for the next Build loop.
+- `school_consistency_analysis.py` was complete and tested; no new code was required — only adding it to the ordered execution sequence and updating the sprint/status/decisions docs.
+- Running the script produces `school_consistency.csv` (424 rows: one per school × subject, with avg proficiency, std deviation, CV, min, max, range, and consistency class) and `consistency_class_summary.csv` (10 rows: per consistency class × subject).
+- With `school_consistency.csv` present, the dashboard callback now returns **17** figures (the 17th is the avg-proficiency × CV scatter coloured by consistency class with median cut-point reference lines), and `summary_report.xlsx` regenerates with **14 sheets** (adds "Consistency").
+- Consistency classification uses citywide median avg proficiency and median CV as cut-points. Schools are placed in one of four classes (High-Consistent, High-Volatile, Low-Consistent, Low-Volatile) if they have ≥ 3 years of valid All Students data; otherwise they are classified as Insufficient Data.
+**Key findings:**
+- ELA: 212 schools have data; 38 High-Consistent (avg 52.7%, avg CV 10.7%), 10 High-Volatile (avg 31.1%, avg CV 30.3%), 10 Low-Consistent (avg 18.7%, avg CV 12.9%), 37 Low-Volatile (avg 13.6%, avg CV 37.5%), 117 Insufficient Data (55%).
+- Math: 39 High-Consistent (avg 47.1%, avg CV 13.2%), 9 High-Volatile (avg 23.1%, avg CV 49.2%), 9 Low-Consistent (avg 11.5%, avg CV 20.7%), 38 Low-Volatile (avg 9.0%, avg CV 59.0%), 117 Insufficient Data (55%).
+- Top ELA High-Consistent: Ross ES (86.1%, CV 3.9%), Janney ES (85.7%, CV 3.9%), Key ES (79.6%, CV 3.8%).
+- Most volatile below-median ELA: Savoy ES (7.0% avg, CV 79.4%), Turner ES (8.3% avg, CV 67.8%), Kramer MS (6.3% avg, CV 62.6%).
+**Consequences:**
+- `.squad/sprint.md` smoke path and execution table updated (order 20 added).
+- `STATUS.md` now reflects Loop 15 Build completion.
+- Next step: Validate Loop 15 (full fresh-clone smoke path with `school_consistency_analysis.py`, confirm 17 dashboard figures and 14 workbook sheets, then Closeout).
