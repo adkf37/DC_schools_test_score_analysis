@@ -720,3 +720,28 @@
 - `STATUS.md`, `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 16 while explicitly returning the repo to **Build** next.
 - The approved handoff now includes the performance-index workflow as baseline behavior rather than future scope.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 18-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
+
+### D-061 — Loop 17 Build: School Program Sector Analysis (Charter vs. DCPS)
+**Date:** 2026-05-02
+**Decision:** Implement the backlog Phase 3 "charter vs. traditional public school comparison" as a **school program sector analysis** that classifies all 251 schools into four sectors using OSSE school codes and name heuristics.
+**Rationale:**
+- The OSSE "School and Demographic Group Aggregation" workbooks in this repo include all DC public schools (DCPS and at least some charter schools).
+- DCPS assigns 3-digit OSSE school codes to its traditional programs; schools added outside the original DCPS numbering scheme carry 4-digit codes and are designated **Charter** (Bard High School Early College DC = 1058, Ida B. Wells Middle School = 1071, MacArthur High School = 1294).
+- Within DCPS the analysis further distinguishes **Specialized** (selective/themed magnets by name), **Alternative** (STAY programs and alternative high schools by name), and **Traditional** (all remaining neighborhood schools).
+- A full charter vs. DCPS comparison encompassing all charter management organizations (KIPP, E.L. Haynes, Capital City, etc.) would require separate OSSE charter-school source files not currently in the repo; this limitation is documented in the script docstring, STATUS.md, and summary workbook.
+**Artifacts produced:**
+- `src/charter_dcps_analysis.py` — exits 0; produces three CSVs.
+- `output_data/school_sector_by_school.csv` — 251 rows (one per school with sector classification).
+- `output_data/school_sector_proficiency.csv` — 48 rows (avg proficiency by sector × subject × year, 2022–2024 for Charter schools, 2016–2024 for DCPS schools).
+- `output_data/school_sector_summary.csv` — 8 rows (4 sectors × 2 subjects with COVID recovery and cohort growth metrics).
+- `app/app_simple.py` extended with **19th** dashboard figure: "School Program Sector Comparison" (`sector-comparison.figure`).
+- `src/generate_summary_report.py` extended with **Sheet 16** "School Sectors".
+**Key findings:**
+- DCPS Specialized: highest ELA proficiency (50.3%), COVID impact −1.4 pp, recovery −1.8 pp.
+- DCPS Alternative: lowest ELA proficiency (13.1%) but strongest ELA recovery (+7.6 pp) — reflects post-COVID catch-up programs.
+- DCPS Specialized Math suffered the largest COVID impact (−16.8 pp) but also showed the strongest Math recovery (+7.0 pp).
+- Charter schools (only 3 schools, 2022–2024 data only): 32.1% ELA, 13.5% Math — limited historical baseline for COVID comparisons.
+**Consequences:**
+- The smoke path must now include `python src/charter_dcps_analysis.py` before `python src/generate_summary_report.py`.
+- Dashboard now returns **19 figures**; `summary_report.xlsx` now has **16 sheets**.
+- Next step: Validate Loop 17 (full smoke path with charter_dcps_analysis.py, confirm 19 dashboard figures and 16 workbook sheets).

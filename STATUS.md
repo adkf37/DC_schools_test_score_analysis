@@ -2,7 +2,33 @@
 
 ## Current Objective
 
-**Loop 16 Closeout complete — the multi-metric school performance index is now part of the approved reproducible in-repo handoff; return to Build for remaining backlog scope.**
+**Loop 17 Build complete — school program sector analysis (charter vs. DCPS) is now implemented; advance to Validate.**
+
+Loop 17 Build completed:
+1. Created `src/charter_dcps_analysis.py` — exits 0; classifies all 251 schools into four program sectors (Charter, DCPS Specialized, DCPS Alternative, DCPS Traditional) based on OSSE school codes and name heuristics; produces `school_sector_by_school.csv` (251 rows), `school_sector_proficiency.csv` (48 rows: avg proficiency by sector × subject × year), and `school_sector_summary.csv` (8 rows: aggregate metrics per sector × subject with COVID recovery and cohort growth).
+2. Extended `app/app_simple.py` — loads `school_sector_proficiency.csv` and `school_sector_by_school.csv`; adds **19th figure** ("School Program Sector Comparison"): in citywide mode, line chart of avg proficiency over time per sector; in school-selection mode, selected school's proficiency overlaid on faint sector-average reference lines.
+3. Extended `src/generate_summary_report.py` — adds **Sheet 16** "School Sectors" when `school_sector_summary.csv` is present; gracefully skips if absent. Workbook now regenerates with **16 sheets**.
+4. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
+5. Dashboard callback returns **19 outputs** total when invoked directly via `m.update_figures('Math', 'All Students', None, [2022, 2024])`.
+
+Key findings from sector analysis (ELA, All Students, all years):
+- DCPS Specialized: highest ELA proficiency (50.3%), COVID impact −1.4 pp, recovery −1.8 pp, avg cohort growth +5.7 pp
+- Charter (3 schools, 2022–2024 only): 32.1% ELA, limited COVID baseline
+- DCPS Traditional (222 schools): 29.8% ELA, COVID impact −4.2 pp, recovery +2.0 pp
+- DCPS Alternative (13 schools): 13.1% ELA, recovery +7.6 pp (post-COVID catch-up programs)
+
+Key findings from sector analysis (Math):
+- DCPS Specialized: 34.2% Math, COVID impact −16.8 pp, recovery +7.0 pp (strongest recovery)
+- DCPS Traditional: 25.9% Math, COVID impact −8.3 pp, recovery +3.3 pp
+- DCPS Alternative: 2.6% Math (expected for at-risk student population)
+
+**Classification notes:**
+- Charter schools are identified by 4-digit OSSE school codes (> 999): Bard High School Early College DC (1058), Ida B. Wells Middle School (1071), MacArthur High School (1294).
+- DCPS Specialized programs are identified by name substrings: Banneker HS, McKinley Technology HS, Ellington School of the Arts, School Without Walls HS.
+- DCPS Alternative programs are identified by name substrings: STAY schools, Washington Metropolitan HS, Luke Moore HS, Phelps ACE HS, Excel Academy, Ron Brown College Prep.
+- A full charter vs. DCPS comparison that includes all charter management organizations (KIPP, E.L. Haynes, Capital City, etc.) would require separate OSSE charter-school source files not currently in the repo.
+
+**Next step: Validate Loop 17 — run the full smoke path with `src/charter_dcps_analysis.py` in the pipeline and confirm 19 dashboard figures + 16 summary workbook sheets.**
 
 Loop 16 Closeout completed:
 1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the closeout acceptance criteria.
@@ -21,7 +47,7 @@ Key findings from performance index (Math):
 - Q5 Top Performers (43 schools): avg composite 79.0, avg proficiency 45.0%
 - Top Math composite schools: Hyde-Addison ES (96.0), Murch ES @ UDC (90.6), Bancroft ES @ Sharpe (88.4), Hearst ES (88.4), Whittier ES (87.4)
 
-**Next step: choose the next Build target — restore the normalized-data / 2024-25 ingestion path, complete the blocked browser-console review for the current 18-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope.**
+**Previous next step (completed Loop 17 Build): choose the next Build target — restore the normalized-data / 2024-25 ingestion path, complete the blocked browser-console review for the current 18-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope.**
 
 Loop 13 Build completed:
 1. Created `src/grade_level_analysis.py` — exits 0; produces `grade_level_proficiency.csv` (98 rows: avg/median proficiency by grade × subject × year) and `grade_level_summary.csv` (14 rows: grand-average metrics by grade × subject with COVID impact, recovery, and avg YoY growth).
