@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Loop 15 Closeout Complete — Consistency-Aware Handoff Signed Off
+## ✅ Current Status: Loop 16 Closeout Complete — Performance-Index-Aware Handoff Signed Off
 
-As of 2026-05-01, Loop 15 Closeout is complete. `src/school_consistency_analysis.py`, the consistency dashboard figure, and the 14-sheet `summary_report.xlsx` are part of the approved documented smoke path, and the repo now returns to Build for the remaining backlog scope:
+As of 2026-05-02, Loop 16 Closeout is complete. `src/school_performance_index.py`, the performance-index dashboard figure, and the 15-sheet `summary_report.xlsx` are part of the approved documented smoke path, and the repo now returns to Build for the remaining backlog scope:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -20,7 +20,8 @@ As of 2026-05-01, Loop 15 Closeout is complete. `src/school_consistency_analysis
 - `python src/grade_level_analysis.py` ✅ ← **new in loop 13**
 - `python src/subgroup_trend_analysis.py` ✅ ← **new in loop 14**
 - `python src/school_consistency_analysis.py` ✅ ← **new in loop 15**
-- `python src/generate_summary_report.py` ✅ ← updated to 14 sheets in loop 15
+- `python src/school_performance_index.py` ✅ ← **new in loop 16**
+- `python src/generate_summary_report.py` ✅ ← updated to 15 sheets in loop 16
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 **Two data pipeline options:**
@@ -326,10 +327,10 @@ python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 15, example callback filters = Subject: Math; Student Group: All Students):**
+**Validated closeout evidence (Loop 16, example callback filters = Subject: Math; Student Group: All Students):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
-- A live callback request returns all seventeen figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, Geographic Equity chart, YoY growth chart, COVID recovery chart, school trajectory chart, school type chart, grade-level chart, subgroup trend chart, and populated consistency chart
+- A live callback request returns all eighteen figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, Geographic Equity chart, YoY growth chart, COVID recovery chart, school trajectory chart, school type chart, grade-level chart, subgroup trend chart, populated consistency chart, and populated performance-index chart
 - `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 Math / All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
 
 ---
@@ -352,16 +353,16 @@ python src/proficiency_trend_analysis.py
 
 ---
 
-### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 15
+### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 16
 **File**: `src/generate_summary_report.py`
 
 **What it does:**
-- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`, `covid_recovery_summary.csv`, `school_trajectory_classification.csv`, `school_type_summary.csv`, `grade_level_summary.csv`, `subgroup_summary.csv`, `school_consistency.csv`)
-- Produces a formatted 14-sheet Excel workbook for policy stakeholders
+- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`, `covid_recovery_summary.csv`, `school_trajectory_classification.csv`, `school_type_summary.csv`, `grade_level_summary.csv`, `subgroup_summary.csv`, `school_consistency.csv`, `school_performance_index.csv`)
+- Produces a formatted 15-sheet Excel workbook for policy stakeholders
 - Applies header formatting, alternating row shading, and colour-coded growth values
 
 **Output:**
-- `summary_report.xlsx` — 14 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types, Grade Levels, Subgroups, Consistency
+- `summary_report.xlsx` — 15 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types, Grade Levels, Subgroups, Consistency, Performance Index
 
 ```bash
 python src/generate_summary_report.py
@@ -432,10 +433,13 @@ python src/subgroup_trend_analysis.py
 # 13. Generate school performance consistency outputs
 python src/school_consistency_analysis.py
 
-# 14. Generate formatted Excel policy summary report
+# 14. Generate school performance index outputs
+python src/school_performance_index.py
+
+# 15. Generate formatted Excel policy summary report
 python src/generate_summary_report.py
 
-# 15. (Optional) Launch the interactive dashboard
+# 16. (Optional) Launch the interactive dashboard
 python app/app_simple.py
 ```
 
@@ -455,7 +459,8 @@ python app/app_simple.py
 | `src/grade_level_analysis.py` | Grade-level proficiency, COVID impact, recovery, and YoY summaries |
 | `src/subgroup_trend_analysis.py` | Student subgroup proficiency, COVID impact, recovery, and YoY summaries |
 | `src/school_consistency_analysis.py` | School performance consistency: std deviation, CV, and consistency class per school × subject |
-| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (14-sheet workbook) |
+| `src/school_performance_index.py` | Multi-metric school performance index: composite score and quintile per school × subject |
+| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (15-sheet workbook) |
 | `src/yoy_growth_analysis.py` | Same-grade YoY growth |
 | `src/covid_recovery_analysis.py` | COVID impact and recovery analysis |
 | `app/app_simple.py` | Interactive dashboard |
@@ -482,7 +487,9 @@ python app/app_simple.py
 | `output_data/grade_level_summary.csv` | Grade-level summary metrics |
 | `output_data/subgroup_proficiency.csv` | Subgroup proficiency trends |
 | `output_data/subgroup_summary.csv` | Subgroup summary metrics |
-| `output_data/summary_report.xlsx` | **Policy summary workbook — 13 formatted sheets** |
+| `output_data/school_performance_index.csv` | School-level composite index scores and quintiles |
+| `output_data/performance_index_summary.csv` | Performance-index summary by quintile × subject |
+| `output_data/summary_report.xlsx` | **Policy summary workbook — 15 formatted sheets** |
 | `output_data/combined_all_years.csv` | Clean combined source data |
 
 ---
@@ -527,7 +534,7 @@ python app/app_simple.py
 
 1. **Choose the next Build target**
     - Restore the full normalized-data / 2024-25 ingestion path, or
-    - Finish the still-blocked browser-console / manual dashboard checks for the current 17-figure dashboard, or
+    - Finish the still-blocked browser-console / manual dashboard checks for the current 18-figure dashboard, or
     - Deliberately narrow the backlog to the verified wide-format scope
 
 2. **If pursuing the normalized-data path**
@@ -536,7 +543,7 @@ python app/app_simple.py
 
 3. **If pursuing the dashboard path**
      - Run `python app/app_simple.py`
-      - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, heatmap, scatter, YoY, COVID recovery, school trajectory, school type, grade-level, subgroup-trend, and consistency outputs
+      - Confirm the browser console remains clean during manual interaction with the regenerated CSV, equity, rankings, map, heatmap, scatter, YoY, COVID recovery, school trajectory, school type, grade-level, subgroup-trend, consistency, and performance-index outputs
 
 4. **Re-run evidence checks**
    - Verify Stuart-Hobson benchmark values
