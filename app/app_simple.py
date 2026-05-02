@@ -1837,14 +1837,14 @@ def update_figures(subject, subgroup, schools, year_range):
                     sel_df = sel_df[sel_df['Subject'] == subject]
                 sel_df = sel_df[sel_df['year'].between(year_range[0], year_range[1])]
                 sel_df = sel_df.merge(sbs, on='School Name', how='left')
-                school_avg_s = (
+                school_avg_df = (
                     sel_df.groupby(
                         ['School Name', 'School Sector', 'year'], as_index=False
                     ).agg(avg_pct=('percent_value', 'mean'))
                 )
-                for school_name in school_avg_s['School Name'].unique():
-                    sd = school_avg_s[
-                        school_avg_s['School Name'] == school_name
+                for school_name in school_avg_df['School Name'].unique():
+                    sd = school_avg_df[
+                        school_avg_df['School Name'] == school_name
                     ].sort_values('year')
                     sect = sd['School Sector'].iloc[0] if not sd.empty else ''
                     fig_sector.add_trace(go.Scatter(

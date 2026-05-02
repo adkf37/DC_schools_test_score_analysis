@@ -98,12 +98,14 @@ SPECIALIZED_SUBSTRINGS = [
     "mckinley technology",
     "ellington",
     "school without walls",
-    "bard high school",      # Bard DC also has a 4-digit code → Charter takes precedence
+    # Note: "bard high school" is already classified as Charter via its 4-digit code
+    # and would never reach this check; it is intentionally omitted here.
     "macfarland",            # MacFarland serves as the host for SWW @ Francis Stevens
 ]
 
 # Schools identified as DCPS Alternative (alternative programs and STAY schools).
 # Matched by substring (case-insensitive).
+# Note: 'stay' already matches Ballou STAY, Roosevelt STAY, and any other STAY variants.
 ALTERNATIVE_SUBSTRINGS = [
     "stay",
     "washington metropolitan",
@@ -111,8 +113,6 @@ ALTERNATIVE_SUBSTRINGS = [
     "phelps",
     "excel academy",
     "ron brown college",
-    "ballou stay",
-    "roosevelt stay",
 ]
 
 
