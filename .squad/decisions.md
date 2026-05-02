@@ -673,3 +673,23 @@
 - `STATUS.md`, `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 15 while explicitly returning the repo to **Build** next.
 - The approved handoff now includes the consistency workflow as baseline behavior rather than optional future scope.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 17-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
+
+### D-058 — Build Loop 16: Multi-Metric School Performance Index Integrated
+**Date:** 2026-05-01
+**Decision:** Implement `src/school_performance_index.py` as Loop 16 to synthesise the four major analytical dimensions (proficiency, cohort growth, COVID recovery, trajectory) into a single composite score per school × subject (All Students).
+**Rationale:**
+- D-057 explicitly identified this as a feasible next Build step: all four source files were already in-repo and validated.
+- The composite index directly serves the policy research mission by enabling ranking and filtering schools on multiple dimensions simultaneously, rather than requiring stakeholders to cross-reference four separate analyses.
+- Using percentile ranks for each component (rather than raw values) makes the composite robust to the different scales and units of the four metrics and ensures each component contributes equally regardless of its magnitude.
+- Equal weights (25% each) are appropriate given the absence of pre-specified policy weights; schools with fewer than 2 valid components receive "Insufficient Data" to avoid misleadingly sparse composites.
+- Implementation mirrors the school_consistency_analysis.py pattern: standalone script, clearly documented inputs/outputs, optional load in app and summary report.
+**Key findings:**
+- ELA: 43 Q5 Top Performers (avg composite 81.1, avg proficiency 47.5%); top schools: Janney ES (93.6), Hyde-Addison ES (92.7), Lafayette ES (92.0).
+- Math: 43 Q5 Top Performers (avg composite 79.0, avg proficiency 45.0%); top schools: Hyde-Addison ES (96.0), Murch ES @ UDC (90.5), Bancroft ES @ Sharpe (88.4).
+- 17 schools per subject (7%) classified Insufficient Data (< 2 valid components); these are mostly small or recently opened schools with limited data in multiple source files.
+**Consequences:**
+- `school_performance_index.csv` (456 rows) and `performance_index_summary.csv` (12 rows) added to `output_data/`.
+- Dashboard now has 18 callback outputs (Figure 18: composite score × proficiency scatter by quintile).
+- `summary_report.xlsx` now has 15 sheets (adds "Performance Index").
+- `.squad/sprint.md` and `STATUS.md` updated to reflect Loop 16 Build complete.
+- Next step: Validate Loop 16 (full fresh-clone smoke path including `school_performance_index.py`, confirm 18 dashboard figures and 15 workbook sheets), then Closeout.
