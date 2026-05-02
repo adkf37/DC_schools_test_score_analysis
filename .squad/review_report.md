@@ -2,11 +2,11 @@
 
 **Date:** 2026-05-02
 **Reviewer:** Ralph
-**Final Decision:** **CLOSEOUT SIGNOFF FOR THE CURRENT 7-WORKBOOK WIDE-FORMAT + SCHOOL-NEEDS-AWARE HANDOFF — return to Build for remaining scope**
+**Final Decision:** **CLOSEOUT SIGNOFF FOR THE CURRENT 7-WORKBOOK WIDE-FORMAT + WARD-AWARE HANDOFF — return to Build for remaining scope**
 
 ## Scope
 
-Closeout review for loop 18 against the backlog tasks, sprint Definition of Done, current validation evidence, and the repository's reproducibility requirements from a fresh clone.
+Closeout review for loop 19 against the backlog tasks, sprint Definition of Done, current validation evidence, and the repository's reproducibility requirements from a fresh clone.
 
 ## Evidence Checked
 
@@ -50,53 +50,54 @@ Closeout review for loop 18 against the backlog tasks, sprint Definition of Done
 17. `python src/school_performance_index.py` — ✅ passed
 18. `python src/charter_dcps_analysis.py` — ✅ passed
 19. `python src/school_needs_index.py` — ✅ passed
-20. `python src/generate_summary_report.py` — ✅ passed
-21. `python -c "import app.app_simple as m; m.update_figures('Math', 'All Students', None, [2022, 2024])"` — ✅ passed (20 analytical figures returned)
-22. `python app/app_simple.py` plus `GET /`, `/_dash-layout`, and `/_dash-dependencies` — ✅ passed
-23. `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,7000 --screenshot=/tmp/loop18-closeout-dashboard.png http://127.0.0.1:8050/` — ✅ passed
+20. `python src/ward_analysis.py` — ✅ passed
+21. `python src/generate_summary_report.py` — ✅ passed
+22. `GET /`, `GET /_dash-layout`, and `GET /_dash-dependencies` against `python app/app_simple.py` — ✅ passed
+23. `python -c "import app.app_simple as m; print(len(m.update_figures('Math', 'All Students', None, [2022, 2024])))"` — ✅ passed (`21` outputs)
+24. `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,7000 --screenshot=/tmp/loop19-closeout-dashboard.png http://127.0.0.1:8050/` — ✅ passed
 
 ## Acceptance Criteria Review
 
 - **Closeout outcome recorded in `STATUS.md`** — ✅ updated in this loop
 - **`.squad/review_report.md` exists and includes an explicit final decision** — ✅
 - **Final closeout notes written to `.squad/decisions.md`** — ✅
-- **Human-facing docs current enough for handoff** — ✅ refreshed to match the validated loop-18 wide-format + equity + rankings + trends + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + subgroup-trend + consistency + performance-index + school-sector + school-needs + summary-report state
+- **Human-facing docs current enough for handoff** — ✅ refreshed to match the validated loop-19 wide-format + equity + rankings + trends + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + subgroup-trend + consistency + performance-index + school-sector + school-needs + ward-analysis + summary-report state
 - **Remaining blockers or follow-up work are explicit** — ✅
 
 ## Findings
 
-1. **Fresh-clone reproducibility succeeds for the repo's documented loop-18 7-workbook wide-format path.**
+1. **Fresh-clone reproducibility succeeds for the repo's documented loop-19 7-workbook wide-format path.**
    Closeout re-ran the documented smoke path from dependency install through `src/generate_summary_report.py`, and every command exited 0. The wide-format loader again discovered the seven committed workbooks under `input_data/School and Demographic Group Aggregation/`, covering 2016, 2017, 2018, 2019, 2022, 2023, and 2024.
 
-2. **Task 03 and Task 05 remain met for the reproducible in-repo path, and the full loop-18 analytical artifact set reproduces cleanly.**
-   The closeout rerun regenerated `output_data/combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `cohort_growth_pivot.xlsx` (6 sheets), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows), `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows), `school_trajectory_classification.csv` (424 rows), `school_type_by_school.csv` (251 rows), `school_type_proficiency.csv` (70 rows), `school_type_summary.csv` (10 rows), `grade_level_proficiency.csv` (98 rows), `grade_level_summary.csv` (14 rows), `subgroup_proficiency.csv` (152 rows), `subgroup_summary.csv` (22 rows), `school_consistency.csv` (424 rows), `consistency_class_summary.csv` (10 rows), `school_performance_index.csv` (456 rows), `performance_index_summary.csv` (12 rows), `school_sector_by_school.csv` (251 rows), `school_sector_proficiency.csv` (48 rows), `school_sector_summary.csv` (8 rows), `school_needs_index.csv` (422 rows), `needs_tier_summary.csv` (10 rows), and `summary_report.xlsx` (17 sheets). The Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp of the manual targets, and the significance fields remain present.
+2. **Task 03 and Task 05 remain met for the reproducible in-repo path, and the full loop-19 analytical artifact set reproduces cleanly.**
+   The closeout rerun regenerated `output_data/combined_all_years.csv` (28,069 rows), `cohort_growth_detail.csv` (12,956 rows), `cohort_growth_summary.csv` (2,560 rows), `cohort_growth_pivot.xlsx` (6 sheets), `equity_gap_detail.csv` (13,008 rows), `equity_gap_summary.csv` (2,138 rows), `school_rankings.csv` (422 rows), `school_equity_rankings.csv` (414 rows), `proficiency_trends.csv` (25,629 rows), `geographic_equity_by_school.csv` (210 rows), `geographic_equity_by_quadrant.csv` (8 rows), `yoy_growth_detail.csv` (14,391 rows), `yoy_growth_summary.csv` (2,604 rows), `covid_recovery_detail.csv` (1,239 rows), `covid_recovery_summary.csv` (200 rows), `school_trajectory_classification.csv` (424 rows), `school_type_by_school.csv` (251 rows), `school_type_proficiency.csv` (70 rows), `school_type_summary.csv` (10 rows), `grade_level_proficiency.csv` (98 rows), `grade_level_summary.csv` (14 rows), `subgroup_proficiency.csv` (152 rows), `subgroup_summary.csv` (22 rows), `school_consistency.csv` (424 rows), `consistency_class_summary.csv` (10 rows), `school_performance_index.csv` (456 rows), `performance_index_summary.csv` (12 rows), `school_sector_by_school.csv` (251 rows), `school_sector_proficiency.csv` (48 rows), `school_sector_summary.csv` (8 rows), `school_needs_index.csv` (422 rows), `needs_tier_summary.csv` (10 rows), `ward_proficiency.csv` (84 rows), `ward_summary.csv` (16 rows), and `summary_report.xlsx` (18 sheets). The Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp of the manual targets, and the significance fields remain present.
 
-3. **The school-needs outputs, workbook, and dashboard path are handoff-ready for this loop.**
-   `python src/school_needs_index.py` reproduces the documented loop-18 findings: ELA needs tiers remain **54 Critical / 51 High / 52 Moderate / 53 Low / 1 Insufficient Data**; Math needs tiers remain **53 / 52 / 52 / 53 / 1**; top Critical-need ELA schools remain **Van Ness ES (78.2), Plummer ES (73.3), and Bancroft ES (72.5)**; and top Critical-need Math schools remain **Ida B. Wells MS (86.5), Van Ness ES (81.2), and Thomson ES (74.1)**. `summary_report.xlsx` regenerates with all seventeen expected sheets, including `School Needs`. `python app/app_simple.py` starts successfully against the regenerated CSVs, `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, dependency metadata includes the `needs-index.figure` output, direct callback invocation returns the documented twenty analytical figures including the populated school-needs chart, and a fresh headless screenshot confirms the dashboard renders in this environment.
+3. **The ward-level outputs, workbook, and dashboard path are handoff-ready for this loop.**
+   `python src/ward_analysis.py` reproduces the documented loop-19 findings: Ward 3 remains highest in ELA (**60.6%**) and Math (**57.3%**); Ward 2 remains within **1.1 pp** of Ward 3 in ELA; Ward 8 remains lowest in ELA (**14.1%**) and Math (**9.7%**); and the Ward 3 vs. Ward 8 gaps remain **−46.5 pp** (ELA) and **−47.6 pp** (Math). All **115** schools in `school_locations.csv` still receive a ward assignment, **95** schools match by name into the proficiency/growth inputs used for ward averages, `summary_report.xlsx` regenerates with all eighteen expected sheets including `Ward Analysis`, `python app/app_simple.py` starts successfully against the regenerated CSVs, `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200, direct callback invocation returns the documented twenty-one analytical figures including the populated ward chart, and a fresh headless screenshot confirms the dashboard renders in this environment.
 
 4. **Closeout should sign off the current loop, but not declare the full backlog complete.**
-   The handoff artifacts now match the verified state of the historical-data wide-format pipeline with the school-needs workflow integrated into the documented baseline. Backlog Tasks 01 and 02 are still open against their original normalized-data acceptance criteria, the original 2024-25 ingestion path is not reproducible from the repo alone, direct browser-console inspection during manual interaction remains unfinished in this sandbox, and the current charter-vs.-DCPS comparison is still limited because the committed wide-format files expose only three charter-coded schools.
+   The handoff artifacts now match the verified state of the historical-data wide-format pipeline with the ward workflow integrated into the documented baseline. Backlog Tasks 01 and 02 are still open against their original normalized-data acceptance criteria, the original 2024-25 ingestion path is not reproducible from the repo alone, direct browser-console inspection during manual interaction remains unfinished in this sandbox, and the current charter-vs.-DCPS comparison is still limited because the committed wide-format files expose only three charter-coded schools.
 
 ## Known Risks
 
 - The repo currently proves the 7-workbook wide-format path, not the original normalized 4-workbook OSSE ingestion path from Tasks 01–02.
 - The 2024-25 source workbook is still absent, so the repo does not yet satisfy the original full-data backlog success criteria from `backlog/README.md`.
 - School names vary across eras in the historical workbooks, which can complicate interpretation of long-horizon school-level comparisons even though consecutive-year cohort and YoY transitions are valid within each available period.
-- The dashboard startup, endpoints, callback path, populated school-needs chart, and headless render are validated, but direct browser-console inspection during manual interaction remains blocked in this environment.
+- The dashboard startup, endpoints, callback path, populated ward chart, and headless render are validated, but direct browser-console inspection during manual interaction remains blocked in this environment.
 - The current charter-vs.-DCPS evidence is only a proxy because the committed wide-format files expose just three charter-coded schools; broader charter coverage still requires separate OSSE charter-school source files.
 
 ## Recommendation
 
-**Sign off the current 7-workbook wide-format + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + subgroup-trend + consistency + performance-index + school-sector + school-needs + summary-report loop for handoff, then return the repository to Build for the remaining backlog scope.**
+**Sign off the current 7-workbook wide-format + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + subgroup-trend + consistency + performance-index + school-sector + school-needs + ward-analysis + summary-report loop for handoff, then return the repository to Build for the remaining backlog scope.**
 
 Required follow-up:
 
-1. Choose the next Build target: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console / manual dashboard checks for the current 20-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope.
+1. Choose the next Build target: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console / manual dashboard checks for the current 21-figure dashboard, improve charter coverage, or deliberately narrow the backlog to the verified wide-format scope.
 2. If the normalized-data path is chosen, align `src/load_clean_data.py` with the actual input contract or add/document the required OSSE files.
-3. If the dashboard path is chosen, validate the browser console during manual interaction against the 20-figure dashboard, including the consistency, performance-index, school-sector, and school-needs charts.
+3. If the dashboard path is chosen, validate the browser console during manual interaction against the 21-figure dashboard, including the consistency, performance-index, school-sector, school-needs, and ward-analysis charts.
 4. Re-run Validate/Closeout after the next Build loop changes the evidence or scope.
 
 ## Signoff
 
-**Approved for closeout of the current 7-workbook wide-format + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + subgroup-trend + consistency + performance-index + school-sector + school-needs + summary-report loop. Not approved as full project completion.**
-The repository is handoff-ready for a human who needs the verified in-repo historical-data path, regenerated analytical outputs, the geographic-equity, YoY, COVID recovery, school trajectory, school type, grade-level, subgroup-trend, consistency, performance-index, school-sector, and school-needs findings, the formatted 17-sheet summary workbook, the 20-figure dashboard evidence, and explicit remaining limitations, and it should now return to **Build** for the next backlog slice.
+**Approved for closeout of the current 7-workbook wide-format + geographic-equity + YoY + COVID-recovery + school-trajectory + school-type + grade-level + subgroup-trend + consistency + performance-index + school-sector + school-needs + ward-analysis + summary-report loop. Not approved as full project completion.**
+The repository is handoff-ready for a human who needs the verified in-repo historical-data path, regenerated analytical outputs, the geographic-equity, YoY, COVID recovery, school trajectory, school type, grade-level, subgroup-trend, consistency, performance-index, school-sector, school-needs, and ward-analysis findings, the formatted 18-sheet summary workbook, the 21-figure dashboard evidence, and explicit remaining limitations, and it should now return to **Build** for the next backlog slice.

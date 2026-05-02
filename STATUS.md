@@ -2,20 +2,35 @@
 
 ## Current Objective
 
-**Loop 19 Validate confirmed — ward-level performance analysis validated; Closeout next.**
+**Loop 19 Closeout complete — the ward-aware wide-format handoff is signed off for the current in-repo path, and the repo now returns to Build for the remaining backlog scope.**
 
-Loop 19 Build completed:
-1. Created `src/ward_analysis.py` — maps all 115 schools in `school_locations.csv` to one of DC's
-   8 political wards using a neighbourhood→ward lookup table aligned to the 2022 DC redistricting.
-   Produces `ward_proficiency.csv` (84 rows: avg proficiency by ward × subject × year) and
-   `ward_summary.csv` (16 rows: ward × subject aggregated metrics including avg proficiency, cohort
-   growth, COVID impact/recovery, gap vs. Ward 3).
-2. Extended `app/app_simple.py` — loads `ward_summary.csv` and `ward_proficiency.csv`; adds **21st**
-   dashboard figure (`ward-analysis`): grouped bar chart of avg proficiency (left axis) and cohort
-   growth (right axis) by DC ward for the selected subject.
-3. Extended `src/generate_summary_report.py` — adds Sheet 18 "Ward Analysis" when `ward_summary.csv`
-   is present; gracefully skips if absent. Workbook now regenerates with **18 sheets**.
-4. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
+Loop 19 Closeout completed:
+1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`,
+   `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and
+   `docs/methods.md` against the closeout acceptance criteria.
+2. Re-ran the documented fresh-clone smoke path: `python -m pip install -r requirements.txt`,
+   `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`,
+   `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`,
+   `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`,
+   `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`,
+   `python src/yoy_growth_analysis.py`, `python src/covid_recovery_analysis.py`,
+   `python src/school_trajectory_analysis.py`, `python src/school_type_analysis.py`,
+   `python src/grade_level_analysis.py`, `python src/subgroup_trend_analysis.py`,
+   `python src/school_consistency_analysis.py`, `python src/school_performance_index.py`,
+   `python src/charter_dcps_analysis.py`, `python src/school_needs_index.py`,
+   `python src/ward_analysis.py`, `python src/generate_summary_report.py`, plus dashboard checks
+   for `GET /`, `/_dash-layout`, `/_dash-dependencies`, direct callback rendering, and a fresh
+   headless screenshot at `/tmp/loop19-closeout-dashboard.png`.
+3. Confirmed the current handoff reproduces `ward_proficiency.csv` (**84 rows**),
+   `ward_summary.csv` (**16 rows**), `summary_report.xlsx` (**18 sheets**), and a **21-figure**
+   dashboard callback path while preserving the previously validated cohort, significance, equity,
+   rankings, trend, geographic-equity, YoY, COVID-recovery, trajectory, school-type,
+   grade-level, subgroup, consistency, performance-index, school-sector, and school-needs outputs.
+4. Updated `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` so the
+   handoff narrative matches the validated loop-19 ward-aware state.
+5. Approved the current reproducible 7-workbook wide-format path for handoff, but returned the repo
+   to **Build** because the normalized-data / 2024-25 ingestion path, direct browser-console
+   inspection, and fuller charter coverage remain open.
 
 Key findings from ward analysis (ELA):
 - Ward 3 (Tenleytown/Cleveland Park/Chevy Chase): 60.6% avg proficiency, +6.5 pp cohort growth — highest ELA proficiency in DC
@@ -36,15 +51,10 @@ DC redistricting. 20 of 115 schools (17%) could not be matched by name to profic
 and are excluded from ward averages; this does not systematically bias any ward because unmatched
 names are distributed across the city.
 
-Loop 19 Validate confirmed:
-1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, and the full smoke path through `python src/generate_summary_report.py` all exit 0 in this clone when `python src/ward_analysis.py` is included before the summary-report step.
-2. The full wide-format path regenerates the documented outputs, including `ward_proficiency.csv` (**84 rows**), `ward_summary.csv` (**16 rows**), and `summary_report.xlsx` (**18 sheets**).
-3. Workbook/schema inspection confirms Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, `cohort_growth_pivot.xlsx` still has **6** sheets, and the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp.
-4. Ward inspection confirms the loop-19 claims: Ward 3 remains highest in ELA (**60.6%**) and Math (**57.3%**); Ward 8 remains lowest in ELA (**14.1%**) and Math (**9.7%**); and the Ward 3 vs. Ward 8 gaps remain **−46.5 pp** (ELA) and **−47.6 pp** (Math).
-5. The dashboard HTTP path is live: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return **200**; Dash advertises a **21-output** callback; direct callback invocation returns all **21** figures including the ward chart; and a fresh headless Chromium screenshot was captured at `/tmp/loop19-validate-dashboard.png`.
-6. Direct browser-console inspection remains blocked in this sandbox, and the normalized-data / 2024-25 path plus full charter coverage remain outside the reproducible in-repo scope.
-
-**Next step: proceed to Closeout for loop 19, then decide whether the next loop returns to Build for normalized-data / 2024-25 ingestion, blocked browser-console review, fuller charter coverage, or explicit narrowing to the verified wide-format path.**
+**Next step: return to Build and choose the next backlog slice — restore the normalized-data /
+2024-25 ingestion path, finish the blocked browser-console review for the current 21-figure
+dashboard, expand charter coverage, or explicitly narrow the backlog to the verified wide-format
+scope.**
 
 Loop 18 Closeout confirmed:
 1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the closeout acceptance criteria.
