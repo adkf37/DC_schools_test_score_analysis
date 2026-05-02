@@ -1,6 +1,17 @@
 # Sprint Plan
 
-## Current Phase: Loop 16 Closeout complete → Build next
+## Current Phase: Loop 17 Build complete → Validate next
+
+Loop 17 adds `src/charter_dcps_analysis.py`, a standalone script that classifies all 251 schools into four
+program sectors — Charter (4-digit OSSE codes), DCPS Specialized (selective/themed magnets), DCPS
+Alternative (STAY programs and alternative HS), and DCPS Traditional (neighborhood schools) — and
+computes proficiency, COVID recovery, and cohort growth metrics per sector × subject.  Key findings:
+DCPS Specialized highest ELA proficiency (50.3%) and strongest Math recovery (+7.0 pp); DCPS Alternative
+lowest ELA proficiency (13.1%) but strongest ELA recovery (+7.6 pp, reflects post-COVID catch-up); DCPS
+Traditional 29.8% ELA, COVID impact −4.2 pp, recovery +2.0 pp; Charter schools (3 schools, 2022–2024
+only) 32.1% ELA.  Note: a full charter vs. DCPS comparison including all CMOs (KIPP, E.L. Haynes, etc.)
+requires separate OSSE charter-school files not in the repo.  The dashboard now renders **19 figures**;
+`summary_report.xlsx` now has **16 sheets** (adds "School Sectors" sheet).
 
 Loop 16 adds `src/school_performance_index.py`, a standalone script that synthesises four analytical
 dimensions into a single composite school performance score (0–100) for each school × subject
@@ -60,21 +71,23 @@ Loop 7 adds `src/generate_summary_report.py`, a formatted 6-sheet Excel policy-s
 | 19 | [Loop 14] Subgroup proficiency trend analysis | Statistician | combined_all_years.csv | ✅ Built — `subgroup_trend_analysis.py` exits 0; `subgroup_proficiency.csv` (152 rows), `subgroup_summary.csv` (22 rows); dashboard returns **16 figures**; `summary_report.xlsx` has **13 sheets** |
 | 20 | [Loop 15] School performance consistency analysis | Statistician | proficiency_trends.csv | ✅ Built — `school_consistency_analysis.py` exits 0; `school_consistency.csv` (424 rows), `consistency_class_summary.csv` (10 rows); dashboard returns **17 figures**; `summary_report.xlsx` has **14 sheets** |
 | 21 | [Loop 16] Multi-metric school performance index | Statistician | consistency, rankings, covid_recovery, trajectory | ✅ Built — `school_performance_index.py` exits 0; `school_performance_index.csv` (456 rows), `performance_index_summary.csv` (12 rows); dashboard returns **18 figures**; `summary_report.xlsx` has **15 sheets** |
+| 22 | [Loop 17] School program sector analysis (charter vs. DCPS) | Statistician | combined_all_years.csv, cohort_growth_summary.csv, covid_recovery_summary.csv | ✅ Built — `charter_dcps_analysis.py` exits 0; `school_sector_by_school.csv` (251 rows), `school_sector_proficiency.csv` (48 rows), `school_sector_summary.csv` (8 rows); dashboard returns **19 figures**; `summary_report.xlsx` has **16 sheets** |
 
 ## Notes
 
-- Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python src/equity_gap_analysis.py` → `python src/generate_school_rankings.py` → `python src/proficiency_trend_analysis.py` → `python src/geographic_equity_analysis.py` → `python src/yoy_growth_analysis.py` → `python src/covid_recovery_analysis.py` → `python src/school_trajectory_analysis.py` → `python src/school_type_analysis.py` → `python src/grade_level_analysis.py` → `python src/subgroup_trend_analysis.py` → `python src/school_consistency_analysis.py` → `python src/school_performance_index.py` → `python src/generate_summary_report.py` → `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies` (**18 figures**)
+- Smoke test commands (from fresh clone): `pip install -r requirements.txt` → `pip install dash plotly` → `python -m py_compile src/*.py app/*.py inspect_data.py` → `python src/load_wide_format_data.py` → `python src/analyze_cohort_growth.py` → `python src/equity_gap_analysis.py` → `python src/generate_school_rankings.py` → `python src/proficiency_trend_analysis.py` → `python src/geographic_equity_analysis.py` → `python src/yoy_growth_analysis.py` → `python src/covid_recovery_analysis.py` → `python src/school_trajectory_analysis.py` → `python src/school_type_analysis.py` → `python src/grade_level_analysis.py` → `python src/subgroup_trend_analysis.py` → `python src/school_consistency_analysis.py` → `python src/school_performance_index.py` → `python src/charter_dcps_analysis.py` → `python src/generate_summary_report.py` → `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies` (**19 figures**)
 - `load_clean_data.py` still requires normalized OSSE files (download from OSSE website) — use `load_wide_format_data.py` for the files already in the repo.
 - `cohort_growth_summary.csv` now has 2,560 rows (Task 03 target was ≥ 1,700 — **target met** in loop 4).
 - No cohort transitions cross the 2019–2022 COVID gap; only within-year-pair transitions (2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024) are produced.
 - `proficiency_trends.csv` has 25,629 rows covering school × year × subject × grade × subgroup proficiency.
-- `summary_report.xlsx` has **15 sheets**: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types, Grade Levels, Subgroups, Consistency, **Performance Index**.
+- `summary_report.xlsx` has **16 sheets**: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types, Grade Levels, Subgroups, Consistency, Performance Index, **School Sectors**.
 - Trajectory key finding: ELA avg slope +0.065 pp/yr (Stable overall); Math avg slope −0.656 pp/yr (Declining overall). ~55% of schools have Insufficient Data (fewer than 3 years with All Students proficiency). Top improver in both ELA and Math: Whittier Elementary School.
 - Grade-level key finding: Grade 4 highest ELA avg proficiency (32.7%); Grade 3 highest Math avg proficiency (33.8%); HS lowest Math (13.2%); Grade 7 largest ELA COVID impact (−10.78 pp); Grade 4 largest Math COVID impact (−11.55 pp).
 - Subgroup key finding: White highest ELA avg proficiency (83.8%), Students with Disabilities lowest (7.9%), gap 75.9 pp; Hispanic/Latino took the largest COVID hit (ELA −9.70 pp, Math −14.54 pp); Asian showed the strongest recovery (ELA +10.31 pp, Math +8.65 pp).
 - Consistency key finding: 212 schools have All Students ELA data; 38 High-Consistent ELA schools (avg 52.7%, avg CV 10.7%); 37 Low-Volatile ELA schools (avg 13.6%, avg CV 37.5%). Top High-Consistent ELA schools: Ross ES (86.1%), Janney ES (85.7%). Most volatile below-median ELA schools: Savoy ES (7.0% avg, 79.4% CV), Turner ES (8.3% avg, 67.8% CV). 55% of schools have Insufficient Data (fewer than 3 years).
 - Performance Index key finding: ELA Q5 Top Performers avg composite 81.1, avg proficiency 47.5%; top ELA schools: Janney ES (93.6), Hyde-Addison ES (92.7), Lafayette ES (92.0). Math Q5 avg composite 79.0, avg proficiency 45.0%; top Math schools: Hyde-Addison ES (96.0), Murch ES @ UDC (90.6), Bancroft ES @ Sharpe (88.4). ~7% of schools per subject classified as "Insufficient Data" (fewer than 2 valid components).
-- Next action: choose the next Build target for the next loop — normalized-data / 2024-25 ingestion, browser-console review for the current 18-figure dashboard, or deliberate narrowing of the backlog to the verified wide-format scope.
+- School Sector key finding (ELA): DCPS Specialized 50.3% avg proficiency (COVID −1.4 pp, recovery −1.8 pp); Charter 32.1% (2022–2024 only, no 2019 baseline); DCPS Traditional 29.8% (COVID −4.2 pp, recovery +2.0 pp); DCPS Alternative 13.1% (recovery +7.6 pp). School Sector key finding (Math): DCPS Specialized 34.2% (COVID −16.8 pp, recovery +7.0 pp); DCPS Traditional 25.9% (COVID −8.3 pp, recovery +3.3 pp); Charter 13.5%; DCPS Alternative 2.6%.
+- Next action: Validate Loop 17 — run the full smoke path including `python src/charter_dcps_analysis.py`, confirm 19 dashboard figures and 16 workbook sheets.
 
 
 Loop 11 adds `src/school_trajectory_analysis.py`, a standalone script that classifies each school's long-run proficiency trajectory by fitting an OLS linear trend to annual All Students proficiency data across all available years (2016–2024).  The slope (pp/yr) and R² measure how consistently and strongly each school is improving or declining over the multi-year period.  Key findings: ELA citywide avg slope +0.065 pp/yr (mostly Stable); Math avg slope −0.656 pp/yr (more Declining than Improving). Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). The dashboard now renders **13 figures**; `summary_report.xlsx` now has **10 sheets** (adds "School Trajectories" sheet).

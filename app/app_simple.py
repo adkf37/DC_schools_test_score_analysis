@@ -107,6 +107,8 @@ GRADE_LEVEL_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'grade_level_proficiency
 SUBGROUP_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'subgroup_proficiency.csv')
 SCHOOL_CONSISTENCY_FILE = os.path.join(OUTPUT_DIR, 'school_consistency.csv')
 PERFORMANCE_INDEX_FILE = os.path.join(OUTPUT_DIR, 'school_performance_index.csv')
+SCHOOL_SECTOR_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'school_sector_proficiency.csv')
+SCHOOL_SECTOR_BY_SCHOOL_FILE = os.path.join(OUTPUT_DIR, 'school_sector_by_school.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
@@ -122,6 +124,8 @@ grade_level_proficiency = pd.DataFrame()
 subgroup_proficiency = pd.DataFrame()
 school_consistency = pd.DataFrame()
 performance_index = pd.DataFrame()
+school_sector_proficiency = pd.DataFrame()
+school_sector_by_school = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -164,6 +168,12 @@ if os.path.isfile(SCHOOL_CONSISTENCY_FILE):
 if os.path.isfile(PERFORMANCE_INDEX_FILE):
     performance_index = pd.read_csv(PERFORMANCE_INDEX_FILE)
     print(f"Loaded school performance index: {len(performance_index):,} rows")
+if os.path.isfile(SCHOOL_SECTOR_PROFICIENCY_FILE):
+    school_sector_proficiency = pd.read_csv(SCHOOL_SECTOR_PROFICIENCY_FILE)
+    print(f"Loaded school sector proficiency: {len(school_sector_proficiency):,} rows")
+if os.path.isfile(SCHOOL_SECTOR_BY_SCHOOL_FILE):
+    school_sector_by_school = pd.read_csv(SCHOOL_SECTOR_BY_SCHOOL_FILE)
+    print(f"Loaded school sector classifications: {len(school_sector_by_school):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -494,6 +504,24 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='performance-index')
         ]),
+
+        html.Hr(),
+
+        # ── School Program Sector Comparison section ──────────────────────
+        html.H4("School Program Sector Comparison", className="mt-3"),
+        html.P(
+            "How do different school program sectors compare in proficiency and growth trends? "
+            "Schools are classified as: Charter (4-digit OSSE codes), "
+            "DCPS Specialized (selective/themed magnets: Banneker HS, McKinley Tech HS, "
+            "Duke Ellington, School Without Walls), "
+            "DCPS Alternative (STAY programs, alternative HS), and "
+            "DCPS Traditional (neighborhood schools). "
+            "Run python src/charter_dcps_analysis.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='sector-comparison')
+        ]),
     ]
 )
 
@@ -538,6 +566,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('subgroup-trend', 'figure'),
     Output('consistency', 'figure'),
     Output('performance-index', 'figure'),
+    Output('sector-comparison', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -1757,12 +1786,128 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No index data – run src/school_performance_index.py'
         )
 
+    # ── School program sector comparison bar chart ────────────────────────
+    SECTOR_ORDER_DISPLAY = [
+        "Charter",
+        "DCPS Specialized",
+        "DCPS Alternative",
+        "DCPS Traditional",
+    ]
+    SECTOR_COLORS = {
+        "Charter": "#9c27b0",
+        "DCPS Specialized": "#1565c0",
+        "DCPS Alternative": "#e65100",
+        "DCPS Traditional": "#388e3c",
+    }
+    fig_sector = go.Figure()
+
+    if not school_sector_proficiency.empty:
+        sp = school_sector_proficiency.copy()
+        if subject:
+            sp = sp[sp['Subject'] == subject]
+        sp = sp[sp['year'].between(year_range[0], year_range[1])]
+
+        if schools and not school_sector_by_school.empty:
+            # School-selection mode: show selected schools coloured by sector,
+            # overlaid on faint sector-average lines
+            sbs = school_sector_by_school[
+                school_sector_by_school['School Name'].isin(schools)
+            ][['School Name', 'School Sector']].drop_duplicates()
+
+            # Faint sector average lines for context
+            for sect in SECTOR_ORDER_DISPLAY:
+                sdata = sp[sp['School Sector'] == sect].sort_values('year')
+                if sdata.empty:
+                    continue
+                fig_sector.add_trace(go.Scatter(
+                    x=sdata['year'],
+                    y=sdata['avg_proficiency_pct'],
+                    mode='lines',
+                    name=f'{sect} (sector avg)',
+                    line=dict(dash='dot', width=1,
+                              color=SECTOR_COLORS.get(sect, '#999')),
+                    opacity=0.4,
+                    showlegend=True,
+                ))
+
+            # Individual school proficiency series
+            if not multi_year.empty:
+                sel_df = multi_year[multi_year['School Name'].isin(schools)].copy()
+                if subject:
+                    sel_df = sel_df[sel_df['Subject'] == subject]
+                sel_df = sel_df[sel_df['year'].between(year_range[0], year_range[1])]
+                sel_df = sel_df.merge(sbs, on='School Name', how='left')
+                school_avg_df = (
+                    sel_df.groupby(
+                        ['School Name', 'School Sector', 'year'], as_index=False
+                    ).agg(avg_pct=('percent_value', 'mean'))
+                )
+                for school_name in school_avg_df['School Name'].unique():
+                    sd = school_avg_df[
+                        school_avg_df['School Name'] == school_name
+                    ].sort_values('year')
+                    sect = sd['School Sector'].iloc[0] if not sd.empty else ''
+                    fig_sector.add_trace(go.Scatter(
+                        x=sd['year'],
+                        y=sd['avg_pct'],
+                        mode='lines+markers',
+                        name=f'{school_name} ({sect})',
+                        marker=dict(
+                            size=8, color=SECTOR_COLORS.get(sect, '#999')
+                        ),
+                    ))
+            fig_sector.update_layout(
+                title=f'{subject} – Selected Schools Proficiency by Sector',
+                xaxis_title='Year',
+                yaxis_title='Avg Proficiency (%)',
+                legend_title='School',
+                height=500,
+            )
+        else:
+            # Citywide mode: one line per sector
+            for sect in SECTOR_ORDER_DISPLAY:
+                sdata = sp[sp['School Sector'] == sect].sort_values('year')
+                if sdata.empty:
+                    continue
+                fig_sector.add_trace(go.Scatter(
+                    x=sdata['year'],
+                    y=sdata['avg_proficiency_pct'],
+                    mode='lines+markers',
+                    name=sect,
+                    marker=dict(size=8, color=SECTOR_COLORS.get(sect, '#999')),
+                    line=dict(color=SECTOR_COLORS.get(sect, '#999'), width=2),
+                    customdata=sdata[['n_schools', 'median_proficiency_pct']].values,
+                    hovertemplate=(
+                        f'<b>{sect}</b><br>'
+                        'Year: %{x}<br>'
+                        'Avg proficiency: %{y:.1f}%<br>'
+                        'Median: %{customdata[1]:.1f}%<br>'
+                        'Schools: %{customdata[0]}<br>'
+                        '<extra></extra>'
+                    ),
+                ))
+            fig_sector.update_layout(
+                title=(
+                    f'{subject} – Avg Proficiency by School Program Sector'
+                    if subject else 'Avg Proficiency by School Program Sector'
+                ),
+                xaxis_title='Year',
+                yaxis_title='Avg Proficiency (%)',
+                legend_title='Sector',
+                height=450,
+            )
+
+    if not fig_sector.data:
+        fig_sector.update_layout(
+            title='No sector data – run src/charter_dcps_analysis.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
         fig_scatter, fig_geo, fig_yoy, fig_covid, fig_trajectory,
         fig_school_type, fig_grade_level, fig_subgroup, fig_consistency,
-        fig_perf_index,
+        fig_perf_index, fig_sector,
     )
 
 
