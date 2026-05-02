@@ -106,6 +106,7 @@ SCHOOL_TYPE_BY_SCHOOL_FILE = os.path.join(OUTPUT_DIR, 'school_type_by_school.csv
 GRADE_LEVEL_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'grade_level_proficiency.csv')
 SUBGROUP_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'subgroup_proficiency.csv')
 SCHOOL_CONSISTENCY_FILE = os.path.join(OUTPUT_DIR, 'school_consistency.csv')
+PERFORMANCE_INDEX_FILE = os.path.join(OUTPUT_DIR, 'school_performance_index.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
@@ -120,6 +121,7 @@ school_type_by_school = pd.DataFrame()
 grade_level_proficiency = pd.DataFrame()
 subgroup_proficiency = pd.DataFrame()
 school_consistency = pd.DataFrame()
+performance_index = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -159,6 +161,9 @@ if os.path.isfile(SUBGROUP_PROFICIENCY_FILE):
 if os.path.isfile(SCHOOL_CONSISTENCY_FILE):
     school_consistency = pd.read_csv(SCHOOL_CONSISTENCY_FILE)
     print(f"Loaded school consistency: {len(school_consistency):,} rows")
+if os.path.isfile(PERFORMANCE_INDEX_FILE):
+    performance_index = pd.read_csv(PERFORMANCE_INDEX_FILE)
+    print(f"Loaded school performance index: {len(performance_index):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -469,6 +474,26 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='consistency')
         ]),
+
+        html.Hr(),
+
+        # ── Multi-Metric Performance Index section ────────────────────────
+        html.H4("Multi-Metric School Performance Index", className="mt-3"),
+        html.P(
+            "A composite school performance score (0–100) that synthesises four "
+            "analytical dimensions: (1) Proficiency — average All Students proficiency "
+            "level; (2) Growth — average cohort-growth (Grade N → N+1); "
+            "(3) Recovery — COVID recovery pp (2022→2024); and "
+            "(4) Trajectory — long-run OLS trend slope (pp/yr). "
+            "Each component is percentile-ranked within the subject; the composite is "
+            "the mean of available component scores. Schools are grouped into five "
+            "quintiles (Q5 = Top Performers … Q1 = Bottom Performers). "
+            "Run python src/school_performance_index.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='performance-index')
+        ]),
     ]
 )
 
@@ -512,6 +537,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('grade-level', 'figure'),
     Output('subgroup-trend', 'figure'),
     Output('consistency', 'figure'),
+    Output('performance-index', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -1632,11 +1658,107 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No consistency data – run src/school_consistency_analysis.py'
         )
 
+    # ── Multi-Metric Performance Index scatter ────────────────────────────
+    QUINTILE_COLORS = {
+        'Q5 – Top Performers': '#1a9641',
+        'Q4 – Above Average': '#a6d96a',
+        'Q3 – Middle': '#ffffbf',
+        'Q2 – Below Average': '#fdae61',
+        'Q1 – Bottom Performers': '#d7191c',
+        'Insufficient Data': '#bdbdbd',
+    }
+    fig_perf_index = go.Figure()
+
+    if not performance_index.empty:
+        pi = performance_index.copy()
+        if subject:
+            pi = pi[pi['Subject'] == subject]
+        if schools:
+            pi = pi[pi['School Name'].isin(schools)]
+
+        pi_plot = pi.dropna(subset=['composite_score'])
+
+        if not pi_plot.empty:
+            quintile_order = [
+                'Q5 – Top Performers', 'Q4 – Above Average', 'Q3 – Middle',
+                'Q2 – Below Average', 'Q1 – Bottom Performers', 'Insufficient Data',
+            ]
+            component_labels = {
+                'proficiency_score': 'Proficiency',
+                'growth_score': 'Growth',
+                'recovery_score': 'Recovery',
+                'trajectory_score': 'Trajectory',
+            }
+            for quintile in quintile_order:
+                sub_pi = pi_plot[pi_plot['composite_quintile'] == quintile]
+                if sub_pi.empty:
+                    continue
+
+                # Build customdata for hover: n_components + component scores
+                custom_cols = ['n_components', 'proficiency_score', 'growth_score',
+                               'recovery_score', 'trajectory_score',
+                               'cohort_growth_pp', 'covid_recovery_pp',
+                               'trajectory_slope_pp_yr']
+                # Use only columns that exist in the dataframe
+                available_custom = [c for c in custom_cols if c in sub_pi.columns]
+                customdata = sub_pi[available_custom].values
+
+                fig_perf_index.add_trace(go.Scatter(
+                    x=sub_pi['composite_score'],
+                    y=sub_pi['proficiency_pct'] if 'proficiency_pct' in sub_pi.columns
+                      else sub_pi['composite_score'],
+                    mode='markers',
+                    name=quintile,
+                    marker=dict(
+                        color=QUINTILE_COLORS.get(quintile, '#999'),
+                        size=9, opacity=0.85,
+                        line=dict(width=0.5, color='#555'),
+                    ),
+                    text=sub_pi['School Name'],
+                    customdata=customdata,
+                    hovertemplate=(
+                        '<b>%{text}</b><br>'
+                        'Composite: %{x:.1f}<br>'
+                        'Avg proficiency: %{y:.1f}%<br>'
+                        'Components used: %{customdata[0]}<br>'
+                        'Proficiency score: %{customdata[1]:.1f}<br>'
+                        'Growth score: %{customdata[2]:.1f}<br>'
+                        'Recovery score: %{customdata[3]:.1f}<br>'
+                        'Trajectory score: %{customdata[4]:.1f}<br>'
+                        '<extra></extra>'
+                    ),
+                ))
+
+            # Reference lines at quintile boundaries
+            valid_composites = pi_plot['composite_score']
+            for pct_val in [20, 40, 60, 80]:
+                threshold = float(np.percentile(valid_composites, pct_val))
+                fig_perf_index.add_vline(
+                    x=threshold, line_dash='dot', line_color='#aaa', line_width=1,
+                )
+
+            fig_perf_index.update_layout(
+                title=(
+                    f'{subject} – Multi-Metric School Performance Index'
+                    if subject else 'Multi-Metric School Performance Index'
+                ),
+                xaxis_title='Composite Score (0–100)',
+                yaxis_title='Avg Proficiency, All Students (%)',
+                legend_title='Quintile',
+                height=520,
+            )
+
+    if not fig_perf_index.data:
+        fig_perf_index.update_layout(
+            title='No index data – run src/school_performance_index.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
         fig_scatter, fig_geo, fig_yoy, fig_covid, fig_trajectory,
         fig_school_type, fig_grade_level, fig_subgroup, fig_consistency,
+        fig_perf_index,
     )
 
 

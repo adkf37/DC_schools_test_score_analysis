@@ -2,20 +2,27 @@
 
 ## Current Objective
 
-**Loop 15 Closeout complete — the consistency-aware 7-workbook wide-format handoff is signed off for the reproducible in-repo path; return to Build for remaining backlog scope.**
+**Loop 16 Build complete — the multi-metric school performance index is integrated into the pipeline; return to Validate, then Closeout.**
 
-Loop 15 Closeout rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md`, then re-ran the documented smoke path and live dashboard checks from a fresh clone. The consistency workflow is now part of the approved baseline: `python src/school_consistency_analysis.py` regenerates `school_consistency.csv` (**424 rows**) and `consistency_class_summary.csv` (**10 rows**), the dashboard callback returns **17** analytical figures including the populated consistency scatter, and `summary_report.xlsx` regenerates with **14 sheets**.
+Loop 16 Build completed:
+1. Created `src/school_performance_index.py` — exits 0; produces `school_performance_index.csv` (**456 rows**: one per school × subject with composite score, quintile, n_components, and four component percentile-rank scores) and `performance_index_summary.csv` (**12 rows**: per quintile × subject aggregates).
+2. Extended `app/app_simple.py` — loads `school_performance_index.csv`; adds 18th figure: scatter of composite score (x) vs. average proficiency (y) coloured by quintile (Q5 = green … Q1 = red), with dashed vertical reference lines at quintile boundaries.
+3. Extended `src/generate_summary_report.py` — adds Sheet 15 "Performance Index" when `school_performance_index.csv` is present; gracefully skips if absent. Workbook now regenerates with **15 sheets**.
+4. Updated `.squad/sprint.md` — added Loop 16 row (order 21) and updated smoke-path notes.
+5. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
+6. Dashboard `/_dash-dependencies` advertises an **18-output** callback, and the callback logic returns all 18 figures.
 
-Loop 15 Closeout confirmed:
-1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, and the full smoke path through `python src/generate_summary_report.py` all exit 0.
-2. The rerun regenerates the documented analytical outputs, including `school_consistency.csv` (**424 rows**), `consistency_class_summary.csv` (**10 rows**), and `summary_report.xlsx` (**14 sheets**).
-3. Task 03 and Task 05 benchmarks still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, and the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp.
-4. Consistency inspection confirms the loop-15 findings: **38 High-Consistent / 10 High-Volatile / 10 Low-Consistent / 37 Low-Volatile / 117 Insufficient Data** schools in ELA and **39 / 9 / 9 / 38 / 117** in Math; top ELA High-Consistent schools remain Ross ES (86.13%, CV 3.85%), Janney ES (85.67%, CV 3.93%), and Key ES (79.58%, CV 3.76%); and the most volatile below-median ELA schools remain Savoy ES (7.04%, CV 79.37%), Turner ES at Green (8.34%, CV 67.82%), and Kramer MS (6.31%, CV 62.60%).
-5. Dashboard `/_dash-dependencies` advertises **17** figure outputs including `consistency.figure`; `GET /`, `/_dash-layout`, and `/_dash-dependencies` all return 200; direct callback invocation returns all **17** analytical figures; and a fresh headless screenshot at `/tmp/loop15-closeout-dashboard.png` confirms the UI renders in this environment.
-6. The current in-repo path is approved for handoff, but the normalized-data / 2024-25 ingestion path, direct browser-console inspection during manual interaction, and charter-vs.-DCPS analysis remain explicit follow-up work.
+Key findings from performance index (ELA):
+- Q5 Top Performers (43 schools): avg composite 81.1, avg proficiency 47.5%
+- Top ELA composite schools: Janney ES (93.6), Hyde-Addison ES (92.7), Lafayette ES (92.0), Eaton ES (91.2), Ludlow Taylor ES (90.3)
+- Q1 Bottom Performers (42 schools): avg composite 19.6, avg proficiency 11.3%
+- ~7% of schools per subject have Insufficient Data (< 2 valid components)
 
-**Next step: Return the repo to Build and choose the next backlog slice — restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console/manual dashboard checks, or deliberately narrow the backlog to the verified wide-format scope.**
+Key findings from performance index (Math):
+- Q5 Top Performers (43 schools): avg composite 79.0, avg proficiency 45.0%
+- Top Math composite schools: Hyde-Addison ES (96.0), Murch ES @ UDC (90.5), Bancroft ES @ Sharpe (88.4), Hearst ES (88.4), Whittier ES (87.4)
 
+**Next step: Validate Loop 16 — run full fresh-clone smoke path including `python src/school_performance_index.py`, confirm 18 dashboard figures and 15 workbook sheets, then proceed to Closeout.**
 
 Loop 13 Build completed:
 1. Created `src/grade_level_analysis.py` — exits 0; produces `grade_level_proficiency.csv` (98 rows: avg/median proficiency by grade × subject × year) and `grade_level_summary.csv` (14 rows: grand-average metrics by grade × subject with COVID impact, recovery, and avg YoY growth).
