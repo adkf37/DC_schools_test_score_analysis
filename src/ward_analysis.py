@@ -112,6 +112,11 @@ NEIGHBORHOOD_WARD: dict[str, int] = {
 # Ward display labels used in charts
 WARD_LABELS: dict[int, str] = {i: f"Ward {i}" for i in range(1, 9)}
 
+# Ward 3 (Tenleytown / Cleveland Park / Chevy Chase / Palisades) is used as the
+# reference benchmark for gap calculations because it consistently has the highest
+# proficiency in both ELA and Math across all years in the dataset.
+REFERENCE_WARD: int = 3
+
 
 # ── Name-normalisation helpers (reused from geographic_equity_analysis.py) ────
 
@@ -332,16 +337,16 @@ def run() -> None:
             covid_ward, on=["Ward", "Subject"], how="left"
         )
 
-    # Gap vs. Ward 3 (historically highest-proficiency ward in DC)
+    # Gap vs. reference ward (historically highest-proficiency ward in DC)
     for subj in ward_summary["Subject"].unique():
         mask = ward_summary["Subject"] == subj
-        w3_row = ward_summary[(ward_summary["Subject"] == subj) &
-                              (ward_summary["Ward"] == 3)]
-        if w3_row.empty:
+        ref_row = ward_summary[(ward_summary["Subject"] == subj) &
+                               (ward_summary["Ward"] == REFERENCE_WARD)]
+        if ref_row.empty:
             continue
-        w3_prof = w3_row["avg_proficiency_pct"].values[0]
-        ward_summary.loc[mask, "gap_vs_ward3_pp"] = (
-            ward_summary.loc[mask, "avg_proficiency_pct"] - w3_prof
+        ref_prof = ref_row["avg_proficiency_pct"].values[0]
+        ward_summary.loc[mask, f"gap_vs_ward{REFERENCE_WARD}_pp"] = (
+            ward_summary.loc[mask, "avg_proficiency_pct"] - ref_prof
         ).round(2)
 
     # Add Ward label column for readability
@@ -362,7 +367,7 @@ def run() -> None:
     ]
     if "covid_impact_pp" in ward_summary.columns:
         col_order += ["covid_impact_pp", "recovery_pp", "net_vs_precovid_pp"]
-    col_order.append("gap_vs_ward3_pp")
+    col_order.append(f"gap_vs_ward{REFERENCE_WARD}_pp")
     col_order = [c for c in col_order if c in ward_summary.columns]
 
     ward_summary = (
@@ -376,13 +381,14 @@ def run() -> None:
     print("WARD SUMMARY")
     print("─" * 70)
 
+    gap_col = f"gap_vs_ward{REFERENCE_WARD}_pp"
     for subj in sorted(ward_summary["Subject"].unique()):
         print(f"\n  {subj}")
         sub = ward_summary[ward_summary["Subject"] == subj]
         for _, row in sub.iterrows():
             gap_str = ""
-            if "gap_vs_ward3_pp" in row and pd.notna(row["gap_vs_ward3_pp"]):
-                gap_str = f"  (gap vs Ward 3: {row['gap_vs_ward3_pp']:+.1f} pp)"
+            if gap_col in row and pd.notna(row[gap_col]):
+                gap_str = f"  (gap vs Ward {REFERENCE_WARD}: {row[gap_col]:+.1f} pp)"
             g_str = ""
             if "avg_pp_growth" in row and pd.notna(row["avg_pp_growth"]):
                 g_str = f"  avg growth: {row['avg_pp_growth']:+.2f} pp"

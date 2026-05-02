@@ -975,8 +975,7 @@ def _build_ward_sheet(ward_summary: pd.DataFrame) -> pd.DataFrame:
         'covid_impact_pp': 'COVID Impact 2019→2022 (pp)',
         'recovery_pp': 'Recovery 2022→2024 (pp)',
         'net_vs_precovid_pp': 'Net vs Pre-COVID (pp)',
-        'gap_vs_ward3_pp': 'Gap vs Ward 3 (pp)',
-    }
+        'gap_vs_ward3_pp': 'Gap vs Ward 3 (pp)',    }
     cols_in_df = [c for c in rename if c in ward_summary.columns]
     out = ward_summary[cols_in_df].rename(columns=rename)
 

@@ -202,6 +202,12 @@ print(f"  Subjects: {SUBJECTS}")
 print(f"  Subgroups: {len(SUBGROUPS)} subgroups")
 print(f"  Schools: {len(SCHOOLS)} schools")
 
+# Module-level colour constants for chart components
+WARD_COLORS = {
+    1: '#1565c0', 2: '#1976d2', 3: '#1e88e5', 4: '#42a5f5',
+    5: '#e65100', 6: '#ef6c00', 7: '#f57c00', 8: '#fb8c00',
+}
+
 # Build app
 external_stylesheets = [
     "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
@@ -2096,10 +2102,6 @@ def update_figures(subject, subgroup, schools, year_range):
         )
 
     # ── Ward-level performance bar+line chart ─────────────────────────────
-    WARD_COLORS = {
-        1: '#1565c0', 2: '#1976d2', 3: '#1e88e5', 4: '#42a5f5',
-        5: '#e65100', 6: '#ef6c00', 7: '#f57c00', 8: '#fb8c00',
-    }
     fig_ward = go.Figure()
 
     if not ward_summary.empty:
