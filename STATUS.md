@@ -2,7 +2,42 @@
 
 ## Current Objective
 
-**Loop 18 Closeout complete — school-needs handoff signed off; return to Build for remaining scope.**
+**Loop 19 Build complete — ward-level performance analysis implemented; Validate next.**
+
+Loop 19 Build completed:
+1. Created `src/ward_analysis.py` — maps all 115 schools in `school_locations.csv` to one of DC's
+   8 political wards using a neighbourhood→ward lookup table aligned to the 2022 DC redistricting.
+   Produces `ward_proficiency.csv` (84 rows: avg proficiency by ward × subject × year) and
+   `ward_summary.csv` (16 rows: ward × subject aggregated metrics including avg proficiency, cohort
+   growth, COVID impact/recovery, gap vs. Ward 3).
+2. Extended `app/app_simple.py` — loads `ward_summary.csv` and `ward_proficiency.csv`; adds **21st**
+   dashboard figure (`ward-analysis`): grouped bar chart of avg proficiency (left axis) and cohort
+   growth (right axis) by DC ward for the selected subject.
+3. Extended `src/generate_summary_report.py` — adds Sheet 18 "Ward Analysis" when `ward_summary.csv`
+   is present; gracefully skips if absent. Workbook now regenerates with **18 sheets**.
+4. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
+
+Key findings from ward analysis (ELA):
+- Ward 3 (Tenleytown/Cleveland Park/Chevy Chase): 60.6% avg proficiency, +6.5 pp cohort growth — highest ELA proficiency in DC
+- Ward 8 (Anacostia/Congress Heights): 14.1% avg proficiency, +4.7 pp cohort growth — gap vs. Ward 3: −46.5 pp
+- Ward 7 (Marshall Heights/Deanwood): 19.7% avg proficiency, +3.4 pp cohort growth — gap vs. Ward 3: −41.0 pp
+- Ward 5 (Brookland/Trinidad): 19.0% avg proficiency, +3.7 pp cohort growth — gap vs. Ward 3: −41.7 pp
+- Ward 2 (Georgetown/Dupont/Logan): 59.6% avg proficiency, +3.1 pp cohort growth — nearly equal to Ward 3
+
+Key findings from ward analysis (Math):
+- Ward 3: 57.3% avg proficiency, −1.2 pp cohort growth — highest Math proficiency
+- Ward 8: 9.7% avg proficiency, +0.4 pp cohort growth — gap vs. Ward 3: −47.6 pp
+- Wards 5 and 7: 12.8% and 13.1% avg proficiency — largest Math gaps
+
+**Note on methodology:** Ward assignments use neighbourhood centroids from `school_locations.csv`
+mapped to wards via the `NEIGHBORHOOD_WARD` lookup dict in `ward_analysis.py`. Schools in
+neighbourhoods that span ward boundaries are assigned to the majority-area ward per the 2022
+DC redistricting. 20 of 115 schools (17%) could not be matched by name to proficiency/growth data
+and are excluded from ward averages; this does not systematically bias any ward because unmatched
+names are distributed across the city.
+
+**Next step: Validate Loop 19 — run full smoke path adding `python src/ward_analysis.py` before
+`python src/generate_summary_report.py`, confirm 21 dashboard figures and 18 workbook sheets.**
 
 Loop 18 Closeout confirmed:
 1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the closeout acceptance criteria.

@@ -814,3 +814,27 @@
 - `STATUS.md`, `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 18 while explicitly returning the repo to **Build** next.
 - The approved handoff now includes the school-needs workflow as baseline behavior rather than future scope.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 20-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
+
+### D-067 — Loop 19 Build: Ward-Level Performance Analysis
+**Date:** 2026-05-02
+**Decision:** Implement `src/ward_analysis.py` as Loop 19's analytical deliverable, extending the dashboard with a 21st figure and the summary workbook with an 18th sheet.
+**Rationale:**
+- DC's 8 political wards are the primary policy and planning unit for the DC Council, DCPS facilities planning, and OSSE equity reporting. Ward-level disparities are finer-grained than the four-quadrant analysis (Loop 7) already in the pipeline.
+- All required data sources (`school_locations.csv`, `proficiency_trends.csv`, `cohort_growth_summary.csv`, `covid_recovery_summary.csv`) are already produced by the existing pipeline, so no new data dependencies are introduced.
+- Ward assignments use the `Neighborhood` column from `school_locations.csv` mapped via a `NEIGHBORHOOD_WARD` lookup dict aligned to the 2022 DC redistricting boundaries. 115 of 115 schools have a neighbourhood assignment; 95 of 115 (83%) match by name to the proficiency and growth files.
+- Ward 3 is used as the reference benchmark for gap calculations because it consistently has the highest proficiency in both ELA and Math — this mirrors the NW-vs.-other-quadrant reference in the quadrant analysis but at finer granularity.
+**Artifacts produced:**
+- `src/ward_analysis.py` — exits 0; produces two CSVs.
+- `output_data/ward_proficiency.csv` — 84 rows (ward × subject × year avg proficiency, n_schools).
+- `output_data/ward_summary.csv` — 16 rows (ward × subject aggregate stats: avg proficiency, cohort growth, COVID impact/recovery, gap vs. Ward 3).
+- `app/app_simple.py` extended with **21st** dashboard figure: "Ward-Level Performance Analysis" (`ward-analysis.figure`) — grouped bar chart with avg proficiency (left axis) and avg cohort growth (right axis) by DC ward.
+- `src/generate_summary_report.py` extended with **Sheet 18** "Ward Analysis".
+**Key findings:**
+- ELA: Ward 3 (60.6%) and Ward 2 (59.6%) are within 1 pp of each other; the gap between Ward 3 and Ward 8 is −46.5 pp — the largest single-ward equity gap in ELA.
+- Math: Ward 3 leads at 57.3%; Wards 7 and 8 trail at 13.1% and 9.7% — gaps of −44.2 and −47.6 pp respectively.
+- ELA cohort growth is positive in all wards; Math cohort growth is positive only in Wards 4, 8, and a small positive in Ward 3 (−1.2 pp), suggesting more widespread Math regression than ELA.
+- COVID impact data is available for all 8 wards; Ward 3 absorbed the smallest ELA COVID impact and had the strongest recovery.
+**Consequences:**
+- The smoke path must now include `python src/ward_analysis.py` before `python src/generate_summary_report.py`.
+- Dashboard now returns **21 figures**; `summary_report.xlsx` now has **18 sheets**.
+- Next step: Validate Loop 19 (full smoke path with ward_analysis.py, confirm 21 dashboard figures and 18 workbook sheets).
