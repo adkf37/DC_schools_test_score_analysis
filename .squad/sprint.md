@@ -1,6 +1,18 @@
 # Sprint Plan
 
-## Current Phase: Loop 18 Build complete → Validate next
+## Current Phase: Loop 19 Build complete → Validate next
+
+Loop 19 adds `src/ward_analysis.py`, a standalone script that maps every school to one of DC's 8
+political wards using the `Neighborhood` column from `school_locations.csv` and a lookup table
+aligned to the 2022 DC redistricting.  It computes ward-level metrics by joining to proficiency
+trends, cohort growth, and COVID recovery outputs already produced by the pipeline.  Key outputs:
+`ward_proficiency.csv` (84 rows: avg proficiency by ward × subject × year) and `ward_summary.csv`
+(16 rows: ward × subject aggregates with avg proficiency, cohort growth, COVID impact/recovery, and
+gap vs. Ward 3).  Key findings: Ward 3 (Tenleytown/Cleveland Park) leads ELA at 60.6% and Math at
+57.3%; Ward 8 (Anacostia/Congress Heights) trails ELA at 14.1% (−46.5 pp gap) and Math at 9.7%
+(−47.6 pp gap); ELA cohort growth is positive in all 8 wards; Math cohort growth is positive only
+in Wards 4, 8.  The dashboard now renders **21 figures**; `summary_report.xlsx` now has **18 sheets**
+(adds "Ward Analysis" sheet).
 
 Loop 18 adds `src/school_needs_index.py`, the policy-targeted complement to the Loop 16 Performance
 Index.  While the Performance Index identifies top performers, the Needs Index surfaces which schools

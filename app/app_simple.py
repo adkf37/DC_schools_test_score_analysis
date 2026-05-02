@@ -110,6 +110,8 @@ PERFORMANCE_INDEX_FILE = os.path.join(OUTPUT_DIR, 'school_performance_index.csv'
 SCHOOL_SECTOR_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'school_sector_proficiency.csv')
 SCHOOL_SECTOR_BY_SCHOOL_FILE = os.path.join(OUTPUT_DIR, 'school_sector_by_school.csv')
 SCHOOL_NEEDS_INDEX_FILE = os.path.join(OUTPUT_DIR, 'school_needs_index.csv')
+WARD_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'ward_summary.csv')
+WARD_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'ward_proficiency.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
@@ -128,6 +130,8 @@ performance_index = pd.DataFrame()
 school_sector_proficiency = pd.DataFrame()
 school_sector_by_school = pd.DataFrame()
 school_needs_index = pd.DataFrame()
+ward_summary = pd.DataFrame()
+ward_proficiency = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -179,6 +183,12 @@ if os.path.isfile(SCHOOL_SECTOR_BY_SCHOOL_FILE):
 if os.path.isfile(SCHOOL_NEEDS_INDEX_FILE):
     school_needs_index = pd.read_csv(SCHOOL_NEEDS_INDEX_FILE)
     print(f"Loaded school needs index: {len(school_needs_index):,} rows")
+if os.path.isfile(WARD_SUMMARY_FILE):
+    ward_summary = pd.read_csv(WARD_SUMMARY_FILE)
+    print(f"Loaded ward summary: {len(ward_summary):,} rows")
+if os.path.isfile(WARD_PROFICIENCY_FILE):
+    ward_proficiency = pd.read_csv(WARD_PROFICIENCY_FILE)
+    print(f"Loaded ward proficiency: {len(ward_proficiency):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -191,6 +201,12 @@ print(f"  Years: {YEARS}")
 print(f"  Subjects: {SUBJECTS}")
 print(f"  Subgroups: {len(SUBGROUPS)} subgroups")
 print(f"  Schools: {len(SCHOOLS)} schools")
+
+# Module-level colour constants for chart components
+WARD_COLORS = {
+    1: '#1565c0', 2: '#1976d2', 3: '#1e88e5', 4: '#42a5f5',
+    5: '#e65100', 6: '#ef6c00', 7: '#f57c00', 8: '#fb8c00',
+}
 
 # Build app
 external_stylesheets = [
@@ -547,6 +563,26 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='needs-index')
         ]),
+
+        html.Hr(),
+
+        # ── Ward-Level Performance Analysis section ───────────────────────
+        html.H4("Ward-Level Performance Analysis", className="mt-3"),
+        html.P(
+            "How do DC's eight political wards compare in proficiency and cohort growth? "
+            "DC wards (1–8) are the primary political and planning units used by the DC "
+            "Council and DCPS.  Each school is assigned to a ward based on its neighbourhood "
+            "(from school_locations.csv).  The chart shows average proficiency (left axis, "
+            "bars) and average cohort growth (right axis, line) per ward × subject.  "
+            "Ward 3 (NW: Tenleytown, Cleveland Park, Chevy Chase) is used as the reference "
+            "because it historically has the highest DCPS proficiency; the gap_vs_ward3_pp "
+            "metric shows how far each ward's average proficiency is below that benchmark. "
+            "Run python src/ward_analysis.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='ward-analysis')
+        ]),
     ]
 )
 
@@ -593,6 +629,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('performance-index', 'figure'),
     Output('sector-comparison', 'figure'),
     Output('needs-index', 'figure'),
+    Output('ward-analysis', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -2064,12 +2101,69 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No needs index data – run src/school_needs_index.py'
         )
 
+    # ── Ward-level performance bar+line chart ─────────────────────────────
+    fig_ward = go.Figure()
+
+    if not ward_summary.empty:
+        ws = ward_summary.copy()
+        if subject:
+            ws = ws[ws['Subject'] == subject]
+
+        if not ws.empty:
+            ws = ws.sort_values('Ward')
+            ward_labels = ws['Ward Label'] if 'Ward Label' in ws.columns else (
+                'Ward ' + ws['Ward'].astype(str)
+            )
+
+            fig_ward.add_trace(go.Bar(
+                name='Avg Proficiency (%)',
+                x=ward_labels,
+                y=ws['avg_proficiency_pct'],
+                marker_color=[WARD_COLORS.get(int(w), '#42a5f5') for w in ws['Ward']],
+                text=ws['avg_proficiency_pct'].round(1).astype(str) + '%',
+                textposition='outside',
+                yaxis='y',
+            ))
+
+            if 'avg_pp_growth' in ws.columns:
+                fig_ward.add_trace(go.Scatter(
+                    name='Avg Cohort Growth (pp)',
+                    x=ward_labels,
+                    y=ws['avg_pp_growth'],
+                    mode='markers+lines',
+                    marker=dict(size=10, color='#d32f2f'),
+                    line=dict(color='#d32f2f', width=2),
+                    yaxis='y2',
+                ))
+
+            fig_ward.update_layout(
+                title=(
+                    f'{subject} – Average Proficiency & Cohort Growth by DC Ward'
+                    if subject else 'Average Proficiency & Cohort Growth by DC Ward'
+                ),
+                xaxis_title='DC Ward',
+                yaxis=dict(title='Avg Proficiency (%)', side='left'),
+                yaxis2=dict(
+                    title='Avg Cohort Growth (pp)',
+                    overlaying='y', side='right', zeroline=True,
+                ),
+                legend=dict(orientation='h', yanchor='bottom', y=1.02,
+                            xanchor='right', x=1),
+                height=420,
+                barmode='group',
+            )
+
+    if not fig_ward.data:
+        fig_ward.update_layout(
+            title='No ward data – run src/ward_analysis.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
         fig_scatter, fig_geo, fig_yoy, fig_covid, fig_trajectory,
         fig_school_type, fig_grade_level, fig_subgroup, fig_consistency,
-        fig_perf_index, fig_sector, fig_needs,
+        fig_perf_index, fig_sector, fig_needs, fig_ward,
     )
 
 
