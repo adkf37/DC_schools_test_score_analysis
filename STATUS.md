@@ -2,14 +2,16 @@
 
 ## Current Objective
 
-**Loop 17 Build complete — school program sector analysis (charter vs. DCPS) is now implemented; advance to Validate.**
+**Loop 17 Validate complete — school program sector analysis is reproducible; advance to Closeout.**
 
-Loop 17 Build completed:
-1. Created `src/charter_dcps_analysis.py` — exits 0; classifies all 251 schools into four program sectors (Charter, DCPS Specialized, DCPS Alternative, DCPS Traditional) based on OSSE school codes and name heuristics; produces `school_sector_by_school.csv` (251 rows), `school_sector_proficiency.csv` (48 rows: avg proficiency by sector × subject × year), and `school_sector_summary.csv` (8 rows: aggregate metrics per sector × subject with COVID recovery and cohort growth).
-2. Extended `app/app_simple.py` — loads `school_sector_proficiency.csv` and `school_sector_by_school.csv`; adds **19th figure** ("School Program Sector Comparison"): in citywide mode, line chart of avg proficiency over time per sector; in school-selection mode, selected school's proficiency overlaid on faint sector-average reference lines.
-3. Extended `src/generate_summary_report.py` — adds **Sheet 16** "School Sectors" when `school_sector_summary.csv` is present; gracefully skips if absent. Workbook now regenerates with **16 sheets**.
-4. `python -m py_compile src/*.py app/*.py inspect_data.py` exits 0.
-5. Dashboard callback returns **19 outputs** total when invoked directly via `m.update_figures('Math', 'All Students', None, [2022, 2024])`.
+Loop 17 Validate confirmed:
+1. `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, and `python -m py_compile src/*.py app/*.py inspect_data.py` all exit 0 in this clone.
+2. The full smoke path through `python src/generate_summary_report.py` exits 0 when `python src/charter_dcps_analysis.py` is included before it, and regenerates the documented outputs, including `school_sector_by_school.csv` (**251 rows**), `school_sector_proficiency.csv` (**48 rows**), `school_sector_summary.csv` (**8 rows**), and `summary_report.xlsx` (**16 sheets**).
+3. Workbook/schema inspection confirms Task 03 and Task 05 still pass: `cohort_growth_detail.csv` retains `p_value` and `significant`, `cohort_growth_summary.csv` retains `pct_significant_transitions`, the four Stuart-Hobson 2022→2023 benchmark rows remain within ±0.1 pp, and the new `School Sectors` sheet is present.
+4. School-sector inspection confirms the loop-17 claims: sector counts are **222 DCPS Traditional / 13 DCPS Specialized / 13 DCPS Alternative / 3 Charter**; DCPS Specialized still leads ELA proficiency (**50.3%**) and Math recovery (**+7.0 pp**); DCPS Alternative remains lowest in ELA proficiency (**13.1%**) but strongest in ELA recovery (**+7.6 pp**); and the in-repo charter slice remains limited to **3** schools.
+5. The dashboard HTTP path is live: `GET /`, `/_dash-layout`, and `/_dash-dependencies` return 200; Dash advertises a grouped **19-output** callback ending in `sector-comparison.figure`; direct callback invocation returns all **19** figures, including the new school-sector chart.
+6. A headless Chromium screenshot at `/tmp/loop17-validate-dashboard.png` confirms the dashboard renders in this environment.
+7. Direct Playwright browser-console inspection remains blocked in this sandbox because the browser profile is already in use, and the normalized-data / 2024-25 path remains outside the reproducible in-repo scope.
 
 Key findings from sector analysis (ELA, All Students, all years):
 - DCPS Specialized: highest ELA proficiency (50.3%), COVID impact −1.4 pp, recovery −1.8 pp, avg cohort growth +5.7 pp
@@ -28,7 +30,7 @@ Key findings from sector analysis (Math):
 - DCPS Alternative programs are identified by name substrings: STAY schools, Washington Metropolitan HS, Luke Moore HS, Phelps ACE HS, Excel Academy, Ron Brown College Prep.
 - A full charter vs. DCPS comparison that includes all charter management organizations (KIPP, E.L. Haynes, Capital City, etc.) would require separate OSSE charter-school source files not currently in the repo.
 
-**Next step: Validate Loop 17 — run the full smoke path with `src/charter_dcps_analysis.py` in the pipeline and confirm 19 dashboard figures + 16 summary workbook sheets.**
+**Next step: Closeout Loop 17 — decide whether to sign off the validated 19-figure / 16-sheet sector-aware handoff or return to Build for the remaining backlog scope.**
 
 Loop 16 Closeout completed:
 1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the closeout acceptance criteria.
@@ -151,8 +153,8 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | ✅ Complete through loop 16 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis, subgroup trend analysis, school consistency analysis, multi-metric school performance index |
-| 4 | Validate | ✅ Complete for loops 1-16 |
+| 3 | Build | ✅ Complete through loop 17 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis, subgroup trend analysis, school consistency analysis, multi-metric school performance index, school program sector analysis |
+| 4 | Validate | ✅ Complete for loops 1-17 |
 | 5 | Closeout | ✅ Complete for loops 2-16 |
 
 ---
@@ -164,10 +166,10 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 01 | Ingest raw data | Squad Init | Data Engineer | ✅ Wide-format path now covers 7 in-repo files (2016–2024); normalized 4-workbook path still pending external data |
 | 02 | Clean & standardize data | Squad Review | Data Engineer | ✅ `combined_all_years.csv` regenerated (28,069 rows, 7 years, 251 raw schools / 211 cohort-analysis schools) |
 | 03 | Cohort growth analysis | Build | Statistician | ✅ Task 03 target now met — 12,956 detail rows, **2,560 summary rows** (target ≥ 1,700); all 4 Stuart-Hobson benchmarks pass |
-| 04 | Interactive dashboard | Validate | Data Engineer | ✅ Validated — app starts, serves **18 figures** (loop 16 adds the performance-index chart), school-level and citywide views functional |
+| 04 | Interactive dashboard | Validate | Data Engineer | ✅ Validated — app starts, serves **19 figures** (loop 17 adds the school-sector chart), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Validate | Statistician | ✅ Validate complete for loop 16 — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **15 sheets** (adds Performance Index in loop 16) |
+| 07 | Formatted Excel summary report | Validate | Statistician | ✅ Validate complete for loop 17 — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **16 sheets** (adds School Sectors in loop 17) |
 
 ---
 
@@ -202,13 +204,16 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | **Consistency class summary** | `output_data/consistency_class_summary.csv` | ✅ **New in loop 15** — 10 rows (consistency class × subject summary) |
 | **School performance index** | `output_data/school_performance_index.csv` | ✅ **New in loop 16** — 456 rows (school × subject composite score, quintile, and component percentiles) |
 | **Performance index summary** | `output_data/performance_index_summary.csv` | ✅ **New in loop 16** — 12 rows (composite quintile × subject summary) |
-| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **15 sheets** — adds Performance Index sheet in loop 16 |
+| **School sector classification (by school)** | `output_data/school_sector_by_school.csv` | ✅ **New in loop 17** — 251 rows (school-level sector: Charter / DCPS Specialized / DCPS Alternative / DCPS Traditional) |
+| **School sector proficiency (trend)** | `output_data/school_sector_proficiency.csv` | ✅ **New in loop 17** — 48 rows (avg proficiency by sector × subject × year) |
+| **School sector summary** | `output_data/school_sector_summary.csv` | ✅ **New in loop 17** — 8 rows (sector × subject summary with COVID recovery and cohort growth) |
+| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **16 sheets** — adds School Sectors sheet in loop 17 |
 | Processing report | `output_data/processing_report.txt` | ✅ Created |
 | Wide-format loader | `src/load_wide_format_data.py` | ✅ Extended — now handles all 7 in-repo workbooks across 6 naming schemes |
 | Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
 | School rankings script | `src/generate_school_rankings.py` | ✅ New — ranks schools by cohort growth and equity-gap narrowing |
 | **Proficiency trend script** | `src/proficiency_trend_analysis.py` | ✅ **New in loop 5** — grade × year proficiency grid |
-| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 16** — now produces 15-sheet Excel workbook |
+| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 17** — now produces 16-sheet Excel workbook |
 | **Geographic equity script** | `src/geographic_equity_analysis.py` | ✅ **New in loop 8** — joins school locations with performance data by DC quadrant |
 | **YoY growth script** | `src/yoy_growth_analysis.py` | ✅ **New in loop 9** — same-grade year-over-year growth for every school, grade, subject, subgroup |
 | **COVID recovery script** | `src/covid_recovery_analysis.py` | ✅ **New in loop 10** — 2019→2022 COVID impact and 2022→2024 recovery per school, subject, subgroup |
@@ -220,8 +225,9 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | **School consistency analysis script** | `src/school_consistency_analysis.py` | ✅ **New in loop 15 smoke path** — school-level volatility / consistency classification |
 | **School performance index script** | `src/school_performance_index.py` | ✅ **New in loop 16 smoke path** — multi-metric composite score and quintile assignment |
-| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **18 analytical figures** including the populated performance-index chart |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 16 |
+| **School sector analysis script** | `src/charter_dcps_analysis.py` | ✅ **New in loop 17 smoke path** — school-program-sector classification and sector metrics |
+| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **19 analytical figures** including the populated school-sector chart |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 17 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 16 |
 
 ---
@@ -241,7 +247,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 16 — closeout complete):**
+- **Smoke test commands (loop 17 — Validate complete):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -259,9 +265,10 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
   15. `python src/subgroup_trend_analysis.py`
   16. `python src/school_consistency_analysis.py`
   17. `python src/school_performance_index.py`
-  18. `python src/generate_summary_report.py`
-  19. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, and `/_dash-dependencies`; verify the dashboard callback path via `app.app_simple.update_figures(...)` (returns **18 figures**, including the school consistency and performance-index charts)
-- **Loop 16 validation evidence:** reran the full smoke path; all scripts exit 0. `school_performance_index.csv` regenerated (**456 rows**), `performance_index_summary.csv` regenerated (**12 rows**), and `summary_report.xlsx` regenerated (**15 sheets**). Dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; dependency metadata included `performance-index.figure`; direct callback invocation returned the **18 analytical figures** including a populated performance-index chart; a fresh headless screenshot was saved to `/tmp/loop16-validate-dashboard.png`.
+  18. `python src/charter_dcps_analysis.py`
+  19. `python src/generate_summary_report.py`
+  20. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, and `/_dash-dependencies`; verify the dashboard callback path via `app.app_simple.update_figures(...)` (returns **19 figures**, including the school-sector chart)
+- **Loop 17 validation evidence:** reran the full smoke path; all scripts exit 0. `school_sector_by_school.csv` regenerated (**251 rows**), `school_sector_proficiency.csv` regenerated (**48 rows**), `school_sector_summary.csv` regenerated (**8 rows**), and `summary_report.xlsx` regenerated (**16 sheets**). Dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; dependency metadata included `sector-comparison.figure`; direct callback invocation returned the **19 analytical figures** including a populated school-sector chart; a fresh headless screenshot was saved to `/tmp/loop17-validate-dashboard.png`.
 - **Loop 16 closeout evidence:** rechecked the backlog tasks, sprint, decision log, validation report, and human-facing docs, then re-ran the same smoke path plus dashboard HTTP checks. The current handoff remains reproducible end to end: `summary_report.xlsx` still has **15 sheets**, the dashboard callback still returns **18 figures**, and a fresh closeout screenshot was saved to `/tmp/loop16-closeout-dashboard.png`.
 - **Loop 16 performance-index findings:** ELA quintiles = **43 Q5 / 42 Q4 / 42 Q3 / 42 Q2 / 42 Q1 / 17 Insufficient Data** with top schools Janney ES (**93.6**), Hyde-Addison ES (**92.7**), Lafayette ES (**92.0**). Math quintiles = **43 / 42 / 42 / 42 / 42 / 17** with top schools Hyde-Addison ES (**96.0**), Murch ES @ UDC (**90.6**), Bancroft ES @ Sharpe (**88.4**).
 - **Loop 11 validation evidence:** reran the full smoke path; all scripts exit 0. `school_trajectory_classification.csv` regenerated (424 rows); `summary_report.xlsx` regenerated (10 sheets); dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` returned 200; live callback returned **13 figures**; headless screenshot saved to `/tmp/loop11-dashboard.png`.
@@ -269,5 +276,5 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 - **Loop 10 COVID recovery findings:** citywide ELA avg COVID impact −3.94 pp (2019→2022), recovery +1.75 pp (2022→2024), net vs. pre-COVID −2.15 pp. Math was hit harder: −8.56 pp impact, +3.17 pp recovery, net −5.43 pp. Recovery status: 38% Partially Recovered, 25% Still Below Pre-COVID, 24% Exceeded Pre-COVID, 12% Fully Recovered, 2% No 2024 Data (200 school/subject observations, All Students).
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
-- **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Proceed to **Build** for the next explicit backlog slice: normalized-data / 2024-25 ingestion, browser-console validation for the current 18-figure dashboard, or a deliberate narrowing of the project scope to the verified wide-format path.
+- **Remaining backlog scope — full charter coverage:** the validated school-sector analysis is still a proxy because the in-repo wide-format files expose only 3 charter-coded schools; a full charter-vs.-DCPS comparison still requires separate OSSE charter-school files.
+- **Next recommended step:** Proceed to **Closeout** for explicit signoff or return-to-Build guidance on the validated 19-figure / 16-sheet sector-aware handoff.
