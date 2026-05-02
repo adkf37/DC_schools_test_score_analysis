@@ -862,3 +862,20 @@
 - `STATUS.md`, `.squad/review_report.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 19 while explicitly sending the repo back to **Build** next.
 - `.squad/review_report.md` becomes the authoritative closeout record for the loop-19 ward-aware handoff.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish blocked browser-console review for the 21-figure dashboard, improve charter coverage, or deliberately narrow the project scope to the verified wide-format path.
+
+### D-070 — Loop 20 Build: Equity Progress (Gap Closure) Analysis
+**Date:** 2026-05-02
+**Decision:** Implement `src/equity_progress_analysis.py` as the Loop 20 analytical module, measuring whether DC's achievement gaps between key demographic subgroup pairs have been narrowing or widening from 2016 to 2024.
+**Rationale:**
+- The existing pipeline already has proficiency data by subgroup (via `combined_all_years.csv`), but has no module that explicitly tracks the *change* in gaps over time.  The cohort-based `equity_gap_analysis.py` measures within-cohort gaps during one-year transitions; this new module instead tracks multi-year trends in the absolute proficiency gap at the citywide level.
+- Six policy-relevant pairs were selected: White − Black, White − Hispanic, White − Econ Dis, All Students − Econ Dis, All Students − EL Active, All Students − Students with Disabilities.  All six are widely used in DC educational equity reporting.
+- The module uses `combined_all_years.csv` directly (same approach as `subgroup_trend_analysis.py`), keeping the dependency on existing pipeline outputs, not requiring any new external data, and being idempotent across pipeline runs.
+- A school-year cell is included only if both subgroups have valid (non-suppressed) proficiency data in the same school × subject × year, and a citywide year average is only computed when ≥ 5 schools contribute, to avoid spurious precision from very small samples.
+- Key findings: Only the EL Active gap narrowed (ELA −2.42 pp, Math −0.63 pp); all other gaps widened significantly.  White − Econ Dis grew by +9.56 pp (ELA) and +12.44 pp (Math); White − Black grew by +8.59 pp (ELA) and +8.92 pp (Math); All − SWD grew by +10.09 pp (ELA) and +4.47 pp (Math).
+- Outputs: `equity_progress_citywide.csv` (82 rows) and `equity_progress_summary.csv` (12 rows).  The dashboard 22nd figure is a horizontal bar chart colour-coded green (Narrowing) / grey (Stable) / red (Widening).  Sheet 19 "Equity Progress" is added to `summary_report.xlsx`.
+**Consequences:**
+- `summary_report.xlsx` now has **19 sheets**.  The dashboard callback now returns **22 figures**.
+- The equity progress finding that DC's White–Black and White–Econ Dis gaps are widening (not narrowing) over the 2016–2024 study window is a significant policy signal that should be surfaced in any stakeholder report.
+- The loop-20 implementation is analytically distinct from both the cohort-growth-based equity gaps (Loop 2) and the subgroup absolute proficiency trend (Loop 14), so all three modules can coexist without double-counting or overlap.
+- Next step: Validate Loop 20 (full smoke path with `equity_progress_analysis.py`, confirm 22 dashboard figures and 19 workbook sheets).
+

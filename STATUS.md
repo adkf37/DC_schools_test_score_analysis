@@ -2,59 +2,47 @@
 
 ## Current Objective
 
-**Loop 19 Closeout complete — the ward-aware wide-format handoff is signed off for the current in-repo path, and the repo now returns to Build for the remaining backlog scope.**
+**Loop 20 Build complete — equity progress (gap closure) analysis added; dashboard now returns 22 figures and summary_report.xlsx has 19 sheets.  Validate next.**
 
-Loop 19 Closeout completed:
-1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`,
-   `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and
-   `docs/methods.md` against the closeout acceptance criteria.
-2. Re-ran the documented fresh-clone smoke path: `python -m pip install -r requirements.txt`,
-   `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`,
-   `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`,
-   `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`,
-   `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`,
-   `python src/yoy_growth_analysis.py`, `python src/covid_recovery_analysis.py`,
-   `python src/school_trajectory_analysis.py`, `python src/school_type_analysis.py`,
-   `python src/grade_level_analysis.py`, `python src/subgroup_trend_analysis.py`,
-   `python src/school_consistency_analysis.py`, `python src/school_performance_index.py`,
-   `python src/charter_dcps_analysis.py`, `python src/school_needs_index.py`,
-   `python src/ward_analysis.py`, `python src/generate_summary_report.py`, plus dashboard checks
-   for `GET /`, `/_dash-layout`, `/_dash-dependencies`, direct callback rendering, and a fresh
-   headless screenshot at `/tmp/loop19-closeout-dashboard.png`.
-3. Confirmed the current handoff reproduces `ward_proficiency.csv` (**84 rows**),
-   `ward_summary.csv` (**16 rows**), `summary_report.xlsx` (**18 sheets**), and a **21-figure**
-   dashboard callback path while preserving the previously validated cohort, significance, equity,
-   rankings, trend, geographic-equity, YoY, COVID-recovery, trajectory, school-type,
-   grade-level, subgroup, consistency, performance-index, school-sector, and school-needs outputs.
-4. Updated `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` so the
-   handoff narrative matches the validated loop-19 ward-aware state.
-5. Approved the current reproducible 7-workbook wide-format path for handoff, but returned the repo
-   to **Build** because the normalized-data / 2024-25 ingestion path, direct browser-console
-   inspection, and fuller charter coverage remain open.
+Loop 20 Build completed:
+1. Implemented `src/equity_progress_analysis.py` — a standalone script that measures whether
+   DC's achievement gaps between key demographic pairs are narrowing or widening over time.
+   For six subgroup pairs (White − Black, White − Hispanic, White − Econ Dis,
+   All − Econ Dis, All − EL Active, All − Students with Disabilities) × 2 subjects it
+   computes: citywide average gap per year, gap in the first available year, gap in the
+   most recent year, gap change (pp), gap % change, and a direction label (Narrowing/Stable/
+   Widening).
+2. Extended `app/app_simple.py` with a **22nd** dashboard figure — a horizontal bar chart
+   ("Equity Progress: Are Achievement Gaps Closing?") showing gap change by subgroup pair
+   and subject, colour-coded green (Narrowing) / grey (Stable) / red (Widening).
+3. Extended `src/generate_summary_report.py` with **Sheet 19** "Equity Progress" showing
+   the gap-closure summary by subgroup pair × subject.
+4. Confirmed `python -m py_compile src/*.py app/*.py inspect_data.py` passes.
+5. Confirmed `update_figures('Math', 'All Students', None, [2022, 2024])` returns **22 figures**
+   including the populated equity-progress bar chart.
+6. Confirmed `summary_report.xlsx` now has **19 sheets**.
 
-Key findings from ward analysis (ELA):
-- Ward 3 (Tenleytown/Cleveland Park/Chevy Chase): 60.6% avg proficiency, +6.5 pp cohort growth — highest ELA proficiency in DC
-- Ward 8 (Anacostia/Congress Heights): 14.1% avg proficiency, +4.7 pp cohort growth — gap vs. Ward 3: −46.5 pp
-- Ward 7 (Marshall Heights/Deanwood): 19.7% avg proficiency, +3.4 pp cohort growth — gap vs. Ward 3: −41.0 pp
-- Ward 5 (Brookland/Trinidad): 19.0% avg proficiency, +3.7 pp cohort growth — gap vs. Ward 3: −41.7 pp
-- Ward 2 (Georgetown/Dupont/Logan): 59.6% avg proficiency, +3.1 pp cohort growth — nearly equal to Ward 3
+Key findings from equity progress analysis (ELA, 2016→2024):
+- All − EL Active: −2.42 pp [Narrowing] — the only ELA gap that narrowed over the period
+- White − Black: +8.59 pp [Widening] — gap grew from 34.7 pp to 43.3 pp
+- White − Econ Dis: +9.56 pp [Widening] — gap grew from 46.7 pp to 56.3 pp
+- All − SWD: +10.09 pp [Widening] — gap grew from 13.4 pp to 23.4 pp
 
-Key findings from ward analysis (Math):
-- Ward 3: 57.3% avg proficiency, −1.2 pp cohort growth — highest Math proficiency
-- Ward 8: 9.7% avg proficiency, +0.4 pp cohort growth — gap vs. Ward 3: −47.6 pp
-- Wards 5 and 7: 12.8% and 13.1% avg proficiency — largest Math gaps
+Key findings from equity progress analysis (Math, 2016→2024):
+- All − EL Active: −0.63 pp [Narrowing] — the only Math gap that narrowed
+- White − Black: +8.92 pp [Widening] — gap grew from 40.6 pp to 49.5 pp
+- White − Econ Dis: +12.44 pp [Widening] — gap grew from 47.5 pp to 59.9 pp
+- All − SWD: +4.47 pp [Widening] — gap grew from 11.6 pp to 16.1 pp
 
-**Note on methodology:** Ward assignments use neighbourhood centroids from `school_locations.csv`
-mapped to wards via the `NEIGHBORHOOD_WARD` lookup dict in `ward_analysis.py`. Schools in
-neighbourhoods that span ward boundaries are assigned to the majority-area ward per the 2022
-DC redistricting. 20 of 115 schools (17%) could not be matched by name to proficiency/growth data
-and are excluded from ward averages; this does not systematically bias any ward because unmatched
-names are distributed across the city.
+**Note on methodology:** Gap series use school-level data from `combined_all_years.csv`
+(All Grades row where available, otherwise grade-level average).  A cell is included only
+if both subgroups have valid (non-suppressed) proficiency data in the same school × year ×
+subject.  Only year × subgroup pair cells with ≥ 5 schools are included in the citywide
+average.  2016 is the earliest year in the wide-format pipeline; 2024 is the most recent.
 
-**Next step: return to Build and choose the next backlog slice — restore the normalized-data /
-2024-25 ingestion path, finish the blocked browser-console review for the current 21-figure
-dashboard, expand charter coverage, or explicitly narrow the backlog to the verified wide-format
-scope.**
+**Next step: Validate Loop 20 — run the full smoke path including
+`python src/equity_progress_analysis.py`, confirm 22 dashboard figures and 19 workbook sheets.**
+
 
 Loop 18 Closeout confirmed:
 1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the closeout acceptance criteria.
