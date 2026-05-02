@@ -2,7 +2,7 @@
 
 ## Current Objective
 
-**Loop 16 Build complete — the multi-metric school performance index is integrated into the pipeline; return to Validate, then Closeout.**
+**Loop 16 Validate complete — the multi-metric school performance index is validated end to end; proceed to Closeout.**
 
 Loop 16 Build completed:
 1. Created `src/school_performance_index.py` — exits 0; produces `school_performance_index.csv` (**456 rows**: one per school × subject with composite score, quintile, n_components, and four component percentile-rank scores) and `performance_index_summary.csv` (**12 rows**: per quintile × subject aggregates).
@@ -22,7 +22,7 @@ Key findings from performance index (Math):
 - Q5 Top Performers (43 schools): avg composite 79.0, avg proficiency 45.0%
 - Top Math composite schools: Hyde-Addison ES (96.0), Murch ES @ UDC (90.5), Bancroft ES @ Sharpe (88.4), Hearst ES (88.4), Whittier ES (87.4)
 
-**Next step: Validate Loop 16 — run full fresh-clone smoke path including `python src/school_performance_index.py`, confirm 18 dashboard figures and 15 workbook sheets, then proceed to Closeout.**
+**Next step: Closeout Loop 16 — review the validation evidence, update the handoff artifacts, and decide whether to sign off the current reproducible in-repo path or return to Build for remaining backlog scope.**
 
 Loop 13 Build completed:
 1. Created `src/grade_level_analysis.py` — exits 0; produces `grade_level_proficiency.csv` (98 rows: avg/median proficiency by grade × subject × year) and `grade_level_summary.csv` (14 rows: grand-average metrics by grade × subject with COVID impact, recovery, and avg YoY growth).
@@ -126,8 +126,8 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | ✅ Complete through loop 15 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis, subgroup trend analysis, school consistency analysis |
-| 4 | Validate | ✅ Complete for loops 1-15 |
+| 3 | Build | ✅ Complete through loop 16 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis, subgroup trend analysis, school consistency analysis, multi-metric school performance index |
+| 4 | Validate | ✅ Complete for loops 1-16 |
 | 5 | Closeout | ✅ Complete for loops 2-15 |
 
 ---
@@ -139,10 +139,10 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 01 | Ingest raw data | Squad Init | Data Engineer | ✅ Wide-format path now covers 7 in-repo files (2016–2024); normalized 4-workbook path still pending external data |
 | 02 | Clean & standardize data | Squad Review | Data Engineer | ✅ `combined_all_years.csv` regenerated (28,069 rows, 7 years, 251 raw schools / 211 cohort-analysis schools) |
 | 03 | Cohort growth analysis | Build | Statistician | ✅ Task 03 target now met — 12,956 detail rows, **2,560 summary rows** (target ≥ 1,700); all 4 Stuart-Hobson benchmarks pass |
-| 04 | Interactive dashboard | Build | Data Engineer | ✅ Validated — app starts, serves **17 figures** (loop 15 adds school consistency), school-level and citywide views functional |
+| 04 | Interactive dashboard | Validate | Data Engineer | ✅ Validated — app starts, serves **18 figures** (loop 16 adds the performance-index chart), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Closeout | Statistician | ✅ Validate complete for loop 15 — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **14 sheets** (adds Consistency in loop 15) |
+| 07 | Formatted Excel summary report | Validate | Statistician | ✅ Validate complete for loop 16 — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **15 sheets** (adds Performance Index in loop 16) |
 
 ---
 
@@ -175,13 +175,15 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | **Subgroup summary** | `output_data/subgroup_summary.csv` | ✅ **New in loop 14** — 22 rows (grand-avg proficiency + COVID recovery + avg YoY growth by subgroup × subject) |
 | **School consistency** | `output_data/school_consistency.csv` | ✅ **New in loop 15** — 424 rows (school × subject consistency metrics and class) |
 | **Consistency class summary** | `output_data/consistency_class_summary.csv` | ✅ **New in loop 15** — 10 rows (consistency class × subject summary) |
-| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **14 sheets** — adds Consistency sheet in loop 15 |
+| **School performance index** | `output_data/school_performance_index.csv` | ✅ **New in loop 16** — 456 rows (school × subject composite score, quintile, and component percentiles) |
+| **Performance index summary** | `output_data/performance_index_summary.csv` | ✅ **New in loop 16** — 12 rows (composite quintile × subject summary) |
+| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **15 sheets** — adds Performance Index sheet in loop 16 |
 | Processing report | `output_data/processing_report.txt` | ✅ Created |
 | Wide-format loader | `src/load_wide_format_data.py` | ✅ Extended — now handles all 7 in-repo workbooks across 6 naming schemes |
 | Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
 | School rankings script | `src/generate_school_rankings.py` | ✅ New — ranks schools by cohort growth and equity-gap narrowing |
 | **Proficiency trend script** | `src/proficiency_trend_analysis.py` | ✅ **New in loop 5** — grade × year proficiency grid |
-| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 15** — now produces 14-sheet Excel workbook |
+| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 16** — now produces 15-sheet Excel workbook |
 | **Geographic equity script** | `src/geographic_equity_analysis.py` | ✅ **New in loop 8** — joins school locations with performance data by DC quadrant |
 | **YoY growth script** | `src/yoy_growth_analysis.py` | ✅ **New in loop 9** — same-grade year-over-year growth for every school, grade, subject, subgroup |
 | **COVID recovery script** | `src/covid_recovery_analysis.py` | ✅ **New in loop 10** — 2019→2022 COVID impact and 2022→2024 recovery per school, subject, subgroup |
@@ -192,8 +194,9 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | School locations | `input_data/school_locations.csv` | ✅ 115 DC public school geocoordinates |
 | Statistical methods note | `docs/methods.md` | ✅ Updated with equity gap and rankings sections |
 | **School consistency analysis script** | `src/school_consistency_analysis.py` | ✅ **New in loop 15 smoke path** — school-level volatility / consistency classification |
-| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **17 analytical figures** including the populated consistency chart |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 15 |
+| **School performance index script** | `src/school_performance_index.py` | ✅ **New in loop 16 smoke path** — multi-metric composite score and quintile assignment |
+| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **18 analytical figures** including the populated performance-index chart |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 16 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 15 |
 
 ---
@@ -213,7 +216,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 15 — validate complete):**
+- **Smoke test commands (loop 16 — validate complete):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -230,14 +233,15 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
   14. `python src/grade_level_analysis.py`
   15. `python src/subgroup_trend_analysis.py`
   16. `python src/school_consistency_analysis.py`
-  17. `python src/generate_summary_report.py`
-  18. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, and `/_dash-dependencies`; verify the dashboard callback path via `app.app_simple.update_figures(...)` (returns **17 figures**, including the school consistency chart)
-- **Loop 15 validation evidence:** reran the full smoke path; all scripts exit 0. `school_consistency.csv` regenerated (**424 rows**), `consistency_class_summary.csv` regenerated (**10 rows**), and `summary_report.xlsx` regenerated (**14 sheets**). Dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; dependency metadata included `consistency.figure`; direct callback invocation returned the **17 analytical figures** including a populated consistency chart; a fresh headless screenshot was saved to `/tmp/loop15-validate-dashboard.png`.
-- **Loop 15 consistency findings:** ELA classes = **38 High-Consistent / 10 High-Volatile / 10 Low-Consistent / 37 Low-Volatile / 117 Insufficient Data**; Math classes = **39 / 9 / 9 / 38 / 117**. Top ELA High-Consistent schools: Ross ES (**86.13%**, CV **3.85%**), Janney ES (**85.67%**, CV **3.93%**), Key ES (**79.58%**, CV **3.76%**). Most volatile below-median ELA schools: Savoy ES (**7.04%**, CV **79.37%**), Turner ES at Green (**8.34%**, CV **67.82%**), Kramer MS (**6.31%**, CV **62.60%**).
+  17. `python src/school_performance_index.py`
+  18. `python src/generate_summary_report.py`
+  19. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, and `/_dash-dependencies`; verify the dashboard callback path via `app.app_simple.update_figures(...)` (returns **18 figures**, including the school consistency and performance-index charts)
+- **Loop 16 validation evidence:** reran the full smoke path; all scripts exit 0. `school_performance_index.csv` regenerated (**456 rows**), `performance_index_summary.csv` regenerated (**12 rows**), and `summary_report.xlsx` regenerated (**15 sheets**). Dashboard `GET /`, `/_dash-layout`, and `/_dash-dependencies` returned 200; dependency metadata included `performance-index.figure`; direct callback invocation returned the **18 analytical figures** including a populated performance-index chart; a fresh headless screenshot was saved to `/tmp/loop16-validate-dashboard.png`.
+- **Loop 16 performance-index findings:** ELA quintiles = **43 Q5 / 42 Q4 / 42 Q3 / 42 Q2 / 42 Q1 / 17 Insufficient Data** with top schools Janney ES (**93.6**), Hyde-Addison ES (**92.7**), Lafayette ES (**92.0**). Math quintiles = **43 / 42 / 42 / 42 / 42 / 17** with top schools Hyde-Addison ES (**96.0**), Murch ES @ UDC (**90.6**), Bancroft ES @ Sharpe (**88.4**).
 - **Loop 11 validation evidence:** reran the full smoke path; all scripts exit 0. `school_trajectory_classification.csv` regenerated (424 rows); `summary_report.xlsx` regenerated (10 sheets); dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` returned 200; live callback returned **13 figures**; headless screenshot saved to `/tmp/loop11-dashboard.png`.
 - **Loop 11 trajectory findings:** ELA citywide avg trend slope +0.065 pp/yr — distribution: 55% Insufficient Data (≤2 years of data), 14% Stable, 13% Declining, 9% Improving, 5% Strongly Improving, 4% Strongly Declining. Math avg slope −0.656 pp/yr — more schools are Declining/Strongly Declining than Improving. Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). Top Math improver: Whittier ES (+9.2 pp/yr, 23%→41%). NOTE: 55% of schools are classified "Insufficient Data" because they only appear in the most recent 1-2 years (minimum 3 years required for OLS trend).
 - **Loop 10 COVID recovery findings:** citywide ELA avg COVID impact −3.94 pp (2019→2022), recovery +1.75 pp (2022→2024), net vs. pre-COVID −2.15 pp. Math was hit harder: −8.56 pp impact, +3.17 pp recovery, net −5.43 pp. Recovery status: 38% Partially Recovered, 25% Still Below Pre-COVID, 24% Exceeded Pre-COVID, 12% Fully Recovered, 2% No 2024 Data (200 school/subject observations, All Students).
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
 - **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
 - **Remaining backlog scope — charter vs. DCPS comparison:** the wide-format OSSE files do not include an LEA-type column distinguishing DCPS from charter schools.
-- **Next recommended step:** Return to **Build** and choose the next follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console/manual dashboard checks for the 17-figure app, or deliberately narrow the backlog to the verified wide-format scope.
+- **Next recommended step:** Proceed to **Closeout** for loop 16: review the fresh validation evidence, update the handoff docs if approved, and either sign off the current 18-figure / 15-sheet reproducible path or return the repo to **Build** for remaining backlog scope.

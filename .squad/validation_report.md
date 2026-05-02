@@ -1,12 +1,12 @@
 # Validation Report
 
-**Date:** 2026-05-01  
+**Date:** 2026-05-02  
 **Reviewer:** Ralph  
-**Recommendation:** **PASS — advance loop 15 to Closeout**
+**Recommendation:** **PASS — advance loop 16 to Closeout**
 
 ## Scope
 
-Validate the latest build output against the current sprint commitments for loop 15: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend/geographic-equity/YoY/COVID/trajectory/school-type/grade-level/subgroup/consistency outputs, the 14-sheet policy summary workbook, and the dashboard startup/rendering path with the committed 17 analytical figures.
+Validate the latest build output against the current sprint commitments for loop 16: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend/geographic-equity/YoY/COVID/trajectory/school-type/grade-level/subgroup/consistency/performance-index outputs, the 15-sheet policy summary workbook, and the dashboard startup/rendering path with the committed 18 analytical figures.
 
 ## Checks Run
 
@@ -37,9 +37,10 @@ Validate the latest build output against the current sprint commitments for loop
       - `python src/grade_level_analysis.py`
       - `python src/subgroup_trend_analysis.py`
       - `python src/school_consistency_analysis.py`
+      - `python src/school_performance_index.py`
       - `python src/generate_summary_report.py`
-   - Result: ✅ Passed
-   - Evidence:
+    - Result: ✅ Passed
+    - Evidence:
       - Loaded **7** in-repo workbooks covering school years **2016, 2017, 2018, 2019, 2022, 2023, 2024**
       - Wrote `output_data/combined_all_years.csv` with **28,069 rows**
       - Wrote `output_data/cohort_growth_detail.csv` with **12,956 rows**
@@ -66,7 +67,9 @@ Validate the latest build output against the current sprint commitments for loop
       - Wrote `output_data/subgroup_summary.csv` with **22 rows**
       - Wrote `output_data/school_consistency.csv` with **424 rows**
       - Wrote `output_data/consistency_class_summary.csv` with **10 rows**
-      - Wrote `output_data/summary_report.xlsx` with **14 sheets**
+      - Wrote `output_data/school_performance_index.csv` with **456 rows**
+      - Wrote `output_data/performance_index_summary.csv` with **12 rows**
+      - Wrote `output_data/summary_report.xlsx` with **15 sheets**
 
 5. **Schema / benchmark / workbook inspection**
    - Command: inspect regenerated outputs with Python/pandas and `openpyxl`
@@ -75,7 +78,7 @@ Validate the latest build output against the current sprint commitments for loop
       - `cohort_growth_detail.csv` contains Task 03 required columns plus Task 05 fields `p_value` and `significant`
       - `cohort_growth_summary.csv` contains `pct_significant_transitions`
       - `cohort_growth_pivot.xlsx` contains **6** sheets: `All Students Summary`, `Full Summary`, `All Students Detail`, `ELA Cohort Pivot`, `Math Cohort Pivot`, `Full Detail`
-      - `summary_report.xlsx` contains **14** sheets: `Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`, `Geographic Equity`, `YoY Growth`, `COVID Recovery`, `School Trajectories`, `School Types`, `Grade Levels`, `Subgroups`, `Consistency`
+      - `summary_report.xlsx` contains **15** sheets: `Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`, `Geographic Equity`, `YoY Growth`, `COVID Recovery`, `School Trajectories`, `School Types`, `Grade Levels`, `Subgroups`, `Consistency`, `Performance Index`
       - Stuart-Hobson 2022→2023 benchmark rows for `Stuart-Hobson Middle School (Capitol Hill Cluster)` remain within ±0.1 pp:
         - ELA Gr6→Gr7: `33.5484% → 40.5405% (+6.9921 pp)`
         - ELA Gr7→Gr8: `36.2500% → 46.5753% (+10.3253 pp)`
@@ -93,6 +96,12 @@ Validate the latest build output against the current sprint commitments for loop
         - Math classes: `High-Consistent` **39**, `High-Volatile` **9**, `Low-Consistent` **9**, `Low-Volatile` **38**, `Insufficient Data` **117**
         - ELA top High-Consistent schools remain **Ross Elementary School (86.13%, CV 3.85%)**, **Janney Elementary School (85.67%, CV 3.93%)**, and **Key Elementary School (79.58%, CV 3.76%)**
         - Most volatile below-median ELA schools remain **Savoy Elementary School (7.04%, CV 79.37%)**, **Turner Elementary School at Green (8.34%, CV 67.82%)**, and **Kramer Middle School (6.31%, CV 62.60%)**
+      - `school_performance_index.csv` contains **456** rows and `performance_index_summary.csv` contains **12** rows
+      - Performance-index findings match the loop-16 build claims:
+        - ELA quintiles: `Q5 – Top Performers` **43**, `Q4 – Above Average` **42**, `Q3 – Middle` **42**, `Q2 – Below Average` **42**, `Q1 – Bottom Performers` **42**, `Insufficient Data` **17**
+        - Math quintiles: `Q5 – Top Performers` **43**, `Q4 – Above Average` **42**, `Q3 – Middle` **42**, `Q2 – Below Average` **42**, `Q1 – Bottom Performers` **42**, `Insufficient Data` **17**
+        - Top ELA composite schools remain **Janney ES (93.6)**, **Hyde-Addison Elementary School (92.7)**, and **Lafayette ES (92.0)**
+        - Top Math composite schools remain **Hyde-Addison Elementary School (96.0)**, **Murch Elementary School @ UDC (90.6)**, and **Bancroft Elementary School @ Sharpe (88.4)**
 
 6. **Dashboard startup / endpoint / rendering smoke test**
    - Commands:
@@ -101,13 +110,13 @@ Validate the latest build output against the current sprint commitments for loop
       - `GET http://127.0.0.1:8050/_dash-layout`
       - `GET http://127.0.0.1:8050/_dash-dependencies`
       - `python -c "import app.app_simple as m; m.update_figures('Math', 'All Students', None, [2022, 2024])"`
-      - `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,5600 --screenshot=/tmp/loop15-validate-dashboard.png http://127.0.0.1:8050/`
-   - Result: ✅ Passed
-   - Evidence:
+      - `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,6400 --screenshot=/tmp/loop16-validate-dashboard.png http://127.0.0.1:8050/`
+    - Result: ✅ Passed
+    - Evidence:
       - App startup loaded regenerated CSVs without exceptions and exposed filters for **7 years**, **2 subjects**, **12 subgroups**, and **251 schools**
       - `GET /`, `GET /_dash-layout`, and `GET /_dash-dependencies` all returned **200**
-      - `/_dash-dependencies` includes the committed `consistency.figure` output
-      - Direct callback invocation returned **17 outputs** total, including the populated consistency chart:
+      - `/_dash-dependencies` includes the committed `performance-index.figure` output alongside the earlier dashboard figures
+      - Direct callback invocation returned **18 outputs** total, including the populated consistency and performance-index charts:
         - `timeseries`: `Math - Percent Meeting/Exceeding Over Time`
         - `bars`: `Math - Year 2024: Top Schools`
         - `cohort-bars`: `Math – Avg Cohort Growth (pp)`
@@ -125,7 +134,8 @@ Validate the latest build output against the current sprint commitments for loop
         - `grade-level`: `Math – Citywide Avg Proficiency by Grade Level`
         - `subgroup-trend`: `Math – Citywide Avg Proficiency by Student Subgroup`
         - `consistency`: `Math – School Performance Consistency`
-      - Captured a headless dashboard screenshot at `/tmp/loop15-validate-dashboard.png` to confirm the dashboard page renders in this environment
+        - `performance-index`: `Math – Multi-Metric School Performance Index`
+      - Captured a headless dashboard screenshot at `/tmp/loop16-validate-dashboard.png` to confirm the dashboard page renders in this environment
 
 ## Acceptance-Criteria Status
 
@@ -145,7 +155,7 @@ Validate the latest build output against the current sprint commitments for loop
 
 - **Task 04 — Interactive dashboard**
   - `python app/app_simple.py` starts without errors with regenerated CSV inputs — ✅
-  - Dashboard callback returns at least five figures — ✅ (returns **17** analytical figures)
+  - Dashboard callback returns at least five figures — ✅ (returns **18** analytical figures)
   - Subject / subgroup / school / year-range interaction path responds without server-side errors — ✅
   - Map view loads without errors when `input_data/school_locations.csv` is present — ✅
   - YoY growth chart is present in the callback output — ✅
@@ -155,6 +165,7 @@ Validate the latest build output against the current sprint commitments for loop
   - Grade-level chart is present in the callback output — ✅
   - Subgroup trend chart is present in the callback output — ✅
   - Consistency chart is present in the callback output — ✅
+  - Performance-index chart is present in the callback output — ✅
   - No unhandled browser-console exceptions during manual interaction — ⚠️ **Blocked in this environment**
 
 - **Task 05 + loop deliverables**
@@ -170,15 +181,16 @@ Validate the latest build output against the current sprint commitments for loop
   - Grade-level outputs regenerate — ✅
   - Subgroup outputs regenerate — ✅
   - Consistency outputs regenerate — ✅
-  - Formatted Excel summary report regenerates with 14 expected sheets — ✅
+  - Performance-index outputs regenerate — ✅
+  - Formatted Excel summary report regenerates with 15 expected sheets — ✅
 
 ## Blocked Checks / Remaining Follow-up
 
-- **Browser-console inspection is still blocked.** This validation pass confirmed server startup, Dash endpoints, callback/rendering behavior, dependency metadata, and a rendered headless screenshot, but it did not produce direct browser-console evidence from an interactive session in this sandbox.
+- **Browser-console inspection is still blocked.** This validation pass confirmed server startup, Dash endpoints, callback/rendering behavior, dependency metadata, and a rendered headless screenshot, but Playwright could not open a clean browser session because the browser profile was already in use in this sandbox.
 - **Original normalized-data backlog scope is still open.** The repo validates the reproducible 7-workbook wide-format path, but `src/load_clean_data.py` still depends on external normalized OSSE workbooks, including 2024-25, that are not committed here.
 - **Charter-vs.-DCPS analysis remains unimplemented.** The wide-format files still do not include an LEA-type field that would separate DCPS from charter schools.
-- **Closeout still needs to decide final handoff status.** This validate pass proves the current loop-15 consistency-aware path is reproducible; Closeout must explicitly sign off or return the repo to Build for remaining backlog scope.
+- **Closeout still needs to decide final handoff status.** This validate pass proves the current loop-16 performance-index-aware path is reproducible; Closeout must explicitly sign off or return the repo to Build for remaining backlog scope.
 
 ## Conclusion
 
-Validation passes for the current loop-15 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the analytical outputs regenerate cleanly, the new consistency CSVs are present, the dashboard returns all seventeen analytical figures including the populated consistency chart, and `summary_report.xlsx` is produced with all fourteen expected sheets. The next phase should be **Closeout**.
+Validation passes for the current loop-16 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the analytical outputs regenerate cleanly, the new performance-index CSVs are present, the dashboard returns all eighteen analytical figures including the populated performance-index chart, and `summary_report.xlsx` is produced with all fifteen expected sheets. The next phase should be **Closeout**.
