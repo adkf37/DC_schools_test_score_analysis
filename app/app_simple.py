@@ -1705,8 +1705,7 @@ def update_figures(subject, subgroup, schools, year_range):
 
                 fig_perf_index.add_trace(go.Scatter(
                     x=sub_pi['composite_score'],
-                    y=sub_pi['proficiency_pct'] if 'proficiency_pct' in sub_pi.columns
-                      else sub_pi['composite_score'],
+                    y=sub_pi['proficiency_pct'],
                     mode='markers',
                     name=quintile,
                     marker=dict(
@@ -1729,10 +1728,15 @@ def update_figures(subject, subgroup, schools, year_range):
                     ),
                 ))
 
-            # Reference lines at quintile boundaries
-            valid_composites = pi_plot['composite_score']
+            # Reference lines at original quintile boundaries derived from the
+            # full subject population (before any school filter) so they stay
+            # consistent with the pre-computed composite_quintile labels.
+            pi_subject_full = performance_index.copy()
+            if subject:
+                pi_subject_full = pi_subject_full[pi_subject_full['Subject'] == subject]
+            full_composites = pi_subject_full['composite_score'].dropna()
             for pct_val in [20, 40, 60, 80]:
-                threshold = float(np.percentile(valid_composites, pct_val))
+                threshold = float(np.percentile(full_composites, pct_val))
                 fig_perf_index.add_vline(
                     x=threshold, line_dash='dot', line_color='#aaa', line_width=1,
                 )
