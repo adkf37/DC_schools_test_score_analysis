@@ -112,6 +112,8 @@ SCHOOL_SECTOR_BY_SCHOOL_FILE = os.path.join(OUTPUT_DIR, 'school_sector_by_school
 SCHOOL_NEEDS_INDEX_FILE = os.path.join(OUTPUT_DIR, 'school_needs_index.csv')
 WARD_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'ward_summary.csv')
 WARD_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'ward_proficiency.csv')
+EQUITY_PROGRESS_CITYWIDE_FILE = os.path.join(OUTPUT_DIR, 'equity_progress_citywide.csv')
+EQUITY_PROGRESS_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'equity_progress_summary.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
@@ -132,6 +134,8 @@ school_sector_by_school = pd.DataFrame()
 school_needs_index = pd.DataFrame()
 ward_summary = pd.DataFrame()
 ward_proficiency = pd.DataFrame()
+equity_progress_citywide = pd.DataFrame()
+equity_progress_summary_df = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -189,6 +193,12 @@ if os.path.isfile(WARD_SUMMARY_FILE):
 if os.path.isfile(WARD_PROFICIENCY_FILE):
     ward_proficiency = pd.read_csv(WARD_PROFICIENCY_FILE)
     print(f"Loaded ward proficiency: {len(ward_proficiency):,} rows")
+if os.path.isfile(EQUITY_PROGRESS_CITYWIDE_FILE):
+    equity_progress_citywide = pd.read_csv(EQUITY_PROGRESS_CITYWIDE_FILE)
+    print(f"Loaded equity progress citywide: {len(equity_progress_citywide):,} rows")
+if os.path.isfile(EQUITY_PROGRESS_SUMMARY_FILE):
+    equity_progress_summary_df = pd.read_csv(EQUITY_PROGRESS_SUMMARY_FILE)
+    print(f"Loaded equity progress summary: {len(equity_progress_summary_df):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -583,6 +593,26 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='ward-analysis')
         ]),
+
+        html.Hr(),
+
+        # ── Equity Progress (Gap Closure) section ─────────────────────────
+        html.H4("Equity Progress: Are Achievement Gaps Closing?", className="mt-3"),
+        html.P(
+            "Has DC made progress on closing achievement gaps between student "
+            "demographic groups?  For six key subgroup pairs (White − Black, "
+            "White − Hispanic, White − Econ Dis, All − Econ Dis, All − EL Active, "
+            "All − Students with Disabilities) this chart shows whether the "
+            "average proficiency gap across DC schools is Narrowing, Stable, or "
+            "Widening from the earliest available year to the most recent year.  "
+            "Bars to the left (negative gap change) indicate equity improvement; "
+            "bars to the right (positive gap change) indicate the gap has grown. "
+            "Run python src/equity_progress_analysis.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='equity-progress')
+        ]),
     ]
 )
 
@@ -630,6 +660,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('sector-comparison', 'figure'),
     Output('needs-index', 'figure'),
     Output('ward-analysis', 'figure'),
+    Output('equity-progress', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -2158,12 +2189,86 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No ward data – run src/ward_analysis.py'
         )
 
+    # ── Equity Progress gap-change horizontal bar chart ───────────────────
+    PROGRESS_COLORS = {
+        'Narrowing': '#1a9641',
+        'Stable': '#bdbdbd',
+        'Widening': '#d7191c',
+    }
+    fig_equity_progress = go.Figure()
+
+    if not equity_progress_summary_df.empty:
+        ep = equity_progress_summary_df.copy()
+        if subject:
+            ep = ep[ep['Subject'] == subject]
+
+        if not ep.empty:
+            ep = ep.sort_values('gap_change_pp')
+
+            colors = [
+                PROGRESS_COLORS.get(d, '#bdbdbd')
+                for d in ep['direction']
+            ]
+
+            first_yr = int(ep['first_year'].min()) if 'first_year' in ep.columns else None
+            last_yr = int(ep['last_year'].max()) if 'last_year' in ep.columns else None
+
+            yr_label = (
+                f"{first_yr}→{last_yr}" if first_yr is not None and last_yr is not None
+                else "unknown period"
+            )
+
+            fig_equity_progress.add_trace(go.Bar(
+                x=ep['gap_change_pp'],
+                y=ep['pair_label'],
+                orientation='h',
+                marker_color=colors,
+                text=[
+                    f"{v:+.1f} pp ({d})"
+                    for v, d in zip(ep['gap_change_pp'], ep['direction'])
+                ],
+                textposition='outside',
+                customdata=ep[['gap_first_pp', 'gap_last_pp',
+                               'first_year', 'last_year',
+                               'n_schools_first', 'n_schools_last']].values,
+                hovertemplate=(
+                    '<b>%{y}</b><br>'
+                    f'Gap in %{{customdata[2]}}: %{{customdata[0]:+.1f}} pp<br>'
+                    f'Gap in %{{customdata[3]}}: %{{customdata[1]:+.1f}} pp<br>'
+                    'Change: %{x:+.2f} pp<br>'
+                    'Schools (first year): %{customdata[4]}<br>'
+                    'Schools (last year): %{customdata[5]}<br>'
+                    '<extra></extra>'
+                ),
+            ))
+
+            fig_equity_progress.add_vline(
+                x=0, line_dash='solid', line_color='#555', line_width=1,
+            )
+
+            fig_equity_progress.update_layout(
+                title=(
+                    f'{subject} – Equity Gap Change: {yr_label} '
+                    f'(negative = gap narrowed)'
+                    if subject else
+                    f'Equity Gap Change: {yr_label} (negative = gap narrowed)'
+                ),
+                xaxis_title='Gap Change (pp) — negative means equity improved',
+                yaxis_title='Subgroup Pair (reference − comparison)',
+                height=420,
+            )
+
+    if not fig_equity_progress.data:
+        fig_equity_progress.update_layout(
+            title='No equity progress data – run src/equity_progress_analysis.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
         fig_scatter, fig_geo, fig_yoy, fig_covid, fig_trajectory,
         fig_school_type, fig_grade_level, fig_subgroup, fig_consistency,
-        fig_perf_index, fig_sector, fig_needs, fig_ward,
+        fig_perf_index, fig_sector, fig_needs, fig_ward, fig_equity_progress,
     )
 
 
