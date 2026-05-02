@@ -14,7 +14,7 @@ Performers … Q1 Bottom Performers (schools with fewer than 2 valid components 
 "Insufficient Data").  Key findings: ELA Q5 Top Performers avg composite 81.1, avg proficiency
 47.5%; Math Q5 avg composite 79.0, avg proficiency 45.0%.  Top ELA composite performers: Janney ES
 (93.6), Hyde-Addison ES (92.7), Lafayette ES (92.0).  Top Math composite performers: Hyde-Addison
-ES (96.0), Murch ES @ UDC (90.5), Bancroft ES @ Sharpe (88.4).  The dashboard now renders **18
+ES (96.0), Murch ES @ UDC (90.6), Bancroft ES @ Sharpe (88.4).  The dashboard now renders **18
 figures**; `summary_report.xlsx` now has **15 sheets** (adds "Performance Index" sheet).
 
 Loop 15 adds `src/school_consistency_analysis.py` as a first-class step in the smoke path.
@@ -73,7 +73,7 @@ Loop 7 adds `src/generate_summary_report.py`, a formatted 6-sheet Excel policy-s
 - Grade-level key finding: Grade 4 highest ELA avg proficiency (32.7%); Grade 3 highest Math avg proficiency (33.8%); HS lowest Math (13.2%); Grade 7 largest ELA COVID impact (−10.78 pp); Grade 4 largest Math COVID impact (−11.55 pp).
 - Subgroup key finding: White highest ELA avg proficiency (83.8%), Students with Disabilities lowest (7.9%), gap 75.9 pp; Hispanic/Latino took the largest COVID hit (ELA −9.70 pp, Math −14.54 pp); Asian showed the strongest recovery (ELA +10.31 pp, Math +8.65 pp).
 - Consistency key finding: 212 schools have All Students ELA data; 38 High-Consistent ELA schools (avg 52.7%, avg CV 10.7%); 37 Low-Volatile ELA schools (avg 13.6%, avg CV 37.5%). Top High-Consistent ELA schools: Ross ES (86.1%), Janney ES (85.7%). Most volatile below-median ELA schools: Savoy ES (7.0% avg, 79.4% CV), Turner ES (8.3% avg, 67.8% CV). 55% of schools have Insufficient Data (fewer than 3 years).
-- Performance Index key finding: ELA Q5 Top Performers avg composite 81.1, avg proficiency 47.5%; top ELA schools: Janney ES (93.6), Hyde-Addison ES (92.7), Lafayette ES (92.0). Math Q5 avg composite 79.0, avg proficiency 45.0%; top Math schools: Hyde-Addison ES (96.0), Murch ES @ UDC (90.5), Bancroft ES @ Sharpe (88.4). ~7% of schools per subject classified as "Insufficient Data" (fewer than 2 valid components).
+- Performance Index key finding: ELA Q5 Top Performers avg composite 81.1, avg proficiency 47.5%; top ELA schools: Janney ES (93.6), Hyde-Addison ES (92.7), Lafayette ES (92.0). Math Q5 avg composite 79.0, avg proficiency 45.0%; top Math schools: Hyde-Addison ES (96.0), Murch ES @ UDC (90.6), Bancroft ES @ Sharpe (88.4). ~7% of schools per subject classified as "Insufficient Data" (fewer than 2 valid components).
 - Next action: choose the next Build target for the next loop — normalized-data / 2024-25 ingestion, browser-console review for the current 18-figure dashboard, or deliberate narrowing of the backlog to the verified wide-format scope.
 
 
