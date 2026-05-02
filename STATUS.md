@@ -2,9 +2,29 @@
 
 ## Current Objective
 
-**Loop 17 Closeout complete — the school-program-sector handoff is signed off for the reproducible 7-workbook wide-format path; return to Build for remaining backlog scope.**
+**Loop 18 Build complete — School Needs Index added; validate 20-figure dashboard and 17-sheet workbook next.**
 
-Loop 17 Closeout confirmed:
+Loop 18 Build completed:
+1. Implemented `src/school_needs_index.py` — a new standalone script that computes a composite intervention-need score (0–100) per school × subject, combining four inverted analytical dimensions: (1) Proficiency Need (low proficiency → high need), (2) Growth Need (low cohort growth → high need), (3) Recovery Need (COVID net impact not recovered → high need), (4) Equity Need (large mean absolute gap across disadvantaged groups → high need). Each component is percentile-ranked within its subject; the composite is the mean of available components. Schools with ≥ 2 valid components are assigned a tier: Critical (≥75th pctile), High (50–75th), Moderate (25–50th), Low (<25th).
+2. Extended `app/app_simple.py` with a 20th figure: "School Needs Index" scatter plot (composite needs score × avg proficiency, coloured by tier). Loading code for `school_needs_index.csv` and the layout section were also added.
+3. Extended `src/generate_summary_report.py` with a 17th sheet ("School Needs") that lists all schools sorted by needs tier and composite score.
+4. Ran full pipeline to confirm: `school_needs_index.csv` (**422 rows**, 211 schools × 2 subjects), `needs_tier_summary.csv` (**10 rows**, 5 tiers × 2 subjects), `summary_report.xlsx` (**17 sheets**), and a **20-figure** dashboard callback path.
+
+Key findings from needs index (ELA):
+- Critical (54 schools): avg proficiency 22.1%, avg cohort growth +0.5 pp
+- High (51 schools): avg proficiency 29.9%, avg cohort growth +3.5 pp
+- Low (53 schools): avg proficiency 37.2%, avg cohort growth +11.3 pp
+- Top Critical-need ELA schools: Van Ness ES (composite 78.2, proficiency 36.1%), Plummer ES (73.3, 17.3%), Bancroft ES (72.5, 45.8%), Miner ES (72.5, 9.9%), Cardozo EC (71.4, 14.2%)
+
+Key findings from needs index (Math):
+- Critical (53 schools): avg proficiency 26.8%, avg cohort growth −4.6 pp
+- Top Critical-need Math schools: Ida B. Wells MS (composite 86.5, proficiency 9.5%), Van Ness ES (81.2, 21.4%), Thomson ES (74.1, 27.9%)
+
+**Note on methodology:** The Needs Index is the policy-targeted complement to the Performance Index (Loop 16). A school can appear Critical-need in the index even with above-median proficiency if it has low growth, poor COVID recovery, and large equity gaps (e.g., Van Ness ES with 36.1% ELA proficiency but low growth and high equity gaps). Policy stakeholders should examine the component scores alongside the composite.
+
+**Next step: run Validate for Loop 18 — confirm 20 dashboard figures and 17 workbook sheets in fresh clone smoke path.**
+
+
 1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the closeout acceptance criteria.
 2. Re-ran the documented fresh-clone smoke path: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`, `python src/yoy_growth_analysis.py`, `python src/covid_recovery_analysis.py`, `python src/school_trajectory_analysis.py`, `python src/school_type_analysis.py`, `python src/grade_level_analysis.py`, `python src/subgroup_trend_analysis.py`, `python src/school_consistency_analysis.py`, `python src/school_performance_index.py`, `python src/charter_dcps_analysis.py`, `python src/generate_summary_report.py`, plus dashboard checks for `GET /`, `/_dash-layout`, `/_dash-dependencies`, direct callback rendering, and a fresh headless screenshot at `/tmp/loop17-closeout-dashboard.png`.
 3. Confirmed the current handoff reproduces `school_sector_by_school.csv` (**251 rows**), `school_sector_proficiency.csv` (**48 rows**), `school_sector_summary.csv` (**8 rows**), `summary_report.xlsx` (**16 sheets**), and a **19-figure** dashboard callback path.

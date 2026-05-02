@@ -109,6 +109,7 @@ SCHOOL_CONSISTENCY_FILE = os.path.join(OUTPUT_DIR, 'school_consistency.csv')
 PERFORMANCE_INDEX_FILE = os.path.join(OUTPUT_DIR, 'school_performance_index.csv')
 SCHOOL_SECTOR_PROFICIENCY_FILE = os.path.join(OUTPUT_DIR, 'school_sector_proficiency.csv')
 SCHOOL_SECTOR_BY_SCHOOL_FILE = os.path.join(OUTPUT_DIR, 'school_sector_by_school.csv')
+SCHOOL_NEEDS_INDEX_FILE = os.path.join(OUTPUT_DIR, 'school_needs_index.csv')
 
 cohort_detail = pd.DataFrame()
 cohort_summary = pd.DataFrame()
@@ -126,6 +127,7 @@ school_consistency = pd.DataFrame()
 performance_index = pd.DataFrame()
 school_sector_proficiency = pd.DataFrame()
 school_sector_by_school = pd.DataFrame()
+school_needs_index = pd.DataFrame()
 if os.path.isfile(COHORT_DETAIL_FILE):
     cohort_detail = pd.read_csv(COHORT_DETAIL_FILE)
     print(f"Loaded cohort detail: {len(cohort_detail):,} rows")
@@ -174,6 +176,9 @@ if os.path.isfile(SCHOOL_SECTOR_PROFICIENCY_FILE):
 if os.path.isfile(SCHOOL_SECTOR_BY_SCHOOL_FILE):
     school_sector_by_school = pd.read_csv(SCHOOL_SECTOR_BY_SCHOOL_FILE)
     print(f"Loaded school sector classifications: {len(school_sector_by_school):,} rows")
+if os.path.isfile(SCHOOL_NEEDS_INDEX_FILE):
+    school_needs_index = pd.read_csv(SCHOOL_NEEDS_INDEX_FILE)
+    print(f"Loaded school needs index: {len(school_needs_index):,} rows")
 
 # Prepare filter options
 YEARS: List[int] = sorted([int(y) for y in multi_year['year'].dropna().unique()]) if not multi_year.empty else []
@@ -522,6 +527,26 @@ app.layout = html.Div(
         html.Div(className="mt-1", children=[
             dcc.Graph(id='sector-comparison')
         ]),
+
+        html.Hr(),
+
+        # ── School Needs Index section ────────────────────────────────────
+        html.H4("School Needs Index", className="mt-3"),
+        html.P(
+            "Which schools most need intervention support? "
+            "The Needs Index is the policy-targeted complement to the Performance Index. "
+            "It combines four inverted dimensions: (1) Low Proficiency; (2) Low Cohort Growth; "
+            "(3) COVID Recovery Deficit (net change vs. pre-COVID); and "
+            "(4) Equity Gap Severity (mean absolute gap across disadvantaged groups). "
+            "Each component is percentile-ranked within the subject; the composite is "
+            "the mean of available components. Schools are grouped into four tiers: "
+            "Critical (top-quartile need), High, Moderate, and Low. "
+            "Run python src/school_needs_index.py to generate this data.",
+            className="text-muted small",
+        ),
+        html.Div(className="mt-1", children=[
+            dcc.Graph(id='needs-index')
+        ]),
     ]
 )
 
@@ -567,6 +592,7 @@ def filter_data(subject: Optional[str], subgroup: Optional[str], schools: Option
     Output('consistency', 'figure'),
     Output('performance-index', 'figure'),
     Output('sector-comparison', 'figure'),
+    Output('needs-index', 'figure'),
     Input('subject-dd', 'value'),
     Input('subgroup-dd', 'value'),
     Input('schools-dd', 'value'),
@@ -1902,12 +1928,148 @@ def update_figures(subject, subgroup, schools, year_range):
             title='No sector data – run src/charter_dcps_analysis.py'
         )
 
+    # ── School Needs Index scatter plot ───────────────────────────────────
+    NEEDS_TIER_ORDER = ["Critical", "High", "Moderate", "Low", "Insufficient Data"]
+    NEEDS_TIER_COLORS = {
+        "Critical": "#d32f2f",
+        "High": "#f57c00",
+        "Moderate": "#fbc02d",
+        "Low": "#388e3c",
+        "Insufficient Data": "#9e9e9e",
+    }
+    NEEDS_CUSTOM_COLS = [
+        'n_components', 'proficiency_need_score',
+        'growth_need_score', 'recovery_need_score',
+        'equity_need_score',
+    ]
+    fig_needs = go.Figure()
+
+    if not school_needs_index.empty:
+        ni = school_needs_index.copy()
+        if subject:
+            ni = ni[ni['Subject'] == subject]
+
+        # School-selection mode: highlight selected schools; grey out others
+        if schools:
+            ni_highlight = ni[ni['School Name'].isin(schools)]
+            ni_rest = ni[~ni['School Name'].isin(schools)]
+            # Background points (faint)
+            for tier in NEEDS_TIER_ORDER:
+                sub_rest = ni_rest[ni_rest['needs_tier'] == tier]
+                if sub_rest.empty:
+                    continue
+                fig_needs.add_trace(go.Scatter(
+                    x=sub_rest['composite_needs_score'],
+                    y=sub_rest['avg_proficiency_pct'],
+                    mode='markers',
+                    name=f'{tier} (other)',
+                    marker=dict(color='#cccccc', size=6, opacity=0.3),
+                    text=sub_rest['School Name'],
+                    hovertemplate=(
+                        '<b>%{text}</b><br>'
+                        'Needs score: %{x:.1f}<br>'
+                        'Avg proficiency: %{y:.1f}%<br>'
+                        '<extra></extra>'
+                    ),
+                    showlegend=False,
+                ))
+            # Highlighted selected schools
+            for tier in NEEDS_TIER_ORDER:
+                sub_sel = ni_highlight[ni_highlight['needs_tier'] == tier]
+                if sub_sel.empty:
+                    continue
+                avail = [c for c in NEEDS_CUSTOM_COLS if c in sub_sel.columns]
+                customdata = sub_sel[avail].values if avail else None
+                fig_needs.add_trace(go.Scatter(
+                    x=sub_sel['composite_needs_score'],
+                    y=sub_sel['avg_proficiency_pct'],
+                    mode='markers+text',
+                    name=tier,
+                    marker=dict(
+                        color=NEEDS_TIER_COLORS.get(tier, '#999'),
+                        size=12, opacity=0.9,
+                        line=dict(width=1, color='#333'),
+                    ),
+                    text=sub_sel['School Name'],
+                    textposition='top center',
+                    customdata=customdata,
+                    hovertemplate=(
+                        '<b>%{text}</b><br>'
+                        'Needs score: %{x:.1f}<br>'
+                        'Avg proficiency: %{y:.1f}%<br>'
+                        '<extra></extra>'
+                    ),
+                ))
+        else:
+            # Citywide mode: all schools coloured by tier
+            for tier in NEEDS_TIER_ORDER:
+                sub_ni = ni[ni['needs_tier'] == tier]
+                if sub_ni.empty:
+                    continue
+                avail = [c for c in NEEDS_CUSTOM_COLS if c in sub_ni.columns]
+                customdata = sub_ni[avail].values if avail else None
+                htmpl = (
+                    '<b>%{text}</b><br>'
+                    'Needs score: %{x:.1f}<br>'
+                    'Avg proficiency: %{y:.1f}%<br>'
+                )
+                if customdata is not None and len(avail) >= 4:
+                    htmpl += (
+                        'Components used: %{customdata[0]}<br>'
+                        'Proficiency need: %{customdata[1]:.1f}<br>'
+                        'Growth need: %{customdata[2]:.1f}<br>'
+                        'Recovery need: %{customdata[3]:.1f}<br>'
+                    )
+                    if len(avail) >= 5:
+                        htmpl += 'Equity need: %{customdata[4]:.1f}<br>'
+                htmpl += '<extra></extra>'
+                fig_needs.add_trace(go.Scatter(
+                    x=sub_ni['composite_needs_score'],
+                    y=sub_ni['avg_proficiency_pct'],
+                    mode='markers',
+                    name=tier,
+                    marker=dict(
+                        color=NEEDS_TIER_COLORS.get(tier, '#999'),
+                        size=8, opacity=0.8,
+                        line=dict(width=0.5, color='#555'),
+                    ),
+                    text=sub_ni['School Name'],
+                    customdata=customdata,
+                    hovertemplate=htmpl,
+                ))
+
+        # Reference line: median needs score
+        ni_valid = ni[ni['composite_needs_score'].notna()]
+        if not ni_valid.empty:
+            median_needs = float(ni_valid['composite_needs_score'].median())
+            fig_needs.add_vline(
+                x=median_needs, line_dash='dot', line_color='#aaa', line_width=1,
+                annotation_text='Median',
+                annotation_position='top right',
+            )
+
+        fig_needs.update_layout(
+            title=(
+                f'{subject} – School Needs Index (Composite vs. Avg Proficiency)'
+                if subject else 'School Needs Index (Composite vs. Avg Proficiency)'
+            ),
+            xaxis_title='Composite Needs Score (0–100, higher = greater need)',
+            yaxis_title='Avg Proficiency, All Students (%)',
+            legend_title='Needs Tier',
+            height=520,
+        )
+
+    if not fig_needs.data:
+        fig_needs.update_layout(
+            title='No needs index data – run src/school_needs_index.py'
+        )
+
     return (
         fig_ts, fig_bars, fig_cohort_bars, fig_cohort_detail,
         fig_map, fig_equity_gaps, fig_equity_gap_change, fig_heatmap,
         fig_scatter, fig_geo, fig_yoy, fig_covid, fig_trajectory,
         fig_school_type, fig_grade_level, fig_subgroup, fig_consistency,
-        fig_perf_index, fig_sector,
+        fig_perf_index, fig_sector, fig_needs,
     )
 
 
