@@ -772,3 +772,20 @@
 - `STATUS.md`, `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` should describe closeout as complete for loop 17 while explicitly returning the repo to **Build** next.
 - The approved handoff now includes the school-program-sector workflow as baseline behavior rather than future scope.
 - The next Build loop must choose an explicit follow-up: restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 19-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope before another Validate/Closeout cycle.
+
+### D-064 — Loop 18 Build: School Needs Index
+**Date:** 2026-05-02
+**Decision:** Implement `src/school_needs_index.py` as Loop 18's analytical deliverable, and extend the dashboard with a 20th figure and the summary workbook with a 17th sheet.
+**Rationale:**
+- The Performance Index (Loop 16) synthesises four dimensions to identify top performers; its natural policy complement is an inverted index that identifies which schools most need intervention support. Calling this the "Needs Index" makes the policy intent explicit.
+- All four component data sources (`school_consistency.csv`, `school_rankings.csv`, `covid_recovery_summary.csv`, `equity_gap_summary.csv`) are already produced by the existing pipeline, so no new data dependencies are introduced.
+- Each component is inverted and percentile-ranked within its subject so the composite is always 0–100 and school-size effects are removed. The four tiers (Critical / High / Moderate / Low) mirror the common 75th/50th/25th percentile threshold used in OSSE priority-school frameworks.
+- A single-school note in the methodology: a school can rank Critical even with above-median proficiency if it has low growth, poor COVID recovery, and a large equity gap (e.g., Van Ness ES in ELA). Component scores should be examined alongside the composite when making intervention decisions.
+**Consequences:**
+- `src/school_needs_index.py` — new standalone script; run after `charter_dcps_analysis.py`.
+- New output files: `school_needs_index.csv` (422 rows, 211 schools × 2 subjects), `needs_tier_summary.csv` (10 rows, 5 tiers × 2 subjects).
+- Dashboard callback now returns **20 figures** (adds `needs-index`).
+- `summary_report.xlsx` now has **17 sheets** (adds "School Needs").
+- Smoke test path updated: adds `python src/school_needs_index.py` as step 19 (after `python src/charter_dcps_analysis.py`).
+- All four Stuart-Hobson benchmark transitions remain within ±0.1 pp (D-004 satisfied); no changes to cohort engine.
+- Next step: run Validate for Loop 18 — confirm 20 dashboard figures and 17 workbook sheets in fresh-clone smoke path.
