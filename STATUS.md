@@ -2,13 +2,14 @@
 
 ## Current Objective
 
-**Loop 18 Build complete — School Needs Index added; validate 20-figure dashboard and 17-sheet workbook next.**
+**Loop 18 Validate complete — school-needs workflow passes; move to Closeout next.**
 
-Loop 18 Build completed:
-1. Implemented `src/school_needs_index.py` — a new standalone script that computes a composite intervention-need score (0–100) per school × subject, combining four inverted analytical dimensions: (1) Proficiency Need (low proficiency → high need), (2) Growth Need (low cohort growth → high need), (3) Recovery Need (COVID net impact not recovered → high need), (4) Equity Need (large mean absolute gap across disadvantaged groups → high need). Each component is percentile-ranked within its subject; the composite is the mean of available components. Schools with ≥ 2 valid components are assigned a tier: Critical (≥75th pctile), High (50–75th), Moderate (25–50th), Low (<25th).
-2. Extended `app/app_simple.py` with a 20th figure: "School Needs Index" scatter plot (composite needs score × avg proficiency, coloured by tier). Loading code for `school_needs_index.csv` and the layout section were also added.
-3. Extended `src/generate_summary_report.py` with a 17th sheet ("School Needs") that lists all schools sorted by needs tier and composite score.
-4. Ran full pipeline to confirm: `school_needs_index.csv` (**422 rows**, 211 schools × 2 subjects), `needs_tier_summary.csv` (**10 rows**, 5 tiers × 2 subjects), `summary_report.xlsx` (**17 sheets**), and a **20-figure** dashboard callback path.
+Loop 18 Validate confirmed:
+1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, and `.squad/decisions.md` against the loop-18 sprint commitments and validate acceptance criteria.
+2. Re-ran the documented fresh-clone smoke path: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`, `python src/yoy_growth_analysis.py`, `python src/covid_recovery_analysis.py`, `python src/school_trajectory_analysis.py`, `python src/school_type_analysis.py`, `python src/grade_level_analysis.py`, `python src/subgroup_trend_analysis.py`, `python src/school_consistency_analysis.py`, `python src/school_performance_index.py`, `python src/charter_dcps_analysis.py`, `python src/school_needs_index.py`, and `python src/generate_summary_report.py`.
+3. Confirmed the current build reproduces `school_needs_index.csv` (**422 rows**), `needs_tier_summary.csv` (**10 rows**), `summary_report.xlsx` (**17 sheets**), and the full **20-figure** dashboard callback path.
+4. Revalidated the dashboard runtime path: `GET /`, `/_dash-layout`, and `/_dash-dependencies` all returned **200**; Dash dependency metadata now includes `needs-index.figure`; direct callback invocation returned all **20** figures; and a fresh headless screenshot was saved to `/tmp/loop18-validate-dashboard.png`.
+5. Browser-console inspection remains blocked in this sandbox, and the normalized-data / 2024-25 backlog scope is still outside the reproducible in-repo path.
 
 Key findings from needs index (ELA):
 - Critical (54 schools): avg proficiency 22.1%, avg cohort growth +0.5 pp
@@ -20,9 +21,9 @@ Key findings from needs index (Math):
 - Critical (53 schools): avg proficiency 26.8%, avg cohort growth −4.6 pp
 - Top Critical-need Math schools: Ida B. Wells MS (composite 86.5, proficiency 9.5%), Van Ness ES (81.2, 21.4%), Thomson ES (74.1, 27.9%)
 
-**Note on methodology:** The Needs Index is the policy-targeted complement to the Performance Index (Loop 16). A school can appear Critical-need in the index even with above-median proficiency if it has low growth, poor COVID recovery, and large equity gaps (e.g., Van Ness ES with 36.1% ELA proficiency but low growth and high equity gaps). Policy stakeholders should examine the component scores alongside the composite.
+**Note on methodology:** The Needs Index is the policy-targeted complement to the Performance Index (Loop 16). A school can appear Critical-need in the index even with above-median proficiency if it has low growth, poor COVID recovery, and large equity gaps (for example, Van Ness ES in ELA). Policy stakeholders should examine the component scores alongside the composite.
 
-**Next step: run Validate for Loop 18 — confirm 20 dashboard figures and 17 workbook sheets in fresh clone smoke path.**
+**Next step: proceed to Closeout for Loop 18 — decide handoff status for the validated 20-figure dashboard and 17-sheet workbook while carrying forward the remaining normalized-data / browser-console / charter-coverage gaps.**
 
 
 1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the closeout acceptance criteria.
@@ -171,8 +172,8 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 0 | Planner | ✅ Complete |
 | 1 | Squad Init | ✅ Complete |
 | 2 | Squad Review | ✅ Complete |
-| 3 | Build | ✅ Complete through loop 17 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis, subgroup trend analysis, school consistency analysis, multi-metric school performance index, school program sector analysis |
-| 4 | Validate | ✅ Complete for loops 1-17 |
+| 3 | Build | ✅ Complete through loop 18 — equity gap, school map, rankings, historical data ingestion, proficiency heatmap, scatter plot, summary report, geographic equity, same-grade YoY growth, COVID recovery analysis, school trajectory classification, school type analysis, grade-level analysis, subgroup trend analysis, school consistency analysis, multi-metric school performance index, school program sector analysis, and school needs index |
+| 4 | Validate | ✅ Complete for loops 1-18 |
 | 5 | Closeout | ✅ Complete for loops 2-17 |
 
 ---
@@ -184,10 +185,10 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | 01 | Ingest raw data | Squad Init | Data Engineer | ✅ Wide-format path now covers 7 in-repo files (2016–2024); normalized 4-workbook path still pending external data |
 | 02 | Clean & standardize data | Squad Review | Data Engineer | ✅ `combined_all_years.csv` regenerated (28,069 rows, 7 years, 251 raw schools / 211 cohort-analysis schools) |
 | 03 | Cohort growth analysis | Build | Statistician | ✅ Task 03 target now met — 12,956 detail rows, **2,560 summary rows** (target ≥ 1,700); all 4 Stuart-Hobson benchmarks pass |
-| 04 | Interactive dashboard | Validate | Data Engineer | ✅ Validated — app starts, serves **19 figures** (loop 17 adds the school-sector chart), school-level and citywide views functional |
+| 04 | Interactive dashboard | Validate | Data Engineer | ✅ Validated — app starts, serves **20 figures** (loop 18 adds the school-needs chart), school-level and citywide views functional |
 | 05 | Statistical significance tests | Build | Statistician | ✅ p_value and significant columns present in detail; pct_significant_transitions in summary |
 | 06 | Equity gap analysis | Build | Statistician | ✅ equity_gap_detail.csv (13,008 rows) and equity_gap_summary.csv (2,138 rows) — expanded with historical data |
-| 07 | Formatted Excel summary report | Validate | Statistician | ✅ Validate complete for loop 17 — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **16 sheets** (adds School Sectors in loop 17) |
+| 07 | Formatted Excel summary report | Validate | Statistician | ✅ Validate complete for loop 18 — `generate_summary_report.py` exits 0; `summary_report.xlsx` regenerated with **17 sheets** (adds School Needs in loop 18) |
 
 ---
 
@@ -225,13 +226,15 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | **School sector classification (by school)** | `output_data/school_sector_by_school.csv` | ✅ **New in loop 17** — 251 rows (school-level sector: Charter / DCPS Specialized / DCPS Alternative / DCPS Traditional) |
 | **School sector proficiency (trend)** | `output_data/school_sector_proficiency.csv` | ✅ **New in loop 17** — 48 rows (avg proficiency by sector × subject × year) |
 | **School sector summary** | `output_data/school_sector_summary.csv` | ✅ **New in loop 17** — 8 rows (sector × subject summary with COVID recovery and cohort growth) |
-| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **16 sheets** — adds School Sectors sheet in loop 17 |
+| **School needs index** | `output_data/school_needs_index.csv` | ✅ **New in loop 18** — 422 rows (211 schools × 2 subjects, with composite needs scores and tiers) |
+| **Needs tier summary** | `output_data/needs_tier_summary.csv` | ✅ **New in loop 18** — 10 rows (needs tier × subject summary) |
+| **Policy summary report** | `output_data/summary_report.xlsx` | ✅ **17 sheets** — adds School Needs sheet in loop 18 |
 | Processing report | `output_data/processing_report.txt` | ✅ Created |
 | Wide-format loader | `src/load_wide_format_data.py` | ✅ Extended — now handles all 7 in-repo workbooks across 6 naming schemes |
 | Equity gap analysis script | `src/equity_gap_analysis.py` | ✅ New — computes proficiency and growth gaps by subgroup |
 | School rankings script | `src/generate_school_rankings.py` | ✅ New — ranks schools by cohort growth and equity-gap narrowing |
 | **Proficiency trend script** | `src/proficiency_trend_analysis.py` | ✅ **New in loop 5** — grade × year proficiency grid |
-| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 17** — now produces 16-sheet Excel workbook |
+| **Summary report script** | `src/generate_summary_report.py` | ✅ **Updated in loop 18** — now produces 17-sheet Excel workbook |
 | **Geographic equity script** | `src/geographic_equity_analysis.py` | ✅ **New in loop 8** — joins school locations with performance data by DC quadrant |
 | **YoY growth script** | `src/yoy_growth_analysis.py` | ✅ **New in loop 9** — same-grade year-over-year growth for every school, grade, subject, subgroup |
 | **COVID recovery script** | `src/covid_recovery_analysis.py` | ✅ **New in loop 10** — 2019→2022 COVID impact and 2022→2024 recovery per school, subject, subgroup |
@@ -244,8 +247,9 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 | **School consistency analysis script** | `src/school_consistency_analysis.py` | ✅ **New in loop 15 smoke path** — school-level volatility / consistency classification |
 | **School performance index script** | `src/school_performance_index.py` | ✅ **New in loop 16 smoke path** — multi-metric composite score and quintile assignment |
 | **School sector analysis script** | `src/charter_dcps_analysis.py` | ✅ **New in loop 17 smoke path** — school-program-sector classification and sector metrics |
-| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **19 analytical figures** including the populated school-sector chart |
-| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 17 |
+| **School needs index script** | `src/school_needs_index.py` | ✅ **New in loop 18 smoke path** — composite intervention-need score and needs-tier assignment |
+| Interactive dashboard | `app/app_simple.py` | ✅ Extended to **20 analytical figures** including the populated school-needs chart |
+| Validation report | `.squad/validation_report.md` | ✅ Updated for loop 18 |
 | Review report | `.squad/review_report.md` | ✅ Updated for loop 17 |
 
 ---
@@ -265,7 +269,7 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
 
 ## Notes / Blockers / Follow-up
 
-- **Smoke test commands (loop 17 — Closeout complete):**
+- **Smoke test commands (loop 18 — Validate complete):**
   1. `python -m pip install -r requirements.txt`
   2. `python -m pip install dash plotly`
   3. `python -m py_compile src/*.py app/*.py inspect_data.py`
@@ -284,14 +288,15 @@ Loop 9 closeout rechecked the backlog tasks, sprint plan, decision log, validati
   16. `python src/school_consistency_analysis.py`
   17. `python src/school_performance_index.py`
   18. `python src/charter_dcps_analysis.py`
-  19. `python src/generate_summary_report.py`
-  20. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, and `/_dash-dependencies`; verify the dashboard callback path via `app.app_simple.update_figures(...)` (returns **19 figures**, including the school-sector chart)
-- **Loop 17 closeout evidence:** rechecked the backlog tasks, sprint, decision log, validation report, and human-facing docs, then re-ran the same smoke path plus dashboard HTTP checks. The current handoff remains reproducible end to end: `school_sector_by_school.csv` regenerated (**251 rows**), `school_sector_proficiency.csv` regenerated (**48 rows**), `school_sector_summary.csv` regenerated (**8 rows**), `summary_report.xlsx` regenerated (**16 sheets**), the dashboard callback returned **19 figures**, and a fresh closeout screenshot was saved to `/tmp/loop17-closeout-dashboard.png`.
-- **Loop 17 sector findings:** sector counts = **222 DCPS Traditional / 13 DCPS Specialized / 13 DCPS Alternative / 3 Charter**. ELA sector leaders/laggards: DCPS Specialized **50.3%**, Charter **32.1%**, Traditional **29.8%**, Alternative **13.1%**. Math sector leaders/laggards: DCPS Specialized **34.2%**, Traditional **25.9%**, Charter **13.5%**, Alternative **2.6%**.
+  19. `python src/school_needs_index.py`
+  20. `python src/generate_summary_report.py`
+  21. Start `python app/app_simple.py`, then hit `GET /`, `/_dash-layout`, and `/_dash-dependencies`; verify the dashboard callback path via `app.app_simple.update_figures(...)` (returns **20 figures**, including the school-needs chart)
+- **Loop 18 validation evidence:** reran the full smoke path plus dashboard HTTP checks. The current build remains reproducible end to end: `school_needs_index.csv` regenerated (**422 rows**), `needs_tier_summary.csv` regenerated (**10 rows**), `summary_report.xlsx` regenerated (**17 sheets**), the dashboard callback returned **20 figures**, and a fresh validation screenshot was saved to `/tmp/loop18-validate-dashboard.png`.
+- **Loop 18 needs findings:** ELA needs tiers = **54 Critical / 51 High / 52 Moderate / 53 Low / 1 Insufficient Data**; Math needs tiers = **53 Critical / 52 High / 52 Moderate / 53 Low / 1 Insufficient Data**. Top Critical-need ELA schools: Van Ness ES (**78.2**), Plummer ES (**73.3**), Bancroft ES (**72.5**). Top Critical-need Math schools: Ida B. Wells MS (**86.5**), Van Ness ES (**81.2**), Thomson ES (**74.1**).
 - **Loop 11 validation evidence:** reran the full smoke path; all scripts exit 0. `school_trajectory_classification.csv` regenerated (424 rows); `summary_report.xlsx` regenerated (10 sheets); dashboard `GET /`, `/_dash-layout`, `/_dash-dependencies` returned 200; live callback returned **13 figures**; headless screenshot saved to `/tmp/loop11-dashboard.png`.
 - **Loop 11 trajectory findings:** ELA citywide avg trend slope +0.065 pp/yr — distribution: 55% Insufficient Data (≤2 years of data), 14% Stable, 13% Declining, 9% Improving, 5% Strongly Improving, 4% Strongly Declining. Math avg slope −0.656 pp/yr — more schools are Declining/Strongly Declining than Improving. Top ELA improver: Whittier ES (+8.2 pp/yr, 22%→39%). Top Math improver: Whittier ES (+9.2 pp/yr, 23%→41%). NOTE: 55% of schools are classified "Insufficient Data" because they only appear in the most recent 1-2 years (minimum 3 years required for OLS trend).
 - **Loop 10 COVID recovery findings:** citywide ELA avg COVID impact −3.94 pp (2019→2022), recovery +1.75 pp (2022→2024), net vs. pre-COVID −2.15 pp. Math was hit harder: −8.56 pp impact, +3.17 pp recovery, net −5.43 pp. Recovery status: 38% Partially Recovered, 25% Still Below Pre-COVID, 24% Exceeded Pre-COVID, 12% Fully Recovered, 2% No 2024 Data (200 school/subject observations, All Students).
 - **Remaining backlog scope — normalized OSSE files:** `load_clean_data.py` targets are still not available in the repo.
-- **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment.
+- **Current environment limitation — browser console:** direct browser-console inspection remains blocked in this environment for the current 20-figure dashboard.
 - **Remaining backlog scope — full charter coverage:** the validated school-sector analysis is still a proxy because the in-repo wide-format files expose only 3 charter-coded schools; a full charter-vs.-DCPS comparison still requires separate OSSE charter-school files.
-- **Next recommended step:** Proceed to **Build** for the next backlog slice: normalized-data / 2024-25 ingestion, blocked browser-console review for the 19-figure dashboard, or explicit narrowing of scope to the verified wide-format path.
+- **Next recommended step:** Proceed to **Closeout** for loop 18, then decide whether the next loop returns to **Build** for normalized-data / 2024-25 ingestion, blocked browser-console review, fuller charter coverage, or an explicit narrowing of scope to the verified wide-format path.
