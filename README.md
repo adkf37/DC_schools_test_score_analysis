@@ -4,7 +4,7 @@ This repository is intended to analyze DC OSSE assessment files across the 2021�
 
 ## Current project state
 
-**As of 2026-05-02, Loop 16 Closeout is complete: `school_performance_index.py` is part of the approved smoke path; the reproducible in-repo pipeline produces an 18-figure analytical dashboard and a 15-sheet summary workbook, and the repo now returns to Build for remaining backlog scope.**
+**As of 2026-05-02, Loop 17 Closeout is complete: `charter_dcps_analysis.py` is part of the approved smoke path; the reproducible in-repo pipeline produces a 19-figure analytical dashboard and a 16-sheet summary workbook, and the repo now returns to Build for remaining backlog scope.**
 
 What was validated from a fresh clone:
 
@@ -25,6 +25,7 @@ What was validated from a fresh clone:
 - `python src/subgroup_trend_analysis.py` ✅
 - `python src/school_consistency_analysis.py` ✅
 - `python src/school_performance_index.py` ✅
+- `python src/charter_dcps_analysis.py` ✅
 - `python src/generate_summary_report.py` ✅
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
@@ -58,10 +59,13 @@ What was validated from a fresh clone:
   - `output_data/consistency_class_summary.csv` (10 rows)
   - `output_data/school_performance_index.csv` (456 rows)
   - `output_data/performance_index_summary.csv` (12 rows)
-  - `output_data/summary_report.xlsx` (15-sheet Excel policy summary)
+  - `output_data/school_sector_by_school.csv` (251 rows)
+  - `output_data/school_sector_proficiency.csv` (48 rows)
+  - `output_data/school_sector_summary.csv` (8 rows)
+  - `output_data/summary_report.xlsx` (16-sheet Excel policy summary)
 - Stuart-Hobson benchmark transitions staying within ±0.1 pp
 - Task 05 significance fields (`p_value`, `significant`, `pct_significant_transitions`)
-- Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all **eighteen** analytical figures in the current handoff
+- Loop 2 equity-gap outputs and Task 04 dashboard startup plus live callback rendering of all **nineteen** analytical figures in the current handoff
 - Loop 3 policy-analysis outputs on the expanded historical dataset:
   - `output_data/school_rankings.csv` (422 rows)
   - `output_data/school_equity_rankings.csv` (414 rows)
@@ -120,6 +124,13 @@ What was validated from a fresh clone:
   - Math quintiles: 43 Q5 / 42 Q4 / 42 Q3 / 42 Q2 / 42 Q1 / 17 Insufficient Data; top Math composite schools are Hyde-Addison ES (96.0), Murch ES @ UDC (90.6), and Bancroft ES @ Sharpe (88.4)
   - the dashboard callback now returns an 18th figure: `Math – Multi-Metric School Performance Index`
   - `summary_report.xlsx` now includes a `Performance Index` sheet
+- Loop 17 school-sector outputs and handoff findings:
+  - `school_sector_by_school.csv` contains 251 school-level sector assignments: 222 DCPS Traditional, 13 DCPS Specialized, 13 DCPS Alternative, and 3 Charter
+  - `school_sector_summary.csv` contains 8 rows (4 sectors × 2 subjects)
+  - ELA sector averages: DCPS Specialized 50.3%, Charter 32.1%, DCPS Traditional 29.8%, DCPS Alternative 13.1%
+  - Math sector averages: DCPS Specialized 34.2%, DCPS Traditional 25.9%, Charter 13.5%, DCPS Alternative 2.6%
+  - the dashboard callback now returns a 19th figure: `Math – Avg Proficiency by School Program Sector`
+  - `summary_report.xlsx` now includes a `School Sectors` sheet
 - Cohort transitions for consecutive year pairs only: 2016→2017, 2017→2018, 2018→2019, 2022→2023, 2023→2024. There is no 2019→2022 transition because OSSE did not release comparable annual school-level assessment files for the COVID-disrupted 2020 and 2021 school years.
 
 ### Remaining gaps
@@ -150,6 +161,7 @@ python src/grade_level_analysis.py
 python src/subgroup_trend_analysis.py
 python src/school_consistency_analysis.py
 python src/school_performance_index.py
+python src/charter_dcps_analysis.py
 python src/generate_summary_report.py
 ```
 
@@ -178,6 +190,7 @@ python src/grade_level_analysis.py
 python src/subgroup_trend_analysis.py
 python src/school_consistency_analysis.py
 python src/school_performance_index.py
+python src/charter_dcps_analysis.py
 python src/generate_summary_report.py
 ```
 
@@ -222,6 +235,9 @@ If the loader and cohort analysis run successfully, the project should produce:
 - `output_data/consistency_class_summary.csv`
 - `output_data/school_performance_index.csv`
 - `output_data/performance_index_summary.csv`
+- `output_data/school_sector_by_school.csv`
+- `output_data/school_sector_proficiency.csv`
+- `output_data/school_sector_summary.csv`
 - `output_data/summary_report.xlsx`
 
 The current closeout review regenerated these files from a fresh clone via the wide-format loader path listed above.
@@ -235,9 +251,9 @@ The current closeout review regenerated these files from a fresh clone via the w
 
 ## Next steps
 
-**Loop 16 (closed out):** the geographic-equity + same-grade YoY + COVID recovery + school trajectory + school type + grade-level + subgroup-trend + consistency + performance-index outputs, the 18-figure dashboard path, and the 15-sheet summary workbook are validated and handoff-ready for the reproducible in-repo path.
+**Loop 17 (closed out):** the geographic-equity + same-grade YoY + COVID recovery + school trajectory + school type + grade-level + subgroup-trend + consistency + performance-index + school-sector outputs, the 19-figure dashboard path, and the 16-sheet summary workbook are validated and handoff-ready for the reproducible in-repo path.
 
 **Future Build loops:**
 1. Restore the full normalized-data / 2024-25 ingestion path (requires downloading OSSE workbooks).
-2. Confirm browser-console cleanliness during manual interaction with the 18-figure dashboard.
+2. Confirm browser-console cleanliness during manual interaction with the 19-figure dashboard.
 3. Re-run Validate + Closeout after the next Build loop changes the evidence or scope.
