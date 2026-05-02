@@ -75,6 +75,9 @@ SUBGROUP_PAIRS = [
 # Minimum schools with valid data for both subgroups in a year
 MIN_SCHOOLS = 5
 
+# Gap change threshold (pp) for classifying direction as Narrowing/Widening vs. Stable
+DIRECTION_THRESHOLD_PP = 0.5
+
 
 # ── Helper ────────────────────────────────────────────────────────────────────
 
@@ -275,9 +278,9 @@ def compute_progress_summary(citywide: pd.DataFrame) -> pd.DataFrame:
         comp_sg = first_row["comparison_subgroup"]
 
         # Progress direction
-        if gap_change < -0.5:
+        if gap_change < -DIRECTION_THRESHOLD_PP:
             direction = "Narrowing"
-        elif gap_change > 0.5:
+        elif gap_change > DIRECTION_THRESHOLD_PP:
             direction = "Widening"
         else:
             direction = "Stable"

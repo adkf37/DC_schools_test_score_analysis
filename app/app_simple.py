@@ -2210,8 +2210,13 @@ def update_figures(subject, subgroup, schools, year_range):
                 for d in ep['direction']
             ]
 
-            first_yr = int(ep['first_year'].min()) if 'first_year' in ep.columns else ''
-            last_yr = int(ep['last_year'].max()) if 'last_year' in ep.columns else ''
+            first_yr = int(ep['first_year'].min()) if 'first_year' in ep.columns else None
+            last_yr = int(ep['last_year'].max()) if 'last_year' in ep.columns else None
+
+            yr_label = (
+                f"{first_yr}→{last_yr}" if first_yr is not None and last_yr is not None
+                else "multi-year"
+            )
 
             fig_equity_progress.add_trace(go.Bar(
                 x=ep['gap_change_pp'],
@@ -2243,10 +2248,10 @@ def update_figures(subject, subgroup, schools, year_range):
 
             fig_equity_progress.update_layout(
                 title=(
-                    f'{subject} – Equity Gap Change: {first_yr}→{last_yr} '
+                    f'{subject} – Equity Gap Change: {yr_label} '
                     f'(negative = gap narrowed)'
                     if subject else
-                    f'Equity Gap Change: {first_yr}→{last_yr} (negative = gap narrowed)'
+                    f'Equity Gap Change: {yr_label} (negative = gap narrowed)'
                 ),
                 xaxis_title='Gap Change (pp) — negative means equity improved',
                 yaxis_title='Subgroup Pair (reference − comparison)',
