@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Loop 18 Closeout Complete — School-Needs-Aware Handoff Signed Off
+## ✅ Current Status: Loop 19 Closeout Complete — Ward-Aware Handoff Signed Off
 
-As of 2026-05-02, Loop 18 Closeout is complete. `src/school_needs_index.py`, the school-needs dashboard figure, and the 17-sheet `summary_report.xlsx` are part of the approved documented smoke path, and the repo now returns to Build for the remaining backlog scope:
+As of 2026-05-02, Loop 19 Closeout is complete. `src/ward_analysis.py`, the ward-analysis dashboard figure, and the 18-sheet `summary_report.xlsx` are part of the approved documented smoke path, and the repo now returns to Build for the remaining backlog scope:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -23,7 +23,8 @@ As of 2026-05-02, Loop 18 Closeout is complete. `src/school_needs_index.py`, the
 - `python src/school_performance_index.py` ✅ ← **new in loop 16**
 - `python src/charter_dcps_analysis.py` ✅ ← **new in loop 17**
 - `python src/school_needs_index.py` ✅ ← **new in loop 18**
-- `python src/generate_summary_report.py` ✅ ← updated to 17 sheets in loop 18
+- `python src/ward_analysis.py` ✅ ← **new in loop 19**
+- `python src/generate_summary_report.py` ✅ ← updated to 18 sheets in loop 19
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 **Two data pipeline options:**
@@ -379,16 +380,16 @@ python src/proficiency_trend_analysis.py
 
 ---
 
-### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 18
+### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 19
 **File**: `src/generate_summary_report.py`
 
 **What it does:**
-- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`, `covid_recovery_summary.csv`, `school_trajectory_classification.csv`, `school_type_summary.csv`, `grade_level_summary.csv`, `subgroup_summary.csv`, `school_consistency.csv`, `school_performance_index.csv`, `school_sector_summary.csv`, `needs_tier_summary.csv`)
-- Produces a formatted 17-sheet Excel workbook for policy stakeholders
+- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`, `covid_recovery_summary.csv`, `school_trajectory_classification.csv`, `school_type_summary.csv`, `grade_level_summary.csv`, `subgroup_summary.csv`, `school_consistency.csv`, `school_performance_index.csv`, `school_sector_summary.csv`, `needs_tier_summary.csv`, `ward_summary.csv`)
+- Produces a formatted 18-sheet Excel workbook for policy stakeholders
 - Applies header formatting, alternating row shading, and colour-coded growth values
 
 **Output:**
-- `summary_report.xlsx` — 17 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types, Grade Levels, Subgroups, Consistency, Performance Index, School Sectors, School Needs
+- `summary_report.xlsx` — 18 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types, Grade Levels, Subgroups, Consistency, Performance Index, School Sectors, School Needs, Ward Analysis
 
 ```bash
 python src/generate_summary_report.py
@@ -494,7 +495,8 @@ python app/app_simple.py
 | `src/school_performance_index.py` | Multi-metric school performance index: composite score and quintile per school × subject |
 | `src/charter_dcps_analysis.py` | School program sector classification plus sector-level proficiency, recovery, and growth summaries |
 | `src/school_needs_index.py` | Multi-metric intervention-needs index with component scores, composite score, and needs tier per school × subject |
-| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (17-sheet workbook) |
+| `src/ward_analysis.py` | Ward-level proficiency, cohort growth, and COVID recovery summaries by DC political ward |
+| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (18-sheet workbook) |
 | `src/yoy_growth_analysis.py` | Same-grade YoY growth |
 | `src/covid_recovery_analysis.py` | COVID impact and recovery analysis |
 | `app/app_simple.py` | Interactive dashboard |
