@@ -2215,7 +2215,7 @@ def update_figures(subject, subgroup, schools, year_range):
 
             yr_label = (
                 f"{first_yr}→{last_yr}" if first_yr is not None and last_yr is not None
-                else "multi-year"
+                else "unknown period"
             )
 
             fig_equity_progress.add_trace(go.Bar(

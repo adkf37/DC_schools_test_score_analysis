@@ -75,7 +75,9 @@ SUBGROUP_PAIRS = [
 # Minimum schools with valid data for both subgroups in a year
 MIN_SCHOOLS = 5
 
-# Gap change threshold (pp) for classifying direction as Narrowing/Widening vs. Stable
+# Gap change threshold (pp) for classifying direction as Narrowing/Widening vs. Stable.
+# 0.5 pp represents a meaningful policy signal while filtering out measurement noise in
+# citywide averages from a sample of ~50–150 schools per year per subgroup pair.
 DIRECTION_THRESHOLD_PP = 0.5
 
 
@@ -268,6 +270,9 @@ def compute_progress_summary(citywide: pd.DataFrame) -> pd.DataFrame:
         gap_last = last_row["avg_gap_pp"]
         gap_change = round(gap_last - gap_first, 2)
 
+        # Guard: only compute percentage change when the original gap is meaningful
+        # (≥ 0.1 pp absolute).  Near-zero initial gaps produce extreme or undefined
+        # percentage changes that misrepresent the policy signal.
         if abs(gap_first) >= 0.1:
             gap_pct_change = round(100 * gap_change / abs(gap_first), 1)
         else:
