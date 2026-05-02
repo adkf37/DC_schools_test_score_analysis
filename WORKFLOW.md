@@ -1,8 +1,8 @@
 # Project Workflow - DC Schools Test Score Analysis
 
-## ✅ Current Status: Loop 17 Closeout Complete — School-Sector-Aware Handoff Signed Off
+## ✅ Current Status: Loop 18 Closeout Complete — School-Needs-Aware Handoff Signed Off
 
-As of 2026-05-02, Loop 17 Closeout is complete. `src/charter_dcps_analysis.py`, the school-sector dashboard figure, and the 16-sheet `summary_report.xlsx` are part of the approved documented smoke path, and the repo now returns to Build for the remaining backlog scope:
+As of 2026-05-02, Loop 18 Closeout is complete. `src/school_needs_index.py`, the school-needs dashboard figure, and the 17-sheet `summary_report.xlsx` are part of the approved documented smoke path, and the repo now returns to Build for the remaining backlog scope:
 
 - `python -m pip install -r requirements.txt` ✅
 - `python -m pip install dash plotly` ✅
@@ -22,7 +22,8 @@ As of 2026-05-02, Loop 17 Closeout is complete. `src/charter_dcps_analysis.py`, 
 - `python src/school_consistency_analysis.py` ✅ ← **new in loop 15**
 - `python src/school_performance_index.py` ✅ ← **new in loop 16**
 - `python src/charter_dcps_analysis.py` ✅ ← **new in loop 17**
-- `python src/generate_summary_report.py` ✅ ← updated to 16 sheets in loop 17
+- `python src/school_needs_index.py` ✅ ← **new in loop 18**
+- `python src/generate_summary_report.py` ✅ ← updated to 17 sheets in loop 18
 - `python app/app_simple.py` + `GET /`, `/_dash-layout`, `/_dash-dependencies`, `POST /_dash-update-component` ✅
 
 **Two data pipeline options:**
@@ -343,6 +344,7 @@ python src/charter_dcps_analysis.py
 - **Grade-level chart** – citywide average proficiency by grade over time or selected-school grade overlays
 - **Subgroup trend chart** – citywide average proficiency by student subgroup over time or selected-school subgroup overlays
 - **School sector chart** – citywide average proficiency by school program sector
+- **School needs chart** – composite needs score vs. average proficiency by school / subject
 - Filter by subject, student group, schools, year range
 - Map view (requires `input_data/school_locations.csv` — included in Loop 3 and still validated in Loop 5)
 
@@ -351,10 +353,10 @@ python app/app_simple.py
 ```
 Then open: http://127.0.0.1:8050/
 
-**Validated closeout evidence (Loop 17, example callback filters = Subject: Math; Student Group: All Students):**
+**Validated closeout evidence (Loop 18, example callback filters = Subject: Math; Student Group: All Students):**
 - App startup succeeds against regenerated CSVs
 - `GET /`, `/_dash-layout`, and `/_dash-dependencies` return successfully
-- A live callback request returns all nineteen figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, Geographic Equity chart, YoY growth chart, COVID recovery chart, school trajectory chart, school type chart, grade-level chart, subgroup trend chart, populated consistency chart, populated performance-index chart, and populated school-sector chart
+- A live callback request returns all twenty figures, including the Grade × Year heatmap, Baseline Proficiency vs. Cohort Growth scatter plot, Geographic Equity chart, YoY growth chart, COVID recovery chart, school trajectory chart, school type chart, grade-level chart, subgroup trend chart, populated consistency chart, populated performance-index chart, populated school-sector chart, and populated school-needs chart
 - `input_data/school_locations.csv` is now present, and the map returns a real `School Performance Map` with 113 plotted schools in the current 2024 Math / All Students view (`DC Public Schools` is intentionally omitted because it is an aggregate row)
 
 ---
@@ -377,16 +379,16 @@ python src/proficiency_trend_analysis.py
 
 ---
 
-### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 17
+### 5c. Policy Summary Report ✅ VALIDATED IN LOOP 18
 **File**: `src/generate_summary_report.py`
 
 **What it does:**
-- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`, `covid_recovery_summary.csv`, `school_trajectory_classification.csv`, `school_type_summary.csv`, `grade_level_summary.csv`, `subgroup_summary.csv`, `school_consistency.csv`, `school_performance_index.csv`, `school_sector_summary.csv`)
-- Produces a formatted 16-sheet Excel workbook for policy stakeholders
+- Reads all analytical output CSVs (`cohort_growth_summary.csv`, `school_rankings.csv`, `school_equity_rankings.csv`, `equity_gap_summary.csv`, `proficiency_trends.csv`, `geographic_equity_by_quadrant.csv`, `yoy_growth_summary.csv`, `covid_recovery_summary.csv`, `school_trajectory_classification.csv`, `school_type_summary.csv`, `grade_level_summary.csv`, `subgroup_summary.csv`, `school_consistency.csv`, `school_performance_index.csv`, `school_sector_summary.csv`, `needs_tier_summary.csv`)
+- Produces a formatted 17-sheet Excel workbook for policy stakeholders
 - Applies header formatting, alternating row shading, and colour-coded growth values
 
 **Output:**
-- `summary_report.xlsx` — 16 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types, Grade Levels, Subgroups, Consistency, Performance Index, School Sectors
+- `summary_report.xlsx` — 17 sheets: Executive Summary, Top Growth (ELA), Top Growth (Math), Top Equity Schools, Proficiency Trends, School Directory, Geographic Equity, YoY Growth, COVID Recovery, School Trajectories, School Types, Grade Levels, Subgroups, Consistency, Performance Index, School Sectors, School Needs
 
 ```bash
 python src/generate_summary_report.py
@@ -463,10 +465,13 @@ python src/school_performance_index.py
 # 15. Generate school program sector outputs
 python src/charter_dcps_analysis.py
 
-# 16. Generate formatted Excel policy summary report
+# 16. Generate school needs outputs
+python src/school_needs_index.py
+
+# 17. Generate formatted Excel policy summary report
 python src/generate_summary_report.py
 
-# 17. (Optional) Launch the interactive dashboard
+# 18. (Optional) Launch the interactive dashboard
 python app/app_simple.py
 ```
 
@@ -488,7 +493,8 @@ python app/app_simple.py
 | `src/school_consistency_analysis.py` | School performance consistency: std deviation, CV, and consistency class per school × subject |
 | `src/school_performance_index.py` | Multi-metric school performance index: composite score and quintile per school × subject |
 | `src/charter_dcps_analysis.py` | School program sector classification plus sector-level proficiency, recovery, and growth summaries |
-| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (16-sheet workbook) |
+| `src/school_needs_index.py` | Multi-metric intervention-needs index with component scores, composite score, and needs tier per school × subject |
+| `src/generate_summary_report.py` | **Formatted Excel policy-summary report** (17-sheet workbook) |
 | `src/yoy_growth_analysis.py` | Same-grade YoY growth |
 | `src/covid_recovery_analysis.py` | COVID impact and recovery analysis |
 | `app/app_simple.py` | Interactive dashboard |
@@ -520,7 +526,9 @@ python app/app_simple.py
 | `output_data/school_sector_by_school.csv` | School-level sector assignments |
 | `output_data/school_sector_proficiency.csv` | School-sector proficiency trends |
 | `output_data/school_sector_summary.csv` | School-sector summary metrics |
-| `output_data/summary_report.xlsx` | **Policy summary workbook — 16 formatted sheets** |
+| `output_data/school_needs_index.csv` | School-level needs-index component scores, composites, and tiers |
+| `output_data/needs_tier_summary.csv` | Needs-tier summary metrics by subject |
+| `output_data/summary_report.xlsx` | **Policy summary workbook — 17 formatted sheets** |
 | `output_data/combined_all_years.csv` | Clean combined source data |
 
 ---

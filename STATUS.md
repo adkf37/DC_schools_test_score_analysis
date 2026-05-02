@@ -2,14 +2,14 @@
 
 ## Current Objective
 
-**Loop 18 Validate complete — school-needs workflow passes; move to Closeout next.**
+**Loop 18 Closeout complete — school-needs handoff signed off; return to Build for remaining scope.**
 
-Loop 18 Validate confirmed:
-1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, and `.squad/decisions.md` against the loop-18 sprint commitments and validate acceptance criteria.
-2. Re-ran the documented fresh-clone smoke path: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`, `python src/yoy_growth_analysis.py`, `python src/covid_recovery_analysis.py`, `python src/school_trajectory_analysis.py`, `python src/school_type_analysis.py`, `python src/grade_level_analysis.py`, `python src/subgroup_trend_analysis.py`, `python src/school_consistency_analysis.py`, `python src/school_performance_index.py`, `python src/charter_dcps_analysis.py`, `python src/school_needs_index.py`, and `python src/generate_summary_report.py`.
-3. Confirmed the current build reproduces `school_needs_index.csv` (**422 rows**), `needs_tier_summary.csv` (**10 rows**), `summary_report.xlsx` (**17 sheets**), and the full **20-figure** dashboard callback path.
-4. Revalidated the dashboard runtime path: `GET /`, `/_dash-layout`, and `/_dash-dependencies` all returned **200**; Dash dependency metadata now includes `needs-index.figure`; direct callback invocation returned all **20** figures; and a fresh headless screenshot was saved to `/tmp/loop18-validate-dashboard.png`.
-5. Browser-console inspection remains blocked in this sandbox, and the normalized-data / 2024-25 backlog scope is still outside the reproducible in-repo path.
+Loop 18 Closeout confirmed:
+1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the closeout acceptance criteria.
+2. Re-ran the documented fresh-clone smoke path: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`, `python src/yoy_growth_analysis.py`, `python src/covid_recovery_analysis.py`, `python src/school_trajectory_analysis.py`, `python src/school_type_analysis.py`, `python src/grade_level_analysis.py`, `python src/subgroup_trend_analysis.py`, `python src/school_consistency_analysis.py`, `python src/school_performance_index.py`, `python src/charter_dcps_analysis.py`, `python src/school_needs_index.py`, `python src/generate_summary_report.py`, plus dashboard checks for `GET /`, `/_dash-layout`, `/_dash-dependencies`, direct callback rendering, and a fresh headless screenshot at `/tmp/loop18-closeout-dashboard.png`.
+3. Confirmed the current handoff reproduces `school_needs_index.csv` (**422 rows**), `needs_tier_summary.csv` (**10 rows**), `summary_report.xlsx` (**17 sheets**), and a **20-figure** dashboard callback path.
+4. Updated `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` so the handoff narrative matches the validated loop-18 school-needs-aware state.
+5. Approved the current reproducible 7-workbook wide-format path for handoff, but returned the repo to **Build** because the normalized-data / 2024-25 path, browser-console inspection, and limited charter coverage remain open.
 
 Key findings from needs index (ELA):
 - Critical (54 schools): avg proficiency 22.1%, avg cohort growth +0.5 pp
@@ -23,34 +23,7 @@ Key findings from needs index (Math):
 
 **Note on methodology:** The Needs Index is the policy-targeted complement to the Performance Index (Loop 16). A school can appear Critical-need in the index even with above-median proficiency if it has low growth, poor COVID recovery, and large equity gaps (for example, Van Ness ES in ELA). Policy stakeholders should examine the component scores alongside the composite.
 
-**Next step: proceed to Closeout for Loop 18 — decide handoff status for the validated 20-figure dashboard and 17-sheet workbook while carrying forward the remaining normalized-data / browser-console / charter-coverage gaps.**
-
-
-1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the closeout acceptance criteria.
-2. Re-ran the documented fresh-clone smoke path: `python -m pip install -r requirements.txt`, `python -m pip install dash plotly`, `python -m py_compile src/*.py app/*.py inspect_data.py`, `python src/load_wide_format_data.py`, `python src/analyze_cohort_growth.py`, `python src/equity_gap_analysis.py`, `python src/generate_school_rankings.py`, `python src/proficiency_trend_analysis.py`, `python src/geographic_equity_analysis.py`, `python src/yoy_growth_analysis.py`, `python src/covid_recovery_analysis.py`, `python src/school_trajectory_analysis.py`, `python src/school_type_analysis.py`, `python src/grade_level_analysis.py`, `python src/subgroup_trend_analysis.py`, `python src/school_consistency_analysis.py`, `python src/school_performance_index.py`, `python src/charter_dcps_analysis.py`, `python src/generate_summary_report.py`, plus dashboard checks for `GET /`, `/_dash-layout`, `/_dash-dependencies`, direct callback rendering, and a fresh headless screenshot at `/tmp/loop17-closeout-dashboard.png`.
-3. Confirmed the current handoff reproduces `school_sector_by_school.csv` (**251 rows**), `school_sector_proficiency.csv` (**48 rows**), `school_sector_summary.csv` (**8 rows**), `summary_report.xlsx` (**16 sheets**), and a **19-figure** dashboard callback path.
-4. Updated `.squad/review_report.md`, `.squad/decisions.md`, `README.md`, and `WORKFLOW.md` so the handoff narrative matches the validated loop-17 sector-aware state.
-5. Approved the current reproducible 7-workbook wide-format path for handoff, but returned the repo to **Build** because the normalized-data / 2024-25 path, browser-console inspection, and full charter-source coverage remain open.
-
-Key findings from sector analysis (ELA, All Students, all years):
-- DCPS Specialized: highest ELA proficiency (50.3%), COVID impact −1.4 pp, recovery −1.8 pp, avg cohort growth +5.7 pp
-- Charter (3 schools, 2022–2024 only): 32.1% ELA, limited COVID baseline
-- DCPS Traditional (222 schools): 29.8% ELA, COVID impact −4.2 pp, recovery +2.0 pp
-- DCPS Alternative (13 schools): 13.1% ELA, recovery +7.6 pp (post-COVID catch-up programs)
-
-Key findings from sector analysis (Math):
-- DCPS Specialized: 34.2% Math, COVID impact −16.8 pp, recovery +7.0 pp (strongest recovery)
-- DCPS Traditional: 25.9% Math, COVID impact −8.3 pp, recovery +3.3 pp
-- DCPS Alternative: 2.6% Math (expected for at-risk student population)
-
-**Classification notes:**
-- Charter schools are identified by 4-digit OSSE school codes (> 999): Bard High School Early College DC (1058), Ida B. Wells Middle School (1071), MacArthur High School (1294).
-- DCPS Specialized programs are identified by name substrings: Banneker HS, McKinley Technology HS, Ellington School of the Arts, School Without Walls HS.
-- DCPS Alternative programs are identified by name substrings: STAY schools, Washington Metropolitan HS, Luke Moore HS, Phelps ACE HS, Excel Academy, Ron Brown College Prep.
-- A full charter vs. DCPS comparison that includes all charter management organizations (KIPP, E.L. Haynes, Capital City, etc.) would require separate OSSE charter-school source files not currently in the repo.
-
-**Next step: choose the next Build target — restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 19-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope.**
-
+**Next step: choose the next Build target — restore the normalized-data / 2024-25 ingestion path, finish the blocked browser-console review for the current 20-figure dashboard, or deliberately narrow the backlog to the verified wide-format scope.**
 Loop 16 Closeout completed:
 1. Rechecked `STATUS.md`, `backlog/README.md`, all backlog task files, `.squad/sprint.md`, `.squad/decisions.md`, `.squad/validation_report.md`, `README.md`, `WORKFLOW.md`, and `docs/methods.md` against the closeout acceptance criteria.
 2. Re-ran the documented smoke path from a fresh clone context: dependency installs, `python -m py_compile src/*.py app/*.py inspect_data.py`, the full wide-format analytical pipeline through `python src/generate_summary_report.py`, and dashboard checks for `GET /`, `/_dash-layout`, `/_dash-dependencies`, direct callback rendering, and a fresh headless screenshot at `/tmp/loop16-closeout-dashboard.png`.
