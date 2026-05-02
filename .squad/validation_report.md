@@ -2,11 +2,11 @@
 
 **Date:** 2026-05-02  
 **Reviewer:** Ralph  
-**Recommendation:** **PASS — advance loop 18 to Closeout**
+**Recommendation:** **PASS — advance loop 19 to Closeout**
 
 ## Scope
 
-Validate the latest build output against the current sprint commitments for loop 18: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend/geographic-equity/YoY/COVID/trajectory/school-type/grade-level/subgroup/consistency/performance-index/school-sector/school-needs outputs, the 17-sheet policy summary workbook, and the dashboard startup/rendering path with the committed 20 analytical figures.
+Validate the latest build output against the current sprint commitments for loop 19: the 7-workbook wide-format ingestion path, regenerated cohort/significance/equity/rankings/proficiency-trend/geographic-equity/YoY/COVID/trajectory/school-type/grade-level/subgroup/consistency/performance-index/school-sector/school-needs/ward outputs, the 18-sheet policy summary workbook, and the dashboard startup/rendering path with the committed 21 analytical figures.
 
 ## Checks Run
 
@@ -40,6 +40,7 @@ Validate the latest build output against the current sprint commitments for loop
       - `python src/school_performance_index.py`
       - `python src/charter_dcps_analysis.py`
       - `python src/school_needs_index.py`
+      - `python src/ward_analysis.py`
       - `python src/generate_summary_report.py`
     - Result: ✅ Passed
     - Evidence:
@@ -76,7 +77,9 @@ Validate the latest build output against the current sprint commitments for loop
       - Wrote `output_data/school_sector_summary.csv` with **8 rows**
       - Wrote `output_data/school_needs_index.csv` with **422 rows**
       - Wrote `output_data/needs_tier_summary.csv` with **10 rows**
-      - Wrote `output_data/summary_report.xlsx` with **17 sheets**
+      - Wrote `output_data/ward_proficiency.csv` with **84 rows**
+      - Wrote `output_data/ward_summary.csv` with **16 rows**
+      - Wrote `output_data/summary_report.xlsx` with **18 sheets**
 
 5. **Schema / benchmark / workbook inspection**
    - Command: inspect regenerated outputs with Python/pandas and `openpyxl`
@@ -85,7 +88,7 @@ Validate the latest build output against the current sprint commitments for loop
       - `cohort_growth_detail.csv` contains Task 03 required columns plus Task 05 fields `p_value` and `significant`
       - `cohort_growth_summary.csv` contains `pct_significant_transitions`
       - `cohort_growth_pivot.xlsx` contains **6** sheets: `All Students Summary`, `Full Summary`, `All Students Detail`, `ELA Cohort Pivot`, `Math Cohort Pivot`, `Full Detail`
-      - `summary_report.xlsx` contains **17** sheets: `Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`, `Geographic Equity`, `YoY Growth`, `COVID Recovery`, `School Trajectories`, `School Types`, `Grade Levels`, `Subgroups`, `Consistency`, `Performance Index`, `School Sectors`, `School Needs`
+      - `summary_report.xlsx` contains **18** sheets: `Executive Summary`, `Top Growth (ELA)`, `Top Growth (Math)`, `Top Equity Schools`, `Proficiency Trends`, `School Directory`, `Geographic Equity`, `YoY Growth`, `COVID Recovery`, `School Trajectories`, `School Types`, `Grade Levels`, `Subgroups`, `Consistency`, `Performance Index`, `School Sectors`, `School Needs`, `Ward Analysis`
       - Stuart-Hobson 2022→2023 benchmark rows for `Stuart-Hobson Middle School (Capitol Hill Cluster)` remain within ±0.1 pp:
         - ELA Gr6→Gr7: `33.5484% → 40.5405% (+6.9921 pp)`
         - ELA Gr7→Gr8: `36.2500% → 46.5753% (+10.3253 pp)`
@@ -108,6 +111,12 @@ Validate the latest build output against the current sprint commitments for loop
         - Math Critical tier averages: **26.8%** proficiency, **−4.6 pp** cohort growth
         - Top Critical-need ELA schools: `Van Ness Elementary School` (**78.2**), `Plummer Elementary School` (**73.3**), `Bancroft Elementary School` (**72.5**)
         - Top Critical-need Math schools: `Ida B. Wells Middle School` (**86.5**), `Van Ness Elementary School` (**81.2**), `Thomson Elementary School` (**74.1**)
+      - `ward_summary.csv` contains the expected loop-19 subject split: **8 ELA rows + 8 Math rows**
+      - `ward_analysis.py` reproduces the documented loop-19 findings:
+        - ELA: Ward 3 **60.6%** avg proficiency / **+6.46 pp** avg cohort growth; Ward 8 **14.1%** / **+4.66 pp**; Ward 3 vs Ward 8 gap **−46.5 pp**
+        - Math: Ward 3 **57.3%** avg proficiency / **−1.22 pp** avg cohort growth; Ward 8 **9.7%** / **+0.43 pp**; Ward 3 vs Ward 8 gap **−47.6 pp**
+        - Ward 2 stays within **1.1 pp** of Ward 3 in ELA (`59.6%` vs `60.6%`)
+        - All **115** schools in `school_locations.csv` receive a ward assignment; **95** match by name into the proficiency/growth inputs used for ward averages
 
 6. **Dashboard startup / endpoint / rendering smoke test**
    - Commands:
@@ -116,13 +125,13 @@ Validate the latest build output against the current sprint commitments for loop
       - `GET http://127.0.0.1:8050/_dash-layout`
       - `GET http://127.0.0.1:8050/_dash-dependencies`
       - `python -c "import app.app_simple as m; m.update_figures('Math', 'All Students', None, [2022, 2024])"`
-      - `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,7000 --screenshot=/tmp/loop18-validate-dashboard.png http://127.0.0.1:8050/`
+      - `chromium-browser --headless --no-sandbox --disable-gpu --window-size=1440,7000 --screenshot=/tmp/loop19-validate-dashboard.png http://127.0.0.1:8050/`
    - Result: ✅ Passed
    - Evidence:
       - App startup loaded regenerated CSVs without exceptions and exposed filters for **7 years**, **2 subjects**, **12 subgroups**, and **251 schools**
       - `GET /`, `GET /_dash-layout`, and `GET /_dash-dependencies` all returned **200**
-      - `/_dash-dependencies` advertises a grouped **20-output** callback ending with the new `needs-index.figure` output
-      - Direct callback invocation returned **20 outputs** total, including the populated needs chart:
+      - `/_dash-dependencies` advertises a grouped **21-output** callback ending with the new `ward-analysis.figure` output
+      - Direct callback invocation returned **21 outputs** total, including the populated ward chart:
         - `timeseries`: `Math - Percent Meeting/Exceeding Over Time`
         - `bars`: `Math - Year 2024: Top Schools`
         - `cohort-bars`: `Math – Avg Cohort Growth (pp)`
@@ -143,7 +152,8 @@ Validate the latest build output against the current sprint commitments for loop
         - `performance-index`: `Math – Multi-Metric School Performance Index`
         - `sector-comparison`: `Math – Avg Proficiency by School Program Sector`
         - `needs-index`: `Math – School Needs Index (Composite vs. Avg Proficiency)`
-      - Captured a headless dashboard screenshot at `/tmp/loop18-validate-dashboard.png` to confirm the dashboard page renders in this environment
+        - `ward-analysis`: `Math – Average Proficiency & Cohort Growth by DC Ward`
+      - Captured a headless dashboard screenshot at `/tmp/loop19-validate-dashboard.png` to confirm the dashboard page renders in this environment
 
 ## Acceptance-Criteria Status
 
@@ -163,7 +173,7 @@ Validate the latest build output against the current sprint commitments for loop
 
 - **Task 04 — Interactive dashboard**
   - `python app/app_simple.py` starts without errors with regenerated CSV inputs — ✅
-  - Dashboard callback returns at least five figures — ✅ (returns **20** analytical figures)
+  - Dashboard callback returns at least five figures — ✅ (returns **21** analytical figures)
   - Subject / subgroup / school / year-range interaction path responds without server-side errors — ✅
   - Map view loads without errors when `input_data/school_locations.csv` is present — ✅
   - YoY growth chart is present in the callback output — ✅
@@ -176,6 +186,7 @@ Validate the latest build output against the current sprint commitments for loop
   - Performance-index chart is present in the callback output — ✅
   - School-sector chart is present in the callback output — ✅
   - School-needs chart is present in the callback output — ✅
+  - Ward-analysis chart is present in the callback output — ✅
   - No unhandled browser-console exceptions during manual interaction — ⚠️ **Blocked in this environment**
 
 - **Task 05 + loop deliverables**
@@ -194,15 +205,16 @@ Validate the latest build output against the current sprint commitments for loop
   - Performance-index outputs regenerate — ✅
   - School-sector outputs regenerate — ✅
   - School-needs outputs regenerate — ✅
-  - Formatted Excel summary report regenerates with 17 expected sheets — ✅
+  - Ward outputs regenerate — ✅
+  - Formatted Excel summary report regenerates with 18 expected sheets — ✅
 
 ## Blocked Checks / Remaining Follow-up
 
-- **Browser-console inspection is still blocked.** A Playwright navigation attempt failed with `Browser is already in use for /root/.cache/ms-playwright/mcp-chrome`, so this pass confirms server startup, Dash endpoints, callback/rendering behavior, dependency metadata, and a rendered Chromium screenshot instead of direct console inspection.
+- **Browser-console inspection is still blocked.** This pass confirms server startup, Dash endpoints, callback/rendering behavior, dependency metadata, and a rendered Chromium screenshot instead of direct console inspection.
 - **Original normalized-data backlog scope is still open.** The repo validates the reproducible 7-workbook wide-format path, but `src/load_clean_data.py` still depends on external normalized OSSE workbooks, including 2024-25, that are not committed here.
 - **The school-sector deliverable is still a partial charter-vs.-DCPS proxy.** The in-repo wide-format files expose only **3** charter-coded schools, so a full comparison across charter management organizations still requires separate OSSE charter-school source files.
-- **Closeout still needs to decide final handoff status.** This validate pass proves the current loop-18 school-needs-aware path is reproducible; Closeout must explicitly sign off or return the repo to Build for the remaining backlog scope.
+- **Closeout still needs to decide final handoff status.** This validate pass proves the current loop-19 ward-aware path is reproducible; Closeout must explicitly sign off or return the repo to Build for the remaining backlog scope.
 
 ## Conclusion
 
-Validation passes for the current loop-18 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the new school-needs CSVs regenerate cleanly, the dashboard returns all twenty analytical figures including the needs-index chart, and `summary_report.xlsx` is produced with all seventeen expected sheets. The next phase should be **Closeout**.
+Validation passes for the current loop-19 wide-format pipeline. The documented smoke path is reproducible from a fresh clone, the new ward CSVs regenerate cleanly, the dashboard returns all twenty-one analytical figures including the ward-analysis chart, and `summary_report.xlsx` is produced with all eighteen expected sheets. The next phase should be **Closeout**.
